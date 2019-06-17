@@ -1,4 +1,3 @@
-"Publication date","3/15/19"
-"Remarks","This document contains the code lists allowed within the European eInvocing standard from the publication date stated above."
-"","This document only contains a simple listing of the codes and their names and does not replace the official publication of each code list that may contain more detailed information about the code lists and the definition of the codes. 
-Decisions on what codes are relevant in specific business cases shall be based on the official publication of the code lists in conjunction with the relevant specification in the eInvoicing standard EN 16931-1 or its syntax bindings."
+"Publication date","6/15/19"
+"Remarks","This document contains a listing of what codes from each of the code lists are allowed in the European eInvocing standard from the publication date stated above and until it is republised."
+"","This document only contains a simple listing of the codes and their names and does not replace the official publication of each code list that may contain more detailed information about the code lists and the definition of the codes. Decisions on what codes are relevant in specific business cases shall be based on the official publication of the code lists in conjunction with the relevant specification in the eInvoicing standard EN 16931-1 or its syntax bindings."
