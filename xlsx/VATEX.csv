@@ -47,6 +47,7 @@
 "VATEX-EU-151-1D","Exempt based on article 151, section 1 (d) of Council Directive 2006/112/EC ",""
 "VATEX-EU-151-1E","Exempt based on article 151, section 1 (e) of Council Directive 2006/112/EC ",""
 "VATEX-EU-309","Exempt based on article 309 of Council Directive 2006/112/EC ",""
+"VATEX-EU-79-C","Exempt based on article 79, point c of Council Directive 2006/112/EC","Repayment of expenditure is not an exemption in the sense of the VAT Directive but may be handled as such in the context of the EN16931."
 "VATEX-EU-AE","Reverse charge","Only use with VAT category code AE"
 "VATEX-EU-D","Travel agents VAT scheme.","Only use with VAT category code E"
 "VATEX-EU-F","Second hand goods VAT scheme.","Only use with VAT category code E"
