@@ -99,6 +99,7 @@
 "VP","Vendor's (seller's) part number"
 "VS","Vendor's supplemental item number"
 "VX","Vendor specification number"
+"EMD","EMDN (European Medical Device Nomenclature)"
 "SRS","RSK number"
 "SRT","IFLS (Institut Francais du Libre Service) 5 digit product"
 "SRU","IFLS (Institut Francais du Libre Service) 9 digit product"
