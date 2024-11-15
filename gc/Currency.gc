@@ -10,9 +10,9 @@ Do NOT edit!</ext:info>
   </Annotation>
   <Identification>
     <ShortName>Currency</ShortName>
-    <Version>2024-05-15</Version>
+    <Version>2024-11-15</Version>
     <CanonicalUri>urn:cef.eu:names:identifier:Currency</CanonicalUri>
-    <CanonicalVersionUri>urn:cef.eu:names:identifier:Currency-2024-05-15</CanonicalVersionUri>
+    <CanonicalVersionUri>urn:cef.eu:names:identifier:Currency-2024-11-15</CanonicalVersionUri>
   </Identification>
   <ColumnSet>
     <Column Id="Code" Use="required">
@@ -515,14 +515,6 @@ Do NOT edit!</ext:info>
       </Value>
       <Value ColumnRef="Name">
         <SimpleValue>Lempira</SimpleValue>
-      </Value>
-    </Row>
-    <Row>
-      <Value ColumnRef="Code">
-        <SimpleValue>HRK</SimpleValue>
-      </Value>
-      <Value ColumnRef="Name">
-        <SimpleValue>Kuna</SimpleValue>
       </Value>
     </Row>
     <Row>
@@ -1071,14 +1063,6 @@ Do NOT edit!</ext:info>
     </Row>
     <Row>
       <Value ColumnRef="Code">
-        <SimpleValue>SLL</SimpleValue>
-      </Value>
-      <Value ColumnRef="Name">
-        <SimpleValue>Sierra Leone</SimpleValue>
-      </Value>
-    </Row>
-    <Row>
-      <Value ColumnRef="Code">
         <SimpleValue>SOS</SimpleValue>
       </Value>
       <Value ColumnRef="Name">
@@ -1271,6 +1255,14 @@ Do NOT edit!</ext:info>
     </Row>
     <Row>
       <Value ColumnRef="Code">
+        <SimpleValue>VED</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Bolívar Soberano, new valuation</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
         <SimpleValue>VES</SimpleValue>
       </Value>
       <Value ColumnRef="Name">
@@ -1459,6 +1451,14 @@ Do NOT edit!</ext:info>
       </Value>
       <Value ColumnRef="Name">
         <SimpleValue>Zambian Kwacha</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>ZWG</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Zimbabwe Gold</SimpleValue>
       </Value>
     </Row>
     <Row>

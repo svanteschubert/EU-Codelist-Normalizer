@@ -10,9 +10,9 @@ Do NOT edit!</ext:info>
   </Annotation>
   <Identification>
     <ShortName>VATEX</ShortName>
-    <Version>2024-05-15</Version>
+    <Version>2024-11-15</Version>
     <CanonicalUri>urn:cef.eu:names:identifier:VATEX</CanonicalUri>
-    <CanonicalVersionUri>urn:cef.eu:names:identifier:VATEX-2024-05-15</CanonicalVersionUri>
+    <CanonicalVersionUri>urn:cef.eu:names:identifier:VATEX-2024-11-15</CanonicalVersionUri>
   </Identification>
   <ColumnSet>
     <Column Id="Code" Use="required">
@@ -291,6 +291,22 @@ Do NOT edit!</ext:info>
     </Row>
     <Row>
       <Value ColumnRef="Code">
+        <SimpleValue>VATEX-EU-144</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on article 144 of Council Directive 2006/112/EC</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-EU-146-1E</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on article 146 section 1 (e) of Council Directive 2006/112/EC</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
         <SimpleValue>VATEX-EU-148</SimpleValue>
       </Value>
       <Value ColumnRef="Name">
@@ -407,6 +423,14 @@ Do NOT edit!</ext:info>
       </Value>
       <Value ColumnRef="Name">
         <SimpleValue>Exempt based on article 151, section 1 (e) of Council Directive 2006/112/EC</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-EU-159</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on article 159 of Council Directive 2006/112/EC</SimpleValue>
       </Value>
     </Row>
     <Row>

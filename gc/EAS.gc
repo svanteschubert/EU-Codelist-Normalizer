@@ -10,9 +10,9 @@ Do NOT edit!</ext:info>
   </Annotation>
   <Identification>
     <ShortName>EAS</ShortName>
-    <Version>2024-05-15</Version>
+    <Version>2024-11-15</Version>
     <CanonicalUri>urn:cef.eu:names:identifier:EAS</CanonicalUri>
-    <CanonicalVersionUri>urn:cef.eu:names:identifier:EAS-2024-05-15</CanonicalVersionUri>
+    <CanonicalVersionUri>urn:cef.eu:names:identifier:EAS-2024-11-15</CanonicalVersionUri>
   </Identification>
   <ColumnSet>
     <Column Id="Code" Use="required">
@@ -188,6 +188,14 @@ Chambers of Commerce and Industry in the Netherlands), Scheme (EDIRA compliant)<
       </Value>
       <Value ColumnRef="Name">
         <SimpleValue>Teikoku Company Code</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>0177</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Odette International Limited</SimpleValue>
       </Value>
     </Row>
     <Row>
@@ -436,6 +444,14 @@ Chambers of Commerce and Industry in the Netherlands), Scheme (EDIRA compliant)<
       </Value>
       <Value ColumnRef="Name">
         <SimpleValue>National e-Invoicing Framework</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>0235</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>UAE Tax Identification Number (TIN)</SimpleValue>
       </Value>
     </Row>
     <Row>
