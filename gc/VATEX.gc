@@ -10,9 +10,9 @@ Do NOT edit!</ext:info>
   </Annotation>
   <Identification>
     <ShortName>VATEX</ShortName>
-    <Version>2024-11-15</Version>
+    <Version>2025-05-15</Version>
     <CanonicalUri>urn:cef.eu:names:identifier:VATEX</CanonicalUri>
-    <CanonicalVersionUri>urn:cef.eu:names:identifier:VATEX-2024-11-15</CanonicalVersionUri>
+    <CanonicalVersionUri>urn:cef.eu:names:identifier:VATEX-2025-05-15</CanonicalVersionUri>
   </Identification>
   <ColumnSet>
     <Column Id="Code" Use="required">
@@ -427,6 +427,14 @@ Do NOT edit!</ext:info>
     </Row>
     <Row>
       <Value ColumnRef="Code">
+        <SimpleValue>VATEX-EU-153</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on article 153 of Council Directive 2006/112/EC</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
         <SimpleValue>VATEX-EU-159</SimpleValue>
       </Value>
       <Value ColumnRef="Name">
@@ -538,6 +546,271 @@ Do NOT edit!</ext:info>
       </Value>
       <Value ColumnRef="Remark">
         <SimpleValue>Only use with VAT category code O</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-298SEXDECIESA</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on article 298 sexdecies A of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-AE</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on 2 of article 283 of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI261-1</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on 1 of article 261 of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI261-2</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on 2 of article 261 of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI261-3</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on 3 of article 261 of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI261-4</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on 4 of article 261 of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI261-5</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on 5 of article 261 of the Code Général des Impôts (CGI ; General tax code) </SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI261-7</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on 7 of article 261 of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI261-8</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on 8 of article 261 of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI261A</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on article 261 A of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI261B</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on article 261 B of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI261C-1</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on 1° of article 261 C of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI261C-2</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on 2° of article 261 C of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI261C-3</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on 3° of article 261 C of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI261D-1</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on 1° of article 261 D of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI261D-1BIS</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on 1°bis of article 261 D of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI261D-2</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on 2° of article 261 D of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI261D-3</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on 3° of article 261 D of the Code Général des Impôts (CGI ; General tax code)
+Exonération de TVA - Article 261 D-3° du Code Général des Impôts </SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI261D-4</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on 4° of article 261 D of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI261E-1</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on 1° of article 261 E of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI261E-2</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on 2° of article 261 E of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI275</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on article 275 of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI277A</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on article 277 A of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-FR-CGI295</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on article 295 of the Code Général des Impôts (CGI ; General tax code)</SimpleValue>
+      </Value>
+      <Value ColumnRef="Remark">
+        <SimpleValue>Only for domestic invoicing in France</SimpleValue>
       </Value>
     </Row>
     <Row>

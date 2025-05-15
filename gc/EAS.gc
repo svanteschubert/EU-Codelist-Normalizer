@@ -10,9 +10,9 @@ Do NOT edit!</ext:info>
   </Annotation>
   <Identification>
     <ShortName>EAS</ShortName>
-    <Version>2024-11-15</Version>
+    <Version>2025-05-15</Version>
     <CanonicalUri>urn:cef.eu:names:identifier:EAS</CanonicalUri>
-    <CanonicalVersionUri>urn:cef.eu:names:identifier:EAS-2024-11-15</CanonicalVersionUri>
+    <CanonicalVersionUri>urn:cef.eu:names:identifier:EAS-2025-05-15</CanonicalVersionUri>
   </Identification>
   <ColumnSet>
     <Column Id="Code" Use="required">
@@ -82,7 +82,7 @@ Do NOT edit!</ext:info>
         <SimpleValue>0096</SimpleValue>
       </Value>
       <Value ColumnRef="Name">
-        <SimpleValue>DANISH CHAMBER OF COMMERCE Scheme (EDIRA compliant)</SimpleValue>
+        <SimpleValue>The Danish Business Authority - P-number (DK:P)</SimpleValue>
       </Value>
     </Row>
     <Row>
@@ -180,6 +180,22 @@ Chambers of Commerce and Industry in the Netherlands), Scheme (EDIRA compliant)<
       </Value>
       <Value ColumnRef="Name">
         <SimpleValue>Australian Business Number (ABN) Scheme</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>0154</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Identification number of economic subjects: (ICO)</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>0158</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Identification number of economic subject (ICO) Act on State Statistics of 29 November 2001, § 27</SimpleValue>
       </Value>
     </Row>
     <Row>
@@ -456,10 +472,10 @@ Chambers of Commerce and Industry in the Netherlands), Scheme (EDIRA compliant)<
     </Row>
     <Row>
       <Value ColumnRef="Code">
-        <SimpleValue>9901</SimpleValue>
+        <SimpleValue>0240</SimpleValue>
       </Value>
       <Value ColumnRef="Name">
-        <SimpleValue>Danish Ministry of the Interior and Health</SimpleValue>
+        <SimpleValue>Register of legal persons (in French : Répertoire des personnes morales)</SimpleValue>
       </Value>
     </Row>
     <Row>

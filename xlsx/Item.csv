@@ -101,6 +101,7 @@
 "VX","Vendor specification number"
 "EMD","EMDN (European Medical Device Nomenclature)"
 "GMN","Global model number"
+"PPI","Phytosanitary Passport identifier"
 "SRS","RSK number"
 "SRT","IFLS (Institut Francais du Libre Service) 5 digit product"
 "SRU","IFLS (Institut Francais du Libre Service) 9 digit product"
