@@ -2,7 +2,7 @@
 <gc:CodeList xmlns:gc="http://docs.oasis-open.org/codelist/ns/genericode/1.0/" xmlns="">
   <Annotation>
     <AppInfo>
-      <ext:info xmlns:ext="urn:cef.eu:codelist:gc-annotation">This is a CEF Code List.
+      <ext:info xmlns:ext="urn:cef.eu:codelist:gc-annotation">This is a Digital Building Blocks for Europe Code List.
 
 This file was automatically generated.
 Do NOT edit!</ext:info>
@@ -10,9 +10,9 @@ Do NOT edit!</ext:info>
   </Annotation>
   <Identification>
     <ShortName>ICD</ShortName>
-    <Version>2025-05-15</Version>
+    <Version>2025-11-15</Version>
     <CanonicalUri>urn:cef.eu:names:identifier:ICD</CanonicalUri>
-    <CanonicalVersionUri>urn:cef.eu:names:identifier:ICD-2025-05-15</CanonicalVersionUri>
+    <CanonicalVersionUri>urn:cef.eu:names:identifier:ICD-2025-11-15</CanonicalVersionUri>
   </Identification>
   <ColumnSet>
     <Column Id="Code" Use="required">
@@ -1907,6 +1907,38 @@ Do NOT edit!</ext:info>
       </Value>
       <Value ColumnRef="Name">
         <SimpleValue>Register of legal persons (in French : Répertoire des personnes morales)</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>0241</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Name unknown</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>0242</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>OpenPeppol Service Provider Identification Scheme (SPIS)</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>0243</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Name unknown</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>0244</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Tax Identification (Tax ID), Nigeria</SimpleValue>
       </Value>
     </Row>
   </SimpleCodeList>

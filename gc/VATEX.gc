@@ -2,7 +2,7 @@
 <gc:CodeList xmlns:gc="http://docs.oasis-open.org/codelist/ns/genericode/1.0/" xmlns="">
   <Annotation>
     <AppInfo>
-      <ext:info xmlns:ext="urn:cef.eu:codelist:gc-annotation">This is a CEF Code List.
+      <ext:info xmlns:ext="urn:cef.eu:codelist:gc-annotation">This is a Digital Building Blocks for Europe Code List.
 
 This file was automatically generated.
 Do NOT edit!</ext:info>
@@ -10,9 +10,9 @@ Do NOT edit!</ext:info>
   </Annotation>
   <Identification>
     <ShortName>VATEX</ShortName>
-    <Version>2025-05-15</Version>
+    <Version>2025-11-15</Version>
     <CanonicalUri>urn:cef.eu:names:identifier:VATEX</CanonicalUri>
-    <CanonicalVersionUri>urn:cef.eu:names:identifier:VATEX-2025-05-15</CanonicalVersionUri>
+    <CanonicalVersionUri>urn:cef.eu:names:identifier:VATEX-2025-11-15</CanonicalVersionUri>
   </Identification>
   <ColumnSet>
     <Column Id="Code" Use="required">
@@ -175,6 +175,14 @@ Do NOT edit!</ext:info>
       </Value>
       <Value ColumnRef="Name">
         <SimpleValue>Exempt based on article 132, section 1 (q) of Council Directive 2006/112/EC</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>VATEX-EU-135-1</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Exempt based on article 135, section 1 of Council Directive 2006/112/EC</SimpleValue>
       </Value>
     </Row>
     <Row>
@@ -487,7 +495,7 @@ Do NOT edit!</ext:info>
         <SimpleValue>VATEX-EU-F</SimpleValue>
       </Value>
       <Value ColumnRef="Name">
-        <SimpleValue>Second hand goods VAT scheme.</SimpleValue>
+        <SimpleValue>Intra-Community acquisition of second hand goods</SimpleValue>
       </Value>
       <Value ColumnRef="Remark">
         <SimpleValue>Only use with VAT category code E</SimpleValue>
@@ -509,7 +517,7 @@ Do NOT edit!</ext:info>
         <SimpleValue>VATEX-EU-I</SimpleValue>
       </Value>
       <Value ColumnRef="Name">
-        <SimpleValue>Works of art VAT scheme.</SimpleValue>
+        <SimpleValue>Intra-Community acquisition of works of art</SimpleValue>
       </Value>
       <Value ColumnRef="Remark">
         <SimpleValue>Only use with VAT category code E</SimpleValue>
@@ -531,7 +539,7 @@ Do NOT edit!</ext:info>
         <SimpleValue>VATEX-EU-J</SimpleValue>
       </Value>
       <Value ColumnRef="Name">
-        <SimpleValue>Collectors items and antiques VAT scheme.</SimpleValue>
+        <SimpleValue>Intra-Community acquisition of collectors items and antiques</SimpleValue>
       </Value>
       <Value ColumnRef="Remark">
         <SimpleValue>Only use with VAT category code E</SimpleValue>
