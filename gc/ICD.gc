@@ -10,9 +10,9 @@ Do NOT edit!</ext:info>
   </Annotation>
   <Identification>
     <ShortName>ICD</ShortName>
-    <Version>2025-11-15</Version>
+    <Version>2026-05-15</Version>
     <CanonicalUri>urn:cef.eu:names:identifier:ICD</CanonicalUri>
-    <CanonicalVersionUri>urn:cef.eu:names:identifier:ICD-2025-11-15</CanonicalVersionUri>
+    <CanonicalVersionUri>urn:cef.eu:names:identifier:ICD-2026-05-15</CanonicalVersionUri>
   </Identification>
   <ColumnSet>
     <Column Id="Code" Use="required">
@@ -1914,7 +1914,7 @@ Do NOT edit!</ext:info>
         <SimpleValue>0241</SimpleValue>
       </Value>
       <Value ColumnRef="Name">
-        <SimpleValue>Name unknown</SimpleValue>
+        <SimpleValue>Hitachi Rail</SimpleValue>
       </Value>
     </Row>
     <Row>
@@ -1930,7 +1930,7 @@ Do NOT edit!</ext:info>
         <SimpleValue>0243</SimpleValue>
       </Value>
       <Value ColumnRef="Name">
-        <SimpleValue>Name unknown</SimpleValue>
+        <SimpleValue>Business Partner Number (Catena-X)</SimpleValue>
       </Value>
     </Row>
     <Row>
@@ -1939,6 +1939,38 @@ Do NOT edit!</ext:info>
       </Value>
       <Value ColumnRef="Name">
         <SimpleValue>Tax Identification (Tax ID), Nigeria</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>0245</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Tax identification number (DIČ, Slovakia)</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>0246</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>German Electronic Business Address</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>0247</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Name unknown</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>0248</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Oman Value Added Tax Identification Number (VATIN)</SimpleValue>
       </Value>
     </Row>
   </SimpleCodeList>

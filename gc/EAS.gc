@@ -10,9 +10,9 @@ Do NOT edit!</ext:info>
   </Annotation>
   <Identification>
     <ShortName>EAS</ShortName>
-    <Version>2025-11-15</Version>
+    <Version>2026-05-15</Version>
     <CanonicalUri>urn:cef.eu:names:identifier:EAS</CanonicalUri>
-    <CanonicalVersionUri>urn:cef.eu:names:identifier:EAS-2025-11-15</CanonicalVersionUri>
+    <CanonicalVersionUri>urn:cef.eu:names:identifier:EAS-2026-05-15</CanonicalVersionUri>
   </Identification>
   <ColumnSet>
     <Column Id="Code" Use="required">
@@ -480,10 +480,42 @@ Chambers of Commerce and Industry in the Netherlands), Scheme (EDIRA compliant)<
     </Row>
     <Row>
       <Value ColumnRef="Code">
+        <SimpleValue>0242</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>OpenPeppol Service Provider Identification Scheme (SPIS)</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
         <SimpleValue>0244</SimpleValue>
       </Value>
       <Value ColumnRef="Name">
         <SimpleValue>Tax Identification (Tax ID), Nigeria</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>0245</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Tax identification number (DIČ, Slovakia)</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>0246</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>German Electronic Business Address</SimpleValue>
+      </Value>
+    </Row>
+    <Row>
+      <Value ColumnRef="Code">
+        <SimpleValue>0248</SimpleValue>
+      </Value>
+      <Value ColumnRef="Name">
+        <SimpleValue>Oman Value Added Tax Identification Number (VATIN)</SimpleValue>
       </Value>
     </Row>
     <Row>
