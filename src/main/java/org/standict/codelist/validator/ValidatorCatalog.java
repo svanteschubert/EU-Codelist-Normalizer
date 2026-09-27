@@ -97,7 +97,8 @@ public final class ValidatorCatalog {
         return Optional.ofNullable(rules.get(syntax.name() + " " + rule));
     }
 
-    private static List<List<String>> rows(String resource, int columns) throws IOException {
+    /** The rows of a bundled CSV resource, without comment lines and the header row. */
+    public static List<List<String>> rows(String resource, int columns) throws IOException {
         String text;
         try (InputStream stream = ValidatorCatalog.class.getResourceAsStream(resource)) {
             if (stream == null) {

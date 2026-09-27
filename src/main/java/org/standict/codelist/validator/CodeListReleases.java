@@ -30,8 +30,24 @@ public final class CodeListReleases {
      *
      * @param genericode {@code normalized/gc} of the highest revision that has one, or {@code null}
      * @param spreadsheet {@code normalized/xlsx} of the highest revision that has one, or {@code null}
+     * @param revisions every revision of the release, lowest first
      */
-    public record Release(String directory, LocalDate effectiveDate, Path genericode, Path spreadsheet) {}
+    public record Release(String directory, LocalDate effectiveDate, Path genericode, Path spreadsheet,
+            List<Revision> revisions) {}
+
+    /** One revision directory of a release, such as {@code 17_2026-05-15/r02}. */
+    public record Revision(String release, LocalDate effectiveDate, int number, Path directory) {
+        /** {@code 17_2026-05-15/r02}, as the release tree names it. */
+        public String name() {
+            return release + "/" + directory.getFileName();
+        }
+
+        /** {@code <stage>/<format>} of this revision, or {@code null} when the revision has no such directory. */
+        public Path stage(String stage, String format) {
+            Path path = directory.resolve(stage).resolve(format);
+            return Files.isDirectory(path) ? path : null;
+        }
+    }
 
     /** The codes one component publishes for one code list, and where they were read. */
     public record Published(String source, List<String> codes) {}
@@ -56,8 +72,10 @@ public final class CodeListReleases {
                 if (!matcher.matches()) {
                     continue;
                 }
-                releases.add(new Release(release.getFileName().toString(), LocalDate.parse(matcher.group(1)),
-                        highestRevisionWith(release, "gc"), highestRevisionWith(release, "xlsx")));
+                String name = release.getFileName().toString();
+                LocalDate date = LocalDate.parse(matcher.group(1));
+                releases.add(new Release(name, date, highestRevisionWith(release, "gc"),
+                        highestRevisionWith(release, "xlsx"), revisions(release, name, date)));
             }
         }
         if (releases.isEmpty()) {
@@ -154,6 +172,20 @@ public final class CodeListReleases {
 
     private String relative(Path file) {
         return root.relativize(file).toString().replace('\\', '/');
+    }
+
+    private static List<Revision> revisions(Path release, String name, LocalDate date) throws IOException {
+        var revisions = new ArrayList<Revision>();
+        try (var entries = Files.list(release)) {
+            for (Path revision : entries.filter(Files::isDirectory).toList()) {
+                var matcher = REVISION.matcher(revision.getFileName().toString());
+                if (matcher.matches()) {
+                    revisions.add(new Revision(name, date, Integer.parseInt(matcher.group(1)), revision));
+                }
+            }
+        }
+        revisions.sort(java.util.Comparator.comparingInt(Revision::number));
+        return List.copyOf(revisions);
     }
 
     private static Path highestRevisionWith(Path release, String format) throws IOException {

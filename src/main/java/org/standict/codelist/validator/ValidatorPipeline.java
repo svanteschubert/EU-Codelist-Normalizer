@@ -17,6 +17,8 @@ import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.standict.codelist.index.BusinessTerms;
+import org.standict.codelist.index.IndexCheck;
 
 /**
  * Extracts the code lists of every validator release, normalizes them, compares them with the published code lists
@@ -52,7 +54,8 @@ public final class ValidatorPipeline {
         this.catalog = catalog;
     }
 
-    public record Result(int releases, int rules, ValidatorComparison.Report report, Path directory) {}
+    public record Result(int releases, int rules, ValidatorComparison.Report report, IndexCheck.Report index,
+            Path directory) {}
 
     /**
      * @param validatorCheckout checkout of the eInvoicing-EN16931 repository, which is only ever read
@@ -112,13 +115,20 @@ public final class ValidatorPipeline {
                 extracted.put(release.tag(), bySyntax);
             }
             var report = new ValidatorComparison().compare(catalog, extracted, codeLists);
-            new ValidatorReport().write(report, staging);
+            var indexCheck = new IndexCheck().check(codeLists);
+            new ValidatorReport().write(report, indexCheck, staging);
             index.put("compared_dates", report.dates().size());
+            index.put("index_revisions_checked", indexCheck.revisions().size());
+            index.put("index_rows_checked", indexCheck.revisions().stream().mapToInt(r -> r.tabs().size()).sum());
+            index.put("index_rows_mismatching", indexCheck.revisions().stream().flatMap(r -> r.tabs().stream())
+                    .filter(tab -> tab.verdict() == IndexCheck.Verdict.MISMATCH).count());
+            index.put("business_term_rows_differing_from_2017", indexCheck.revisions().stream()
+                    .flatMap(r -> r.terms().stream()).filter(BusinessTerms.Check::differsFrom2017).count());
             Files.writeString(staging.resolve(INDEX),
                     json.writerWithDefaultPrettyPrinter().writeValueAsString(index) + "\n", StandardCharsets.UTF_8);
             // Publish only after every release has been read and compared.
             replace(staging, destination);
-            return new Result(catalog.releases().size(), rules, report, destination);
+            return new Result(catalog.releases().size(), rules, report, indexCheck, destination);
         } finally {
             deleteRecursively(staging);
         }

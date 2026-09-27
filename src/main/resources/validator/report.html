@@ -3,21 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EN 16931 validator against the published code lists</title>
+<title>EN 16931 code list releases compared</title>
 <style>
   :root {
     --ink: #1a1a1a; --quiet: #6b6b6b; --line: #d8d8d8; --bg: #ffffff; --panel: #f6f6f4;
-    --added: #0a6b3d; --removed: #9b1c1c; --gc: #1f4e79; --xlsx: #5b2d82;
+    --added: #0a6b3d; --removed: #9b1c1c; --reworded: #8a5a00; --gc: #1f4e79; --xlsx: #5b2d82;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
       --ink: #ececec; --quiet: #a0a0a0; --line: #3a3a3a; --bg: #161616; --panel: #1f1f1f;
-      --added: #5fd39b; --removed: #ff8e8e; --gc: #8ab6e0; --xlsx: #c2a0e8;
+      --added: #5fd39b; --removed: #ff8e8e; --reworded: #e0b25e; --gc: #8ab6e0; --xlsx: #c2a0e8;
     }
   }
   :root[data-theme="dark"] {
     --ink: #ececec; --quiet: #a0a0a0; --line: #3a3a3a; --bg: #161616; --panel: #1f1f1f;
-    --added: #5fd39b; --removed: #ff8e8e; --gc: #8ab6e0; --xlsx: #c2a0e8;
+    --added: #5fd39b; --removed: #ff8e8e; --reworded: #e0b25e; --gc: #8ab6e0; --xlsx: #c2a0e8;
   }
   html { background: var(--bg); }
   body { margin: 0 auto; padding: 2rem 1rem 4rem; max-width: 76rem; background: var(--bg); color: var(--ink);
@@ -50,15 +50,27 @@
   .component.spreadsheet { color: var(--xlsx); }
   details { border-top: 1px solid var(--line); padding: .5rem 0; }
   summary { cursor: pointer; }
+  h3 { font-size: 1rem; margin: 1.75rem 0 .4rem; }
+  td.note { text-align: left; white-space: normal; min-width: 14rem; }
+  td.note ul, ul.findings { margin: 0; padding-left: 1.1rem; }
+  li.mismatch { color: var(--removed); }
+  li.info { color: var(--quiet); }
+  li code { color: var(--ink); font-size: .85rem; }
+  td.reworded { color: var(--reworded); }
+  .component.sheet { color: var(--xlsx); }
+  .component.index, .component.structure { color: var(--quiet); }
+  caption { text-align: left; color: var(--quiet); font-size: .85rem; padding: .3rem 0 .5rem; }
   footer { margin-top: 3rem; color: var(--quiet); font-size: .85rem; max-width: 48rem; }
 </style>
 </head>
 <body>
 
-<h1>EN 16931 validator against the published code lists</h1>
+<h1>EN 16931 code list releases compared</h1>
 <p>The codes each BR-CL rule of the validation artefacts accepts, compared with the Genericode files and the
 spreadsheet the European Commission published. Every date on which either side changed is listed, each compared
-with what was in force on both sides that day. UBL and CII only.</p>
+with what was in force on both sides that day. UBL and CII only. Below that, each release's Index sheet is checked
+against what its code list sheets and Genericode files actually changed, and its business terms against
+EN 16931-1:2017.</p>
 
 <div class="facts">
   <div><span>Effective dates</span>{{dates}}</div>
@@ -90,6 +102,46 @@ each rule that accepts or rejects it. Before 2021 the code lists were published 
 “Published, not accepted”: an invoice using a published code is rejected. The complete lists are in
 <code>rules.csv</code>.</p>
 {{details}}
+
+<h2>Index sheet: stated against actual changes</h2>
+<p>Each workbook's Index sheet states, per tab, whether the list changed (“Changes”) and how (“Remark on
+updates”). Every revision is compared with the release before it: first with its own code list sheet, then with its
+Genericode file, which is also compared with the sheet. Where releases without Genericode lie between two that have
+it, the Genericode file is compared across them. Full details are in <code>index-claims.csv</code>.</p>
+<div class="scroll">
+<table>
+  <thead>
+    <tr><th scope="col">Release</th><th scope="col">Compared with</th><th scope="col">Index rows</th>
+        <th scope="col">Release findings</th><th scope="col">Business terms vs 2017</th>
+        <th scope="col">Business terms changed</th></tr>
+  </thead>
+  <tbody>
+{{indexSummary}}
+  </tbody>
+</table>
+</div>
+{{indexClaims}}
+
+<h2>Business terms against EN 16931-1:2017</h2>
+<p>The Index column “EN business terms where the code list is used.” against the business terms whose
+description or usage note in Table 2 of EN 16931-1:2017 names the list (<code>business-terms-2017.csv</code>).
+All releases are in <code>business-terms.csv</code>.</p>
+{{businessTerms}}
+
+<h2>Dates stated on the Index sheet</h2>
+<p>The effective date the Index states, against the effective date the Commission's registry files the release under.
+The 2019 workbooks state their dates on a separate Main sheet.</p>
+<div class="scroll">
+<table>
+  <thead>
+    <tr><th scope="col">Release</th><th scope="col">Publication date</th><th scope="col">Index effective date</th>
+        <th scope="col">Filed under</th></tr>
+  </thead>
+  <tbody>
+{{indexDates}}
+  </tbody>
+</table>
+</div>
 
 <footer>Validator codes are read from the tagged releases of the eInvoicing-EN16931 repository; effective dates
 come from <code>validator-releases.csv</code>, and the rule-to-code-list mapping from <code>rule-catalog.csv</code>.

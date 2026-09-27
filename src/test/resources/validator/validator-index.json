@@ -6820,5 +6820,9 @@
       } ]
     } ]
   } ],
-  "compared_dates" : 25
+  "compared_dates" : 25,
+  "index_revisions_checked" : 19,
+  "index_rows_checked" : 346,
+  "index_rows_mismatching" : 14,
+  "business_term_rows_differing_from_2017" : 23
 }

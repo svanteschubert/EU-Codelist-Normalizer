@@ -28,7 +28,11 @@ public final class NormalizerMain {
                                   --validator        Extract the UBL and CII code lists of every validator release,
                                                      normalize them and compare them, per effective date, with the
                                                      Genericode files and spreadsheets of the releases in --output;
-                                                     writes validator/ with summary.csv, rules.csv and index.html
+                                                     also checks every release's Index sheet: its stated changes
+                                                     against its sheets and Genericode files, and its business
+                                                     terms against EN 16931-1:2017; writes validator/ with
+                                                     summary.csv, rules.csv, index-claims.csv, business-terms.csv,
+                                                     index-releases.csv and index.html
                                   --downloader PATH  Downloader repository (default: ../EU-Codelist-Downloader)
                                   --validator-repo PATH
                                                      eInvoicing-EN16931 checkout, read through its release tags
@@ -80,6 +84,15 @@ public final class NormalizerMain {
                         latest.stream().filter(r -> r.genericode() != null && !r.genericode().agrees()).count(),
                         latest.size(),
                         latest.stream().filter(r -> r.spreadsheet() != null && !r.spreadsheet().agrees()).count());
+                var revisions = result.index().revisions();
+                System.out.printf("Index sheets of %d release revisions: %d of %d rows disagree with their sheets "
+                        + "or Genericode files; %d rows list other business terms than EN 16931-1:2017%n",
+                        revisions.size(), revisions.stream().flatMap(r -> r.tabs().stream())
+                                .filter(t -> t.verdict() == org.standict.codelist.index.IndexCheck.Verdict.MISMATCH)
+                                .count(),
+                        revisions.stream().mapToInt(r -> r.tabs().size()).sum(),
+                        revisions.stream().flatMap(r -> r.terms().stream())
+                                .filter(org.standict.codelist.index.BusinessTerms.Check::differsFrom2017).count());
                 System.out.printf("Report: %s%n", result.directory().resolve("index.html"));
                 return;
             }

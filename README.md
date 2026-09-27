@@ -286,6 +286,33 @@ validator/
   not dropped. Before 2021 only spreadsheets were published; a missing component is
   reported as such, never as agreement.
 
+The same run also checks the `Index` sheet of every EN16931 workbook revision,
+whose table (row 6 of the workbook) states per tab whether and how the list
+changed and which business terms use it:
+
+```text
+validator/
+├── index-claims.csv            # per revision and tab: stated vs. actual changes
+├── business-terms.csv          # per revision and tab: BTs vs. EN 16931-1:2017
+└── index-releases.csv          # per revision: stated dates and structure
+```
+
+- **Stated changes:** the `Changes` flag (`Yes`, `No`, `Fixed`) and the free-text
+  `Remark on updates` are parsed into added, removed, renamed and deprecated codes
+  and counts ("adding 49 codes"). Words count as codes only when the list has them;
+  missing leading zeros (`Adding 0221 to 230`) are restored, and code-like words the
+  list lacks (`2017` for `0217`, `VATEX-135-1`) are reported as unresolved.
+- **Actual changes:** every revision's TabName sheet is compared with the previous
+  release, by column role, ignoring whitespace-only edits. Its Genericode file is
+  compared with the latest earlier release that has Genericode, across all Index
+  claims in between, and with the sheet over the same span.
+- **Business terms:** the Index column "EN business terms where the code list is
+  used." is compared with [`business-terms-2017.csv`](src/main/resources/validator/business-terms-2017.csv),
+  derived from Table 2 of EN 16931-1:2017, and with the previous release. Genericode
+  files and sheets name no business terms; they are searched for `BT-n` anyway.
+- **Dates:** the effective date the Index states is compared with the date the
+  release is filed under. The 2019 workbooks state only a publication date, on `Main`.
+
 The tree is replaced as a whole on each run and is byte-identical for the same
 inputs. A `validator/` directory without `validator-index.json` is refused.
 
@@ -306,6 +333,8 @@ mvn verify
 - `ValidatorPipeline`, `SchematronCodeLists`, `CodeListReleases`, `ValidatorComparison`,
   `ValidatorReport`: extraction of the validator's code lists and their comparison
   with the published ones.
+- `IndexSheet`, `ChangeClaims`, `ActualChanges`, `IndexCheck`, `BusinessTerms`,
+  `IndexReport`: the Index sheet checks.
 
 Tests cover preservation of values, ordering, repeatability, historical revisions,
 source integrity and failure handling. Spreadsheet tests cover quoted UTF-8

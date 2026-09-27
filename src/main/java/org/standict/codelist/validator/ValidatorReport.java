@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import org.standict.codelist.index.IndexCheck;
+import org.standict.codelist.index.IndexReport;
 import org.standict.codelist.validator.ValidatorComparison.DatePoint;
 import org.standict.codelist.validator.ValidatorComparison.RuleComparison;
 import org.standict.codelist.validator.ValidatorComparison.Side;
@@ -32,10 +34,23 @@ public final class ValidatorReport {
     private static final int CODES_SHOWN = 24;
 
     public void write(ValidatorComparison.Report report, Path directory) throws IOException {
+        write(report, null, directory);
+    }
+
+    /**
+     * @param index the check of the Index sheets, or {@code null} to leave its sections out
+     */
+    public void write(ValidatorComparison.Report report, IndexCheck.Report index, Path directory) throws IOException {
         Files.createDirectories(directory);
         writeCsv(directory.resolve("summary.csv"), summary(report));
         writeCsv(directory.resolve("rules.csv"), rules(report));
-        Files.writeString(directory.resolve("index.html"), html(report), StandardCharsets.UTF_8);
+        var sections = index == null ? null : new IndexReport(index);
+        if (sections != null) {
+            writeCsv(directory.resolve("index-claims.csv"), sections.claimsCsv());
+            writeCsv(directory.resolve("business-terms.csv"), sections.businessTermsCsv());
+            writeCsv(directory.resolve("index-releases.csv"), sections.releasesCsv());
+        }
+        Files.writeString(directory.resolve("index.html"), html(report, sections), StandardCharsets.UTF_8);
     }
 
     /** Counts for one date and syntax, over the rules compared with one component. */
@@ -116,7 +131,7 @@ public final class ValidatorReport {
         return rows;
     }
 
-    private String html(ValidatorComparison.Report report) throws IOException {
+    private String html(ValidatorComparison.Report report, IndexReport sections) throws IOException {
         String template;
         try (InputStream stream = ValidatorReport.class.getResourceAsStream(TEMPLATE)) {
             if (stream == null) {
@@ -132,7 +147,11 @@ public final class ValidatorReport {
                 .replace("{{validators}}", String.valueOf(dates.stream().map(date -> date.validator().tag())
                         .distinct().count()))
                 .replace("{{summary}}", summaryRows(report))
-                .replace("{{details}}", details(report));
+                .replace("{{details}}", details(report))
+                .replace("{{indexSummary}}", sections == null ? "" : sections.summaryHtml())
+                .replace("{{indexClaims}}", sections == null ? "" : sections.claimsHtml())
+                .replace("{{businessTerms}}", sections == null ? "" : sections.businessTermsHtml())
+                .replace("{{indexDates}}", sections == null ? "" : sections.releasesHtml());
     }
 
     private String summaryRows(ValidatorComparison.Report report) {
@@ -233,7 +252,8 @@ public final class ValidatorReport {
         };
     }
 
-    private static void writeCsv(Path destination, List<List<String>> rows) throws IOException {
+    /** Writes quoted UTF-8 CSV with LF line endings, the project's convention. */
+    public static void writeCsv(Path destination, List<List<String>> rows) throws IOException {
         var text = new StringBuilder();
         for (List<String> row : rows) {
             for (int i = 0; i < row.size(); i++) {
@@ -247,7 +267,7 @@ public final class ValidatorReport {
         Files.writeString(destination, text, StandardCharsets.UTF_8);
     }
 
-    private static String escape(String value) {
+    public static String escape(String value) {
         return value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
     }
 }

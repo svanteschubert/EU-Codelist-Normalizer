@@ -97,6 +97,13 @@ class ValidatorPipelineTest {
         assertEquals(1 + 3 * 2, summary.size(), "a header and one row per date and syntax");
         assertTrue(Files.readString(root.resolve("rules.csv")).contains("\"389\""));
         assertTrue(Files.readString(root.resolve("index.html")).contains("2024-11-15"));
+        // The Index of 02 states "Added 389", which its sheet bears out; the Time sheet is not in its Index.
+        var claims = Files.readAllLines(root.resolve("index-claims.csv"));
+        assertEquals(3, claims.size(), "a header and the 1001 row of each release");
+        assertTrue(claims.get(2).startsWith("\"02_2024-11-15/r01\",\"01_2024-05-15/r01\",\"1001\""), claims.get(2));
+        assertTrue(claims.get(2).contains("\"OK\""), claims.get(2));
+        assertTrue(Files.readString(root.resolve("index-releases.csv")).contains("sheets the Index does not list: Time"));
+        assertTrue(Files.readString(root.resolve("business-terms.csv")).contains("\"1001\",\"BT-3\",\"BT-3\""));
         var index = json.readTree(root.resolve(ValidatorPipeline.INDEX).toFile());
         assertEquals(2, index.path("releases").size());
         assertEquals(40, index.path("releases").get(0).path("commit").asText().length());
@@ -193,6 +200,10 @@ class ValidatorPipelineTest {
             csv.append('"').append(code).append("\",\"A name\nwrapped over two lines\"\n");
         }
         write(normalized.resolve("xlsx/1001.csv"), csv.toString());
+        write(output.resolve(release).resolve("r01/extracted/xlsx/Index.csv"),
+                "\"Code lists\",\"Tab name\",\"Version/as published on\",\"Usage\",\"Changes\","
+                        + "\"Remark on updates\",\"EN business terms where the code list is used.\"\n"
+                        + "\"UNTDID 1001\",\"1001\",\"\",\"Subset\",\"Yes\",\"Added 389\",\"BT-3\"\n");
         write(normalized.resolve("xlsx/Time.csv"), """
                 "UBL and UN/EDIFACT","","UN/CEFACT Cross Industry Invoice",""
                 "2005 Code","Value","2475 Code","Value"
