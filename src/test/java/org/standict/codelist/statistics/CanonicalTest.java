@@ -140,6 +140,25 @@ class CanonicalTest {
                 rows.stream().filter(row -> row.role() == Canonical.Role.NAME).findFirst().orElseThrow().value());
     }
 
+    /**
+     * The EAS sheet wraps scheme names over several lines inside one quoted cell. The continuation belongs to that
+     * cell; read as a row of its own, its text would become a code that no other component publishes.
+     */
+    @Test
+    void readsACellThatSpansSeveralLinesAsOneValue() throws Exception {
+        Path csv = temp.resolve("EAS.csv");
+        Files.writeString(csv, "\"AES\",\"Scheme name\"\n"
+                + "\"0106\",\"Vereniging van Kamers van Koophandel en Fabrieken in Nederland\n"
+                + "Chambers of Commerce and Industry in the Netherlands)\"\n"
+                + "\"0135\",\"SIA Object Identifiers\"\n", StandardCharsets.UTF_8);
+
+        List<Canonical.Row> rows = Canonical.readSpreadsheet(csv, "EAS");
+
+        assertEquals(List.of("0106", "0135"), rows.stream().filter(row -> row.role() == Canonical.Role.CODE)
+                .map(Canonical.Row::value).toList());
+        assertTrue(rows.get(1).value().endsWith("\nChambers of Commerce and Industry in the Netherlands)"));
+    }
+
     /** The catalogue must state the known spreadsheet quirks, or the comparison silently mistakes them for changes. */
     @Test
     void catalogueNamesTheMetadataSheetAndTheSpreadsheetOnlyLists() throws Exception {

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN 16931 validator against the published code lists</title>
+<style>
+  :root {
+    --ink: #1a1a1a; --quiet: #6b6b6b; --line: #d8d8d8; --bg: #ffffff; --panel: #f6f6f4;
+    --added: #0a6b3d; --removed: #9b1c1c; --gc: #1f4e79; --xlsx: #5b2d82;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ececec; --quiet: #a0a0a0; --line: #3a3a3a; --bg: #161616; --panel: #1f1f1f;
+      --added: #5fd39b; --removed: #ff8e8e; --gc: #8ab6e0; --xlsx: #c2a0e8;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #ececec; --quiet: #a0a0a0; --line: #3a3a3a; --bg: #161616; --panel: #1f1f1f;
+    --added: #5fd39b; --removed: #ff8e8e; --gc: #8ab6e0; --xlsx: #c2a0e8;
+  }
+  html { background: var(--bg); }
+  body { margin: 0 auto; padding: 2rem 1rem 4rem; max-width: 76rem; background: var(--bg); color: var(--ink);
+         font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+  h1 { font-size: 1.5rem; line-height: 1.25; margin: 0 0 .35rem; }
+  h2 { font-size: 1.1rem; margin: 2.5rem 0 .4rem; }
+  p  { margin: .35rem 0 1rem; color: var(--quiet); max-width: 48rem; }
+  a  { color: inherit; }
+  .facts { display: flex; flex-wrap: wrap; gap: .5rem 2rem; padding: .85rem 1rem; margin: 1rem 0 0;
+           background: var(--panel); border: 1px solid var(--line); border-radius: .4rem; }
+  .facts div { font-variant-numeric: tabular-nums; }
+  .facts span { display: block; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--quiet); }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: .93rem; }
+  th, td { border-bottom: 1px solid var(--line); padding: .35rem .5rem; text-align: right; white-space: nowrap; }
+  th[scope="row"], td:first-child, td.list { text-align: left; }
+  thead th { border-bottom: 2px solid var(--line); font-size: .8rem; text-transform: uppercase;
+             letter-spacing: .03em; color: var(--quiet); font-weight: 600; }
+  thead th.group { text-align: center; border-bottom-width: 1px; }
+  tbody tr:hover { background: var(--panel); }
+  td.added { color: var(--added); }
+  td.removed { color: var(--removed); }
+  td.zero, td.quiet, .quiet { color: var(--quiet); font-weight: normal; }
+  td.absent { color: var(--quiet); font-style: italic; text-align: center; }
+  td.codes { text-align: left; white-space: normal; min-width: 16rem; }
+  td.codes .count { font-weight: 600; }
+  td.codes code { font-size: .85rem; color: var(--ink); }
+  .component { font-size: .82rem; padding: .08rem .4rem; border-radius: .25rem; border: 1px solid currentColor; }
+  .component.genericode { color: var(--gc); }
+  .component.spreadsheet { color: var(--xlsx); }
+  details { border-top: 1px solid var(--line); padding: .5rem 0; }
+  summary { cursor: pointer; }
+  footer { margin-top: 3rem; color: var(--quiet); font-size: .85rem; max-width: 48rem; }
+</style>
+</head>
+<body>
+
+<h1>EN 16931 validator against the published code lists</h1>
+<p>The codes each BR-CL rule of the validation artefacts accepts, compared with the Genericode files and the
+spreadsheet the European Commission published. Every date on which either side changed is listed, each compared
+with what was in force on both sides that day. UBL and CII only.</p>
+
+<div class="facts">
+  <div><span>Effective dates</span>{{dates}}</div>
+  <div><span>Validator releases in force</span>{{validators}}</div>
+  <div><span>First date</span>{{first}}</div>
+  <div><span>Latest date</span>{{last}}</div>
+</div>
+
+<h2>Disagreements per effective date</h2>
+<p>Rules that disagree, of the rules compared, and the number of codes they disagree on. A code counts once for
+each rule that accepts or rejects it. Before 2021 the code lists were published as a spreadsheet only.</p>
+<div class="scroll">
+<table>
+  <thead>
+    <tr><th scope="col" rowspan="2">Effective date</th><th scope="col" rowspan="2">Changed</th>
+        <th scope="col" rowspan="2">Validator</th><th scope="col" rowspan="2">Code lists</th>
+        <th scope="col" class="group" colspan="2">UBL</th><th scope="col" class="group" colspan="2">CII</th></tr>
+    <tr><th scope="col">Genericode</th><th scope="col">Spreadsheet</th>
+        <th scope="col">Genericode</th><th scope="col">Spreadsheet</th></tr>
+  </thead>
+  <tbody>
+{{summary}}
+  </tbody>
+</table>
+</div>
+
+<h2>Codes that differ</h2>
+<p>“Accepted, not published”: the validator lets an invoice use a code the code list does not contain.
+“Published, not accepted”: an invoice using a published code is rejected. The complete lists are in
+<code>rules.csv</code>.</p>
+{{details}}
+
+<footer>Validator codes are read from the tagged releases of the eInvoicing-EN16931 repository; effective dates
+come from <code>validator-releases.csv</code>, and the rule-to-code-list mapping from <code>rule-catalog.csv</code>.
+Where a rule states several lists — UBL's BR-CL-01 for invoices and credit notes, UBL's BR-CL-10 with the
+additional SEPA scheme — their union is compared.</footer>
+
+</body>
+</html>

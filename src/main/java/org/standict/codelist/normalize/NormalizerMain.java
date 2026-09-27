@@ -12,18 +12,27 @@ public final class NormalizerMain {
             boolean deliveries = false;
             boolean compare = false;
             boolean statistics = false;
+            boolean validator = false;
+            Path validatorRepository = Path.of("../eInvoicing-EN16931");
             for (int i = 0; i < args.length; i++) {
                 switch (args[i]) {
                     case "--help", "-h" -> {
                         System.out.println("""
-                                Usage: ./run-normalize.sh [--deliveries|--compare] [--downloader PATH]
-                                                        [--output PATH]
+                                Usage: ./run-normalize.sh [--deliveries|--compare|--statistics|--validator]
+                                                        [--downloader PATH] [--validator-repo PATH] [--output PATH]
                                   --deliveries       Write one delivery per effective date instead of per release
                                   --compare          Report what changed between the deliveries written by
                                                      --deliveries, into compared/ as CSV
                                   --statistics       Render the same analysis, plus the agreement between the
                                                      Genericode and spreadsheet components, as statistics/index.html
+                                  --validator        Extract the UBL and CII code lists of every validator release,
+                                                     normalize them and compare them, per effective date, with the
+                                                     Genericode files and spreadsheets of the releases in --output;
+                                                     writes validator/ with summary.csv, rules.csv and index.html
                                   --downloader PATH  Downloader repository (default: ../EU-Codelist-Downloader)
+                                  --validator-repo PATH
+                                                     eInvoicing-EN16931 checkout, read through its release tags
+                                                     (default: ../eInvoicing-EN16931)
                                   --output PATH      Releases (default: src/test/resources)
 
                                 Default: reads the downloader registry, Genericode ZIPs and EN16931 XLSX
@@ -45,16 +54,34 @@ public final class NormalizerMain {
                     case "--deliveries" -> deliveries = true;
                     case "--compare" -> compare = true;
                     case "--statistics" -> statistics = true;
-                    case "--downloader", "--output" -> {
+                    case "--validator" -> validator = true;
+                    case "--downloader", "--output", "--validator-repo" -> {
                         String option = args[i];
                         if (++i == args.length || args[i].startsWith("--")) {
                             throw new IllegalArgumentException("Missing value for " + option);
                         }
                         if (option.equals("--downloader")) downloader = Path.of(args[i]);
+                        else if (option.equals("--validator-repo")) validatorRepository = Path.of(args[i]);
                         else output = Path.of(args[i]);
                     }
                     default -> throw new IllegalArgumentException("Unknown argument: " + args[i]);
                 }
+            }
+            if (validator) {
+                var result = new org.standict.codelist.validator.ValidatorPipeline().run(validatorRepository, output);
+                var latest = result.report().rules().stream()
+                        .filter(rule -> !result.report().dates().isEmpty() && rule.effectiveDate().equals(
+                                result.report().dates().get(result.report().dates().size() - 1).effectiveDate()))
+                        .toList();
+                System.out.printf("Extracted %d code-list rules from %d validator releases (UBL and CII), "
+                        + "compared on %d effective dates%n", result.rules(), result.releases(),
+                        result.report().dates().size());
+                System.out.printf("Latest date: %d of %d rules disagree with Genericode, %d with the spreadsheet%n",
+                        latest.stream().filter(r -> r.genericode() != null && !r.genericode().agrees()).count(),
+                        latest.size(),
+                        latest.stream().filter(r -> r.spreadsheet() != null && !r.spreadsheet().agrees()).count());
+                System.out.printf("Report: %s%n", result.directory().resolve("index.html"));
+                return;
             }
             if (statistics) {
                 Path normalized = output.resolve("normalized");

@@ -120,12 +120,7 @@ public final class Canonical {
      * (the Currency sheet calls it {@code "Currency"}), else the first column that is not the code.
      */
     public static List<Row> readSpreadsheet(Path csv, String codeList) throws IOException {
-        List<List<String>> table = new ArrayList<>();
-        for (String line : Files.readString(csv, StandardCharsets.UTF_8).split("\n")) {
-            if (!line.isBlank()) {
-                table.add(parseCsvLine(line.strip()));
-            }
-        }
+        List<List<String>> table = parseCsv(Files.readString(csv, StandardCharsets.UTF_8));
         if (table.isEmpty()) {
             return List.of();
         }
@@ -192,8 +187,56 @@ public final class Canonical {
         return column < header.size() ? header.get(column).strip() : "column " + (column + 1);
     }
 
-    /** Minimal RFC 4180 reader for the quoted CSV this project writes and the catalogue resource. */
-    static List<String> parseCsvLine(String line) {
+    /**
+     * Reads a whole CSV file as this project writes it, where a quoted cell may span several lines: the EAS and VATEX
+     * sheets wrap scheme names and remarks. Splitting the file at every line break first would turn the continuation
+     * of such a cell into a row of its own, and its text into a code. Records whose cells are all blank are skipped.
+     */
+    public static List<List<String>> parseCsv(String text) {
+        var table = new ArrayList<List<String>>();
+        var record = new ArrayList<String>();
+        var cell = new StringBuilder();
+        boolean quoted = false;
+        for (int i = 0; i < text.length(); i++) {
+            char character = text.charAt(i);
+            if (quoted) {
+                if (character == '"') {
+                    if (i + 1 < text.length() && text.charAt(i + 1) == '"') {
+                        cell.append('"');
+                        i++;
+                    } else {
+                        quoted = false;
+                    }
+                } else {
+                    cell.append(character);
+                }
+            } else if (character == '"') {
+                quoted = true;
+            } else if (character == ',') {
+                record.add(cell.toString());
+                cell.setLength(0);
+            } else if (character == '\n') {
+                record.add(cell.toString());
+                cell.setLength(0);
+                addUnlessBlank(table, record);
+                record = new ArrayList<>();
+            } else if (character != '\r') {
+                cell.append(character);
+            }
+        }
+        record.add(cell.toString());
+        addUnlessBlank(table, record);
+        return table;
+    }
+
+    private static void addUnlessBlank(List<List<String>> table, List<String> record) {
+        if (record.stream().anyMatch(value -> !value.isBlank())) {
+            table.add(List.copyOf(record));
+        }
+    }
+
+    /** Minimal RFC 4180 reader for one line of the catalogue resources, whose cells never span lines. */
+    public static List<String> parseCsvLine(String line) {
         var cells = new ArrayList<String>();
         var cell = new StringBuilder();
         boolean quoted = false;

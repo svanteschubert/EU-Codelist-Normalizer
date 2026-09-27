@@ -241,6 +241,54 @@ order changes:
 - Keep `Index`, `Main`, empty sheets and other sheets without a recognized code
   header in the extracted order, since they have no code-list rows to sort.
 
+## Validator code lists
+
+The EN 16931 validation artefacts in
+[`ConnectingEurope/eInvoicing-EN16931`](https://github.com/ConnectingEurope/eInvoicing-EN16931)
+enforce the same code lists, spelled out inline in the tests of their `BR-CL`
+Schematron assertions. `--validator` extracts them for UBL and CII from every
+tagged release, normalizes them and compares them with the Genericode files and
+spreadsheets of the releases above:
+
+```bash
+./run-normalize.sh --validator --validator-repo ../eInvoicing-EN16931
+```
+
+The run reads the validator checkout through `git show <tag>:<path>` only, so its
+branch, local changes and untracked files do not matter, and it writes
+`src/test/resources/validator/` (or `<--output>/validator/`):
+
+```text
+validator/
+├── validator-index.json        # tags, commits, effective dates, source hashes, rules
+├── extracted/2026-05-15_validation-1.3.16/{ubl,cii}/EN16931-*-codes.sch
+├── normalized/2026-05-15_validation-1.3.16/{ubl,cii}/BR-CL-01.csv
+├── summary.csv                 # per effective date and syntax
+├── rules.csv                   # per effective date, syntax and rule, with the differing codes
+└── index.html
+```
+
+- **Extraction:** the codes of an assertion are the union of its
+  `contains(' … ', concat(…))` enumerations and its `@attr = '…'` comparisons
+  (BR-CL-24). UBL's BR-CL-01 (invoice and credit note types) and BR-CL-10 (ICD plus
+  `SEPA`) therefore compare as one list each. Literals are kept exactly, including
+  case and stray spaces.
+- **Normalization:** one quoted `"Code"` CSV per rule, codes de-duplicated and in
+  the base-36 order of the normalized Genericode files.
+- **Effective dates:** [`validator-releases.csv`](src/main/resources/validator/validator-releases.csv)
+  gives the date each tag applies from, taken from the Commission's registry where it
+  lists the release, otherwise from the validator's README. Every date on which either
+  the code lists or the validator changed is compared, each time with what was in force
+  on both sides. The highest revision of a code-list release carrying a format is used.
+- **Mapping:** [`rule-catalog.csv`](src/main/resources/validator/rule-catalog.csv)
+  ties each rule to its Genericode file and sheet. BR-CL-06 reads the Time sheet's
+  `2005 Code` column for UBL and `2475 Code` for CII. Unmapped rules are reported,
+  not dropped. Before 2021 only spreadsheets were published; a missing component is
+  reported as such, never as agreement.
+
+The tree is replaced as a whole on each run and is byte-identical for the same
+inputs. A `validator/` directory without `validator-index.json` is refused.
+
 ## Development
 
 ```bash
@@ -255,6 +303,9 @@ mvn verify
 - `ReleaseRevisions`: explicit source-to-revision assignments.
 - `GeneratedOutputs`: validation, publication and cleanup of manifest-tracked files.
 - `NormalizerMain`: command-line entry point.
+- `ValidatorPipeline`, `SchematronCodeLists`, `CodeListReleases`, `ValidatorComparison`,
+  `ValidatorReport`: extraction of the validator's code lists and their comparison
+  with the published ones.
 
 Tests cover preservation of values, ordering, repeatability, historical revisions,
 source integrity and failure handling. Spreadsheet tests cover quoted UTF-8
