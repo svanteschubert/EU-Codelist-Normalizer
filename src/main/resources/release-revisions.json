@@ -1,0 +1,39 @@
+{
+  "format_version": 1,
+  "assignments": [
+    {
+      "effective_date": "2020-11-16",
+      "version": "6",
+      "revision": 1,
+      "sources": {
+        "xlsx": "dbda897ca1526323e28963ac25a2aef9d3320c4b364e5cf6ede606ac53b4e0e7"
+      }
+    },
+    {
+      "effective_date": "2020-11-16",
+      "version": "6",
+      "revision": 2,
+      "sources": {
+        "xlsx": "97de49237cfc92c1f0d9e325c2d9fd7ff2f9a95907445771a41cdb1b0ebcccc6"
+      }
+    },
+    {
+      "effective_date": "2026-05-15",
+      "version": "17",
+      "revision": 1,
+      "sources": {
+        "gc": "ca7d144bbb9c6c7c9a8e7e12d9c3beefd2b8fb6a19f1af0f1a1241954842bd93",
+        "xlsx": "a3f091505008aa31d8fbb1492de529fe7461d123c5f60f96452ceef3e8a74c05"
+      }
+    },
+    {
+      "effective_date": "2026-05-15",
+      "version": "17",
+      "revision": 2,
+      "sources": {
+        "gc": "b10ac254517f3173311498e200829483cdca3c11f4d8046820c72e53ced0c926",
+        "xlsx": "a56f85ff5b30287cabdbb68dc2690be6bc0c628041e29bdcb4cd5eac1f6f5296"
+      }
+    }
+  ]
+}

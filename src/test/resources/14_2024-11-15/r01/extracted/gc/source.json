@@ -1,0 +1,89 @@
+{
+  "source_url" : "https://ec.europa.eu/digital-building-blocks/sites/download/attachments/467108974/cef-genericodes-2024-11-15.zip?version=1&modificationDate=1727768706150&api=v2",
+  "source_path" : "src/main/resources/downloaded-files/EN 16931 code list - GeneriCode/cef-genericodes-2024-11-15.zip",
+  "source_sha256" : "0b7935a66f618ae6fc0a3bcf7b743f1386d6c8a9c2381305de8f909892e2b07d",
+  "source_filename" : "cef-genericodes-2024-11-15.zip",
+  "version" : "14",
+  "release_revision" : 1,
+  "release_directory" : "14_2024-11-15",
+  "revision_directory" : "14_2024-11-15/r01",
+  "effective_date" : [ 2024, 11, 15 ],
+  "extraction" : "original-archive-entry-v1",
+  "normalized" : false,
+  "files" : [ {
+    "filename" : "1001.gc",
+    "source_entry" : "1001.gc",
+    "rows" : 55,
+    "sha256" : "c492d7c3f7341c1600722882356d02aff83dfce9dfab191cc3eab6256ebaf52f"
+  }, {
+    "filename" : "1153.gc",
+    "source_entry" : "1153.gc",
+    "rows" : 817,
+    "sha256" : "f9dc2e5529d31fb54bed6ef91fe2c97b21686edde60cc1647c6816ca4c4246f9"
+  }, {
+    "filename" : "5305.gc",
+    "source_entry" : "5305.gc",
+    "rows" : 9,
+    "sha256" : "08884aeb363f6947d94d67c1674da9e63e324f8a6ec3ec39f537661a72cfd712"
+  }, {
+    "filename" : "Allowance.gc",
+    "source_entry" : "Allowance.gc",
+    "rows" : 19,
+    "sha256" : "16b2331d4c9b4bc1053882378c9868ce0425d0580d9a9ba251121ca16fc7f0a0"
+  }, {
+    "filename" : "Charge.gc",
+    "source_entry" : "Charge.gc",
+    "rows" : 178,
+    "sha256" : "dc1faae68b713f4137fbcfe18b9185757068fb99ad80cd9f4e774e1fe998f0a8"
+  }, {
+    "filename" : "Country.gc",
+    "source_entry" : "Country.gc",
+    "rows" : 251,
+    "sha256" : "6ddd604ea09a07014fb767c9d3409c3f4a0bcaa6261fa910b2c7b423197896aa"
+  }, {
+    "filename" : "Currency.gc",
+    "source_entry" : "Currency.gc",
+    "rows" : 180,
+    "sha256" : "973c97fe2eab125504101079646401d1a651a20379fa22b94f435539f594d1af"
+  }, {
+    "filename" : "EAS.gc",
+    "source_entry" : "EAS.gc",
+    "rows" : 95,
+    "sha256" : "bf20bb30c3effd182c2fe208ace16720fb60366a6eacc14b951eb978ea75003f"
+  }, {
+    "filename" : "ICD.gc",
+    "source_entry" : "ICD.gc",
+    "rows" : 233,
+    "sha256" : "50a97a014f45ebad6dc6018c2e2c8b00ff267343a82d2598331eba39df6186ac"
+  }, {
+    "filename" : "Item.gc",
+    "source_entry" : "Item.gc",
+    "rows" : 184,
+    "sha256" : "0a8f2ad3dc1335c3247bd8cfbed908ccc0a8e994bbddc68842a509c24a143ca7"
+  }, {
+    "filename" : "MIME.gc",
+    "source_entry" : "MIME.gc",
+    "rows" : 6,
+    "sha256" : "7cc012a343dd82f763ad9c481cbf077267722dfd2f566aedc07830c1e38dc4d8"
+  }, {
+    "filename" : "Payment.gc",
+    "source_entry" : "Payment.gc",
+    "rows" : 84,
+    "sha256" : "e222f1c1f199acfc13d0cdfe3437bee82a32ead61fccf570cb61813f44b076ae"
+  }, {
+    "filename" : "Text.gc",
+    "source_entry" : "Text.gc",
+    "rows" : 401,
+    "sha256" : "4899656a68946b671a6047e8a11d90470c5c28b68994dc7b5488e93888d293cb"
+  }, {
+    "filename" : "Unit.gc",
+    "source_entry" : "Unit.gc",
+    "rows" : 2162,
+    "sha256" : "f002500f07582e30d1648f916e1473f20e14ab1931008b03cb5ec58ef6d38c4a"
+  }, {
+    "filename" : "VATEX.gc",
+    "source_entry" : "VATEX.gc",
+    "rows" : 62,
+    "sha256" : "6129500edf456f82609f5b36c5f66da90b70ba8acd5a8c2d0765465d05f79a3f"
+  } ]
+}

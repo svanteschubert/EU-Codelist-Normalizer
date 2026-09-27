@@ -1,0 +1,134 @@
+{
+  "source_url" : "https://ec.europa.eu/digital-building-blocks/sites/download/attachments/467108974/EN16931%20code%20lists%20values%20v16%20-%20used%20from%202025-11-15.xlsx?version=1&modificationDate=1761226229087&api=v2",
+  "source_path" : "src/main/resources/downloaded-files/EN 16931 code list - XLSX/EN16931 code lists values v16 - used from 2025-11-15.xlsx",
+  "source_sha256" : "727bf8607044f4cedeed774b7d653ff49bca3469bd29b981b1f5acfe8876252e",
+  "source_filename" : "EN16931 code lists values v16 - used from 2025-11-15.xlsx",
+  "version" : "16",
+  "release_revision" : 1,
+  "release_directory" : "16_2025-11-15",
+  "revision_directory" : "16_2025-11-15/r01",
+  "effective_date" : [ 2025, 11, 15 ],
+  "extraction" : "sheet-order-quoted-utf8-csv-v2",
+  "normalized" : false,
+  "files" : [ {
+    "filename" : "Index.csv",
+    "source_sheet" : "Index",
+    "rows" : 26,
+    "columns" : 7,
+    "sha256" : "3dddcb29d5e6bbda8c75cd805aafdf6d90221855c55fe208e43726a8e22bd1a3"
+  }, {
+    "filename" : "Country.csv",
+    "source_sheet" : "Country",
+    "rows" : 252,
+    "columns" : 2,
+    "sha256" : "43ae9b074dbeb6aff465383f1f1b31b16eae551dc19c2cc5e8c252b886c69974"
+  }, {
+    "filename" : "Currency.csv",
+    "source_sheet" : "Currency",
+    "rows" : 180,
+    "columns" : 2,
+    "sha256" : "263df44d5c6b50181a9b8710196809b586b5bc4d93da4c0e8a8aecacc9a72462"
+  }, {
+    "filename" : "ICD.csv",
+    "source_sheet" : "ICD",
+    "rows" : 240,
+    "columns" : 2,
+    "sha256" : "e9a516e63c824b8e6f2abf15beef7435b29f21168dafe395a2deec56e6c1b1aa"
+  }, {
+    "filename" : "1001.csv",
+    "source_sheet" : "1001",
+    "rows" : 63,
+    "columns" : 3,
+    "sha256" : "c0dce48e6433e29ddd146bb956a8bc016dd24946bf9baede8a0b814191941fd3"
+  }, {
+    "filename" : "1153.csv",
+    "source_sheet" : "1153",
+    "rows" : 819,
+    "columns" : 2,
+    "sha256" : "c26fc35f81125c78d3fc0928a3b589dd22e3c416aada10e537d375e5ad2ed5cb"
+  }, {
+    "filename" : "VAT ID.csv",
+    "source_sheet" : "VAT ID",
+    "rows" : 4,
+    "columns" : 4,
+    "sha256" : "7d0ff26c4d4e81acad1a542a43c16890e99ad3ac28233b35e566ad5263ad1ea4"
+  }, {
+    "filename" : "FISCAL ID.csv",
+    "source_sheet" : "FISCAL ID",
+    "rows" : 2,
+    "columns" : 2,
+    "sha256" : "e0d40907dac366db16ddbd1172d58bb803536e7a3b88ae98fa6fe277f4f0eac1"
+  }, {
+    "filename" : "VAT CAT.csv",
+    "source_sheet" : "VAT CAT",
+    "rows" : 3,
+    "columns" : 4,
+    "sha256" : "037a07e6d1bcb263b9d915fd64eb184dc23aa731625bb1b19e46f139ceef34ab"
+  }, {
+    "filename" : "Time.csv",
+    "source_sheet" : "Time",
+    "rows" : 5,
+    "columns" : 4,
+    "sha256" : "cd88c7fa49a4d1ff68d93e6536b492664afaca67f6e6b15633b0dd2d60637b7c"
+  }, {
+    "filename" : "Text.csv",
+    "source_sheet" : "Text",
+    "rows" : 402,
+    "columns" : 2,
+    "sha256" : "41767d0b014e54f61def4c15c210a9842cd8e39c1f08531dfac7931390903a70"
+  }, {
+    "filename" : "Payment.csv",
+    "source_sheet" : "Payment",
+    "rows" : 85,
+    "columns" : 3,
+    "sha256" : "d8cdff2633b9d01303d2a249742c1da2825086914e555520688dd4418e58b11c"
+  }, {
+    "filename" : "5305.csv",
+    "source_sheet" : "5305",
+    "rows" : 10,
+    "columns" : 3,
+    "sha256" : "d1ef881828ef886209c259fc0f8c4660e7b07e7b94c23decb26f5e7db52f8f2d"
+  }, {
+    "filename" : "Allowance.csv",
+    "source_sheet" : "Allowance",
+    "rows" : 20,
+    "columns" : 2,
+    "sha256" : "bdd950cb935c97cb306b9d66dbfa59dec027a6ecc591317f172475ed65e5881c"
+  }, {
+    "filename" : "Item.csv",
+    "source_sheet" : "Item",
+    "rows" : 186,
+    "columns" : 2,
+    "sha256" : "fa98ef5a3545d1bc12bcc003915b35c74ae06d56c7ade90bbfd7d17d29d23f81"
+  }, {
+    "filename" : "Charge.csv",
+    "source_sheet" : "Charge",
+    "rows" : 179,
+    "columns" : 2,
+    "sha256" : "88c54a134509cf55825f8c5e01238ee76cbd553fc515dc222de36410c654314f"
+  }, {
+    "filename" : "MIME.csv",
+    "source_sheet" : "MIME",
+    "rows" : 7,
+    "columns" : 1,
+    "sha256" : "b8f08d95e2e35610803eb5b220d0b6c976116bd8ea507690d702c85d20c7bd75"
+  }, {
+    "filename" : "EAS.csv",
+    "source_sheet" : "EAS",
+    "rows" : 99,
+    "columns" : 2,
+    "sha256" : "c99c934b0445e2b3d0202674bb758ed6248df92d1574665dbd3663216785ea5f"
+  }, {
+    "filename" : "VATEX.csv",
+    "source_sheet" : "VATEX",
+    "rows" : 89,
+    "columns" : 3,
+    "sha256" : "56b5f0753dd24f7a3ecaf8b94eceaff087eb26fc570d83f31770a3192d6e0b62"
+  }, {
+    "filename" : "Unit.csv",
+    "source_sheet" : "Unit",
+    "rows" : 2163,
+    "columns" : 4,
+    "sha256" : "a5550f40d2a637811cf9fe033436b0efbb055f0a2ae73ea2d0f64f9dcbc5b1ce"
+  } ]
+}

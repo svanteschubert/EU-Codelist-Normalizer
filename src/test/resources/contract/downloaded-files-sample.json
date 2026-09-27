@@ -1,0 +1,77 @@
+{
+  "https://ec.europa.eu/digital-building-blocks/sites/download/attachments/467108974/EN16931%20code%20lists%20%281%29%20%281%29.xlsx?version=1&modificationDate=1639417211596&api=v2": {
+    "url": "https://ec.europa.eu/digital-building-blocks/sites/download/attachments/467108974/EN16931%20code%20lists%20%281%29%20%281%29.xlsx?version=1&modificationDate=1639417211596&api=v2",
+    "contentLength": 173421,
+    "contentType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8",
+    "lastModified": [
+      1970,
+      1,
+      19,
+      23,
+      23,
+      37
+    ],
+    "downloaded": true,
+    "downloadTime": [
+      2025,
+      10,
+      29,
+      20,
+      21,
+      53,
+      186294600
+    ],
+    "localPath": "src/main/resources/downloaded-files/EN 16931 code list - XLSX/EN16931 code lists (1) (1).xlsx",
+    "effective_date": [
+      2019,
+      3,
+      15
+    ],
+    "version": "1",
+    "is_latest_release": false,
+    "actual_hash": "0873e8fe55b5a63e872cd8bca76caef8bb52de4a9aa63c44a11f021fb320a0fc",
+    "actual_size": 173421,
+    "category": "EN 16931 code list - XLSX",
+    "filename": "EN16931 code lists (1) (1).xlsx"
+  },
+  "https://ec.europa.eu/digital-building-blocks/sites/download/attachments/467108974/EN16931%20code%20lists%20values%20-%20genericodes%20-used%20from%202021-05-17.zip?version=1&modificationDate=1639417211205&api=v2": {
+    "url": "https://ec.europa.eu/digital-building-blocks/sites/download/attachments/467108974/EN16931%20code%20lists%20values%20-%20genericodes%20-used%20from%202021-05-17.zip?version=1&modificationDate=1639417211205&api=v2",
+    "contentLength": 69045,
+    "contentType": "application/zip;charset=UTF-8",
+    "lastModified": [
+      1970,
+      1,
+      19,
+      23,
+      23,
+      37
+    ],
+    "downloaded": true,
+    "downloadTime": [
+      2025,
+      10,
+      29,
+      20,
+      22,
+      38,
+      672206800
+    ],
+    "localPath": "src/main/resources/downloaded-files/EN 16931 code list - GeneriCode/EN16931 code lists values - genericodes -used from 2021-05-17.zip",
+    "effective_date": [
+      2021,
+      5,
+      17
+    ],
+    "publishing_date": [
+      2021,
+      3,
+      5
+    ],
+    "version": "7",
+    "is_latest_release": false,
+    "actual_hash": "8a422698571191ecaad91a124462466676a9898ca23369df9d70a6ee40895aae",
+    "actual_size": 69045,
+    "category": "EN 16931 code list - GeneriCode",
+    "filename": "EN16931 code lists values - genericodes -used from 2021-05-17.zip"
+  }
+}

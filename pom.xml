@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.standict</groupId>
+  <artifactId>eu-codelist-normalizer</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <name>EU Code List Normalizer</name>
+  <description>Extracts and normalizes EU Genericode releases and spreadsheet sheets as CSV.</description>
+  <licenses>
+    <license><name>Apache License, Version 2.0</name><url>https://www.apache.org/licenses/LICENSE-2.0</url></license>
+  </licenses>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>17</maven.compiler.release>
+    <ph-genericode.version>8.1.0</ph-genericode.version>
+    <poi.version>5.5.1</poi.version>
+  </properties>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId><artifactId>log4j-bom</artifactId><version>2.25.3</version><type>pom</type><scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <dependencies>
+    <dependency>
+      <groupId>com.helger</groupId><artifactId>ph-genericode</artifactId><version>${ph-genericode.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId><artifactId>poi-ooxml</artifactId><version>${poi.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.xml.bind</groupId><artifactId>jaxb-impl</artifactId><version>4.0.6</version><scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-databind</artifactId><version>2.20.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId><artifactId>slf4j-simple</artifactId><version>2.0.17</version><scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId><artifactId>log4j-to-slf4j</artifactId><scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId><artifactId>junit-jupiter</artifactId><version>5.10.0</version><scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <finalName>eu-codelist-normalizer</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId><artifactId>maven-compiler-plugin</artifactId><version>3.11.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId><artifactId>maven-surefire-plugin</artifactId><version>3.2.2</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId><artifactId>maven-shade-plugin</artifactId><version>3.6.1</version>
+        <executions>
+          <execution>
+            <phase>package</phase><goals><goal>shade</goal></goals>
+            <configuration>
+              <createDependencyReducedPom>false</createDependencyReducedPom>
+              <outputFile>${project.build.directory}/eu-codelist-normalizer-all.jar</outputFile>
+              <filters>
+                <filter><artifact>*:*</artifact><excludes>
+                  <exclude>META-INF/*.SF</exclude><exclude>META-INF/*.DSA</exclude><exclude>META-INF/*.RSA</exclude>
+                  <exclude>module-info.class</exclude><exclude>META-INF/versions/*/module-info.class</exclude>
+                  <exclude>META-INF/buildinfo.xml</exclude><exclude>META-INF/sun-jaxb.episode</exclude>
+                  <exclude>META-INF/MANIFEST.MF</exclude>
+                </excludes></filter>
+              </filters>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <mainClass>org.standict.codelist.normalize.NormalizerMain</mainClass>
+                  <manifestEntries><Multi-Release>true</Multi-Release></manifestEntries>
+                </transformer>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer"/>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer"><resource>LICENSE</resource></transformer>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer"><resource>NOTICE</resource></transformer>
+              </transformers>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

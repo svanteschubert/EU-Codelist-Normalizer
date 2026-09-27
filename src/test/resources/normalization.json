@@ -1,0 +1,242 @@
+{
+  "format_version" : 5,
+  "normalization" : "base36-code-order-v1",
+  "ph_genericode_version" : "8.1.0",
+  "spreadsheet_extraction" : "sheet-order-quoted-utf8-csv-v2",
+  "spreadsheet_normalization" : "base36-code-column-order-v2",
+  "apache_poi_version" : "5.5.1",
+  "archives" : [ {
+    "directory" : "07_2021-05-17/r01/normalized/gc",
+    "extracted_directory" : "07_2021-05-17/r01/extracted/gc",
+    "release_directory" : "07_2021-05-17",
+    "release_revision" : 1,
+    "revision_directory" : "07_2021-05-17/r01",
+    "source_sha256" : "8a422698571191ecaad91a124462466676a9898ca23369df9d70a6ee40895aae",
+    "files" : 15
+  }, {
+    "directory" : "09_2022-05-16/r01/normalized/gc",
+    "extracted_directory" : "09_2022-05-16/r01/extracted/gc",
+    "release_directory" : "09_2022-05-16",
+    "release_revision" : 1,
+    "revision_directory" : "09_2022-05-16/r01",
+    "source_sha256" : "63e9cc106f0ac8faaecfbc71b60ce834a45fd0b0753e1b146e9c322465846f2a",
+    "files" : 15
+  }, {
+    "directory" : "10_2022-11-15/r01/normalized/gc",
+    "extracted_directory" : "10_2022-11-15/r01/extracted/gc",
+    "release_directory" : "10_2022-11-15",
+    "release_revision" : 1,
+    "revision_directory" : "10_2022-11-15/r01",
+    "source_sha256" : "1fafc1c700bb657618eb5336141d869db5946e2fb4ea0aa7d5c97b29e6c9ed13",
+    "files" : 15
+  }, {
+    "directory" : "11_2023-05-15/r01/normalized/gc",
+    "extracted_directory" : "11_2023-05-15/r01/extracted/gc",
+    "release_directory" : "11_2023-05-15",
+    "release_revision" : 1,
+    "revision_directory" : "11_2023-05-15/r01",
+    "source_sha256" : "7acb784d939ffff85804adeacf349a5f9d29519886cfb41607a4182a6df3a565",
+    "files" : 15
+  }, {
+    "directory" : "13_2024-05-15/r01/normalized/gc",
+    "extracted_directory" : "13_2024-05-15/r01/extracted/gc",
+    "release_directory" : "13_2024-05-15",
+    "release_revision" : 1,
+    "revision_directory" : "13_2024-05-15/r01",
+    "source_sha256" : "f69298a1a3c07b39e79a6d1aa85b47b977600f87ef8cc2a07aafa7443d81d6f0",
+    "files" : 15
+  }, {
+    "directory" : "14_2024-11-15/r01/normalized/gc",
+    "extracted_directory" : "14_2024-11-15/r01/extracted/gc",
+    "release_directory" : "14_2024-11-15",
+    "release_revision" : 1,
+    "revision_directory" : "14_2024-11-15/r01",
+    "source_sha256" : "0b7935a66f618ae6fc0a3bcf7b743f1386d6c8a9c2381305de8f909892e2b07d",
+    "files" : 15
+  }, {
+    "directory" : "15_2025-05-15/r01/normalized/gc",
+    "extracted_directory" : "15_2025-05-15/r01/extracted/gc",
+    "release_directory" : "15_2025-05-15",
+    "release_revision" : 1,
+    "revision_directory" : "15_2025-05-15/r01",
+    "source_sha256" : "5f25031535a2cb7d2eb5894ca5ae2b767b38e117625a10ab5ad89b1a849d4578",
+    "files" : 15
+  }, {
+    "directory" : "16_2025-11-15/r01/normalized/gc",
+    "extracted_directory" : "16_2025-11-15/r01/extracted/gc",
+    "release_directory" : "16_2025-11-15",
+    "release_revision" : 1,
+    "revision_directory" : "16_2025-11-15/r01",
+    "source_sha256" : "1338c423de9f581260d973cb2cbafbfc11718906e2d663dd895b4805efd232fa",
+    "files" : 15
+  }, {
+    "directory" : "17_2026-05-15/r01/normalized/gc",
+    "extracted_directory" : "17_2026-05-15/r01/extracted/gc",
+    "release_directory" : "17_2026-05-15",
+    "release_revision" : 1,
+    "revision_directory" : "17_2026-05-15/r01",
+    "source_sha256" : "ca7d144bbb9c6c7c9a8e7e12d9c3beefd2b8fb6a19f1af0f1a1241954842bd93",
+    "files" : 15
+  }, {
+    "directory" : "17_2026-05-15/r02/normalized/gc",
+    "extracted_directory" : "17_2026-05-15/r02/extracted/gc",
+    "release_directory" : "17_2026-05-15",
+    "release_revision" : 2,
+    "revision_directory" : "17_2026-05-15/r02",
+    "source_sha256" : "b10ac254517f3173311498e200829483cdca3c11f4d8046820c72e53ced0c926",
+    "files" : 15
+  } ],
+  "workbooks" : [ {
+    "directory" : "01_2019-03-15/r01/normalized/xlsx",
+    "extracted_directory" : "01_2019-03-15/r01/extracted/xlsx",
+    "release_directory" : "01_2019-03-15",
+    "release_revision" : 1,
+    "revision_directory" : "01_2019-03-15/r01",
+    "source_sha256" : "0873e8fe55b5a63e872cd8bca76caef8bb52de4a9aa63c44a11f021fb320a0fc",
+    "sheets" : 20
+  }, {
+    "directory" : "02_2019-06-17/r01/normalized/xlsx",
+    "extracted_directory" : "02_2019-06-17/r01/extracted/xlsx",
+    "release_directory" : "02_2019-06-17",
+    "release_revision" : 1,
+    "revision_directory" : "02_2019-06-17/r01",
+    "source_sha256" : "c28ccfb0d73a108fec709cc5c2529adc936e7aff184fee5d908a1c8816bbf1bc",
+    "sheets" : 20
+  }, {
+    "directory" : "03_2019-11-15/r01/normalized/xlsx",
+    "extracted_directory" : "03_2019-11-15/r01/extracted/xlsx",
+    "release_directory" : "03_2019-11-15",
+    "release_revision" : 1,
+    "revision_directory" : "03_2019-11-15/r01",
+    "source_sha256" : "cfe2a2164d2023950b8305a3905d8bf00721f10e42f4e8725c70ade5fb96dfd5",
+    "sheets" : 19
+  }, {
+    "directory" : "04_2020-05-15/r01/normalized/xlsx",
+    "extracted_directory" : "04_2020-05-15/r01/extracted/xlsx",
+    "release_directory" : "04_2020-05-15",
+    "release_revision" : 1,
+    "revision_directory" : "04_2020-05-15/r01",
+    "source_sha256" : "dc4608209745864454ba0c67bc403ac4762ea69fc6067c65da2e749939110ec1",
+    "sheets" : 19
+  }, {
+    "directory" : "05_2020-06-30/r01/normalized/xlsx",
+    "extracted_directory" : "05_2020-06-30/r01/extracted/xlsx",
+    "release_directory" : "05_2020-06-30",
+    "release_revision" : 1,
+    "revision_directory" : "05_2020-06-30/r01",
+    "source_sha256" : "eb4430d2b34c074f507b4ed9265430145d8bfc79d50e665abc2543c09611cc9f",
+    "sheets" : 19
+  }, {
+    "directory" : "06_2020-11-16/r01/normalized/xlsx",
+    "extracted_directory" : "06_2020-11-16/r01/extracted/xlsx",
+    "release_directory" : "06_2020-11-16",
+    "release_revision" : 1,
+    "revision_directory" : "06_2020-11-16/r01",
+    "source_sha256" : "dbda897ca1526323e28963ac25a2aef9d3320c4b364e5cf6ede606ac53b4e0e7",
+    "sheets" : 19
+  }, {
+    "directory" : "06_2020-11-16/r02/normalized/xlsx",
+    "extracted_directory" : "06_2020-11-16/r02/extracted/xlsx",
+    "release_directory" : "06_2020-11-16",
+    "release_revision" : 2,
+    "revision_directory" : "06_2020-11-16/r02",
+    "source_sha256" : "97de49237cfc92c1f0d9e325c2d9fd7ff2f9a95907445771a41cdb1b0ebcccc6",
+    "sheets" : 19
+  }, {
+    "directory" : "07_2021-05-17/r01/normalized/xlsx",
+    "extracted_directory" : "07_2021-05-17/r01/extracted/xlsx",
+    "release_directory" : "07_2021-05-17",
+    "release_revision" : 1,
+    "revision_directory" : "07_2021-05-17/r01",
+    "source_sha256" : "df0d0a5593bbced94a496f22e8718d8bcc4d73688aba611ab94e81506e8d0f38",
+    "sheets" : 19
+  }, {
+    "directory" : "08_2021-11-15/r01/normalized/xlsx",
+    "extracted_directory" : "08_2021-11-15/r01/extracted/xlsx",
+    "release_directory" : "08_2021-11-15",
+    "release_revision" : 1,
+    "revision_directory" : "08_2021-11-15/r01",
+    "source_sha256" : "17691e4eda341f3a5940efdb7f9d7de016edd34c7ee73cb8704415b2001297f9",
+    "sheets" : 19
+  }, {
+    "directory" : "09_2022-05-16/r01/normalized/xlsx",
+    "extracted_directory" : "09_2022-05-16/r01/extracted/xlsx",
+    "release_directory" : "09_2022-05-16",
+    "release_revision" : 1,
+    "revision_directory" : "09_2022-05-16/r01",
+    "source_sha256" : "93b0469dd7496a6c9da646a857960179c6c15e2c3dbda54b0ceacf46d4ae83af",
+    "sheets" : 19
+  }, {
+    "directory" : "10_2022-11-15/r01/normalized/xlsx",
+    "extracted_directory" : "10_2022-11-15/r01/extracted/xlsx",
+    "release_directory" : "10_2022-11-15",
+    "release_revision" : 1,
+    "revision_directory" : "10_2022-11-15/r01",
+    "source_sha256" : "43495e490e90d4847ff72d03e87c46deccb6fbffbc5605e2e0cd1e4615022ccf",
+    "sheets" : 19
+  }, {
+    "directory" : "11_2023-05-15/r01/normalized/xlsx",
+    "extracted_directory" : "11_2023-05-15/r01/extracted/xlsx",
+    "release_directory" : "11_2023-05-15",
+    "release_revision" : 1,
+    "revision_directory" : "11_2023-05-15/r01",
+    "source_sha256" : "8045e33e0bc4ee3337022a116c17115999732ad72a1479955cb549322c35ea04",
+    "sheets" : 19
+  }, {
+    "directory" : "12_2023-11-15/r01/normalized/xlsx",
+    "extracted_directory" : "12_2023-11-15/r01/extracted/xlsx",
+    "release_directory" : "12_2023-11-15",
+    "release_revision" : 1,
+    "revision_directory" : "12_2023-11-15/r01",
+    "source_sha256" : "8648cc5c4e34856954cc2482e1e3c2b4667ca71b384ea25a21cbfe165c0ce01b",
+    "sheets" : 19
+  }, {
+    "directory" : "13_2024-05-15/r01/normalized/xlsx",
+    "extracted_directory" : "13_2024-05-15/r01/extracted/xlsx",
+    "release_directory" : "13_2024-05-15",
+    "release_revision" : 1,
+    "revision_directory" : "13_2024-05-15/r01",
+    "source_sha256" : "f5c750ebee3fca73d0750ef5dafbc1e7219e2f8839e172fba374ffc1939866f0",
+    "sheets" : 19
+  }, {
+    "directory" : "14_2024-11-15/r01/normalized/xlsx",
+    "extracted_directory" : "14_2024-11-15/r01/extracted/xlsx",
+    "release_directory" : "14_2024-11-15",
+    "release_revision" : 1,
+    "revision_directory" : "14_2024-11-15/r01",
+    "source_sha256" : "a55edd22bc024bea907e17f83b23c26540bd1449cd0b8aee949835867ad0ca82",
+    "sheets" : 19
+  }, {
+    "directory" : "15_2025-05-15/r01/normalized/xlsx",
+    "extracted_directory" : "15_2025-05-15/r01/extracted/xlsx",
+    "release_directory" : "15_2025-05-15",
+    "release_revision" : 1,
+    "revision_directory" : "15_2025-05-15/r01",
+    "source_sha256" : "e3f7c59a3d70618a6ce31f9a8fa3aae154d87d90ba1051232f6717ab632b9714",
+    "sheets" : 20
+  }, {
+    "directory" : "16_2025-11-15/r01/normalized/xlsx",
+    "extracted_directory" : "16_2025-11-15/r01/extracted/xlsx",
+    "release_directory" : "16_2025-11-15",
+    "release_revision" : 1,
+    "revision_directory" : "16_2025-11-15/r01",
+    "source_sha256" : "727bf8607044f4cedeed774b7d653ff49bca3469bd29b981b1f5acfe8876252e",
+    "sheets" : 20
+  }, {
+    "directory" : "17_2026-05-15/r01/normalized/xlsx",
+    "extracted_directory" : "17_2026-05-15/r01/extracted/xlsx",
+    "release_directory" : "17_2026-05-15",
+    "release_revision" : 1,
+    "revision_directory" : "17_2026-05-15/r01",
+    "source_sha256" : "a3f091505008aa31d8fbb1492de529fe7461d123c5f60f96452ceef3e8a74c05",
+    "sheets" : 20
+  }, {
+    "directory" : "17_2026-05-15/r02/normalized/xlsx",
+    "extracted_directory" : "17_2026-05-15/r02/extracted/xlsx",
+    "release_directory" : "17_2026-05-15",
+    "release_revision" : 2,
+    "revision_directory" : "17_2026-05-15/r02",
+    "source_sha256" : "a56f85ff5b30287cabdbb68dc2690be6bc0c628041e29bdcb4cd5eac1f6f5296",
+    "sheets" : 20
+  } ]
+}

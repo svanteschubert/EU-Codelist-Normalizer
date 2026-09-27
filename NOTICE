@@ -1,0 +1,11 @@
+EU Code List Normalizer
+Copyright 2026 Svante Schubert
+
+This project uses ph-genericode by Philip Helger under the Apache License 2.0.
+Spreadsheet extraction uses Apache POI under the Apache License 2.0.
+The normalization approach is based on Genericode10EN16931CodeListMarshallerTest
+by Svante Schubert and Philip Helger in svanteschubert/ph-genericode.
+
+The EAS regression fixtures and normalized outputs originate from the European
+Commission's Registry of supporting artefacts to implement EN16931.
+Original annotations and source provenance are preserved.
