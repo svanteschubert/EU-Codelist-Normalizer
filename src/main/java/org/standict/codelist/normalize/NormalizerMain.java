@@ -10,12 +10,16 @@ public final class NormalizerMain {
             Path downloader = Path.of("../EU-Codelist-Downloader");
             Path output = Path.of("src/test/resources");
             boolean deliveries = false;
+            boolean compare = false;
             for (int i = 0; i < args.length; i++) {
                 switch (args[i]) {
                     case "--help", "-h" -> {
                         System.out.println("""
-                                Usage: ./run-normalize.sh [--deliveries] [--downloader PATH] [--output PATH]
+                                Usage: ./run-normalize.sh [--deliveries|--compare] [--downloader PATH]
+                                                        [--output PATH]
                                   --deliveries       Write one delivery per effective date instead of per release
+                                  --compare          Report what changed between the deliveries written by
+                                                     --deliveries, into compared/
                                   --downloader PATH  Downloader repository (default: ../EU-Codelist-Downloader)
                                   --output PATH      Releases (default: src/test/resources)
 
@@ -36,6 +40,7 @@ public final class NormalizerMain {
                         return;
                     }
                     case "--deliveries" -> deliveries = true;
+                    case "--compare" -> compare = true;
                     case "--downloader", "--output" -> {
                         String option = args[i];
                         if (++i == args.length || args[i].startsWith("--")) {
@@ -46,6 +51,17 @@ public final class NormalizerMain {
                     }
                     default -> throw new IllegalArgumentException("Unknown argument: " + args[i]);
                 }
+            }
+            if (compare) {
+                Path normalized = output.resolve("normalized");
+                Path compared = output.resolve("compared");
+                var report = new org.standict.codelist.compare.DeliveryComparison().compare(normalized, compared);
+                System.out.printf("Compared %d consecutive deliveries and %d correction(s): "
+                        + "%d code lists changed, %d codes added, %d removed, %d reworded%n",
+                        report.deliveryPairs(), report.corrections(), report.codeLists(), report.added(),
+                        report.removed(), report.changed());
+                System.out.printf("Reports in %s%n", compared.toAbsolutePath().normalize());
+                return;
             }
             if (deliveries) {
                 var delivered = new org.standict.codelist.delivery.DeliveryPipeline().run(downloader, output);

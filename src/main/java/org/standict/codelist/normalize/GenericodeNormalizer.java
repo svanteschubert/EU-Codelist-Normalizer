@@ -72,6 +72,12 @@ public final class GenericodeNormalizer {
         }
     }
 
+    /**
+     * The order normalized code lists are written in, so that a report can list codes the way the files do. One
+     * definition only: a second base-36 comparator elsewhere would drift from the bytes on disk.
+     */
+    public static final java.util.Comparator<String> CODE_ORDER = GenericodeNormalizer::compareCodes;
+
     /** Base-36 ordering from the original example, without integer overflow or ambiguous ties. */
     static int compareCodes(String left, String right) {
         boolean leftNumeric = left.matches("[0-9A-Za-z]+");
