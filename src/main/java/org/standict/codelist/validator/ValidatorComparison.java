@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.TreeSet;
 
 /**
- * Compares the codes each validator rule accepts with the code list the Commission published for the same date.
+ * Compares the codes each validator rule implements with the code list the Commission published for the same date.
  *
  * <p><strong>Which dates.</strong> Something changes for an implementer whenever either side changes: a new code-list
  * release, or a new validator release. The two are not always published for the same day -- validator 1.3.8 applies
@@ -35,10 +35,11 @@ public final class ValidatorComparison {
      * One rule compared with one published component.
      *
      * @param published how many codes the component publishes for the list
-     * @param onlyInValidator codes the validator accepts that the component does not publish
+     * @param onlyInValidator codes the validator implements that the component does not publish
      * @param onlyPublished codes the component publishes that the validator rejects
      */
-    public record Side(String source, int published, List<String> onlyInValidator, List<String> onlyPublished) {
+    public record Side(String source, int published, List<String> onlyInValidator, List<String> onlyPublished,
+            Map<String, Description> names) {
         public boolean agrees() {
             return onlyInValidator.isEmpty() && onlyPublished.isEmpty();
         }
@@ -47,6 +48,14 @@ public final class ValidatorComparison {
             return onlyInValidator.size() + onlyPublished.size();
         }
     }
+
+    /**
+     * The name of a code, as a reader needs it next to the code.
+     *
+     * @param from empty when the compared release names the code itself; otherwise the release the name was taken
+     *     from, because a code the validator still implements may have left the published list long ago
+     */
+    public record Description(String name, String from) {}
 
     /**
      * One rule of one syntax on one date.
@@ -109,22 +118,78 @@ public final class ValidatorComparison {
         }
         String codeList = mapping.get().codeList();
         String column = mapping.get().spreadsheetColumn();
-        var genericode = cached("gc\u0000" + release.directory() + "\u0000" + codeList,
-                () -> codeLists.genericode(release, codeList));
-        var spreadsheet = cached("xlsx\u0000" + release.directory() + "\u0000" + codeList + "\u0000" + column,
-                () -> codeLists.spreadsheet(release, codeList, column));
+        var genericode = genericode(codeLists, release, codeList);
+        var spreadsheet = spreadsheet(codeLists, release, codeList, column);
         return new RuleComparison(date, validator.tag(), release.directory(), syntax, rule.rule(), codeList,
-                rule.codes().size(), genericode.map(side -> side(rule.codes(), side)).orElse(null),
-                spreadsheet.map(side -> side(rule.codes(), side)).orElse(null));
+                rule.codes().size(),
+                genericode.isEmpty() ? null : side(rule.codes(), genericode.get(), codeLists, release, codeList, column, true),
+                spreadsheet.isEmpty() ? null
+                        : side(rule.codes(), spreadsheet.get(), codeLists, release, codeList, column, false));
+    }
+
+    private Optional<CodeListReleases.Published> genericode(CodeListReleases codeLists,
+            CodeListReleases.Release release, String codeList) throws IOException {
+        return cached("gc\u0000" + release.directory() + "\u0000" + codeList,
+                () -> codeLists.genericode(release, codeList));
+    }
+
+    private Optional<CodeListReleases.Published> spreadsheet(CodeListReleases codeLists,
+            CodeListReleases.Release release, String codeList, String column) throws IOException {
+        return cached("xlsx\u0000" + release.directory() + "\u0000" + codeList + "\u0000" + column,
+                () -> codeLists.spreadsheet(release, codeList, column));
+    }
+
+    /**
+     * The name of a code, from the compared release where it lists the code, else from the nearest release that did:
+     * the latest earlier one first, then the earliest later one. Each release is asked for its compared component
+     * first. {@code null} when no release ever named the code, as for the {@code SEPA} scheme UBL's BR-CL-10 allows.
+     */
+    private Description describe(CodeListReleases codeLists, CodeListReleases.Release compared, String codeList,
+            String column, boolean genericodeFirst, String code) throws IOException {
+        var order = new java.util.ArrayList<CodeListReleases.Release>();
+        codeLists.releases().stream().filter(r -> !r.effectiveDate().isAfter(compared.effectiveDate()))
+                .forEach(r -> order.add(0, r));
+        codeLists.releases().stream().filter(r -> r.effectiveDate().isAfter(compared.effectiveDate()))
+                .forEach(order::add);
+        for (CodeListReleases.Release release : order) {
+            for (boolean fromGenericode : genericodeFirst ? new boolean[] {true, false} : new boolean[] {false, true}) {
+                var published = fromGenericode ? genericode(codeLists, release, codeList)
+                        : spreadsheet(codeLists, release, codeList, column);
+                if (published.isPresent() && published.get().names().containsKey(code)) {
+                    return new Description(published.get().names().get(code),
+                            release == compared ? "" : release.directory());
+                }
+            }
+        }
+        return null;
     }
 
     /** Both lists are in code order already, and the differences keep that order. */
-    private static Side side(List<String> validator, CodeListReleases.Published published) {
-        var accepted = new LinkedHashSet<>(validator);
+    private Side side(List<String> validator, CodeListReleases.Published published, CodeListReleases codeLists,
+            CodeListReleases.Release release, String codeList, String column, boolean genericode) throws IOException {
+        var implemented = new LinkedHashSet<>(validator);
         var listed = new LinkedHashSet<>(published.codes());
-        return new Side(published.source(), listed.size(),
-                validator.stream().filter(code -> !listed.contains(code)).toList(),
-                published.codes().stream().filter(code -> !accepted.contains(code)).toList());
+        var onlyInValidator = validator.stream().filter(code -> !listed.contains(code)).toList();
+        var onlyPublished = published.codes().stream().filter(code -> !implemented.contains(code)).toList();
+        var names = new java.util.TreeMap<String, Description>();
+        for (String code : onlyInValidator) {
+            Description description = describe(codeLists, release, codeList, column, genericode, code);
+            if (description != null) {
+                names.put(code, description);
+            }
+        }
+        for (String code : onlyPublished) {
+            String name = published.names().get(code);
+            Description description = name != null ? new Description(name, "")
+                    : describe(codeLists, release, codeList, column, genericode, code);
+            if (description != null) {
+                names.put(code, description);
+            }
+        }
+        var ordered = new java.util.TreeMap<String, Description>(org.standict.codelist.normalize.GenericodeNormalizer.CODE_ORDER);
+        ordered.putAll(names);
+        return new Side(published.source(), listed.size(), onlyInValidator, onlyPublished,
+                java.util.Collections.unmodifiableMap(ordered));
     }
 
     private interface Read {

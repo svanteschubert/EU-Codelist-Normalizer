@@ -49,8 +49,12 @@ public final class CodeListReleases {
         }
     }
 
-    /** The codes one component publishes for one code list, and where they were read. */
-    public record Published(String source, List<String> codes) {}
+    /**
+     * The codes one component publishes for one code list, and where they were read.
+     *
+     * @param names the name the component gives each code, where it gives one
+     */
+    public record Published(String source, List<String> codes, java.util.Map<String, String> names) {}
 
     private final Path root;
     private final List<Release> releases;
@@ -110,8 +114,14 @@ public final class CodeListReleases {
         if (!Files.isRegularFile(file)) {
             return Optional.empty();
         }
-        var codes = new CodeListReader().read(file).rows().keySet();
-        return Optional.of(new Published(relative(file), sorted(codes)));
+        var rows = new CodeListReader().read(file).rows();
+        var names = new java.util.LinkedHashMap<String, String>();
+        rows.forEach((code, values) -> {
+            if (values.containsKey("Name") && !values.get("Name").isBlank()) {
+                names.put(code, collapse(values.get("Name")));
+            }
+        });
+        return Optional.of(new Published(relative(file), sorted(rows.keySet()), java.util.Map.copyOf(names)));
     }
 
     /**
@@ -128,25 +138,31 @@ public final class CodeListReleases {
             return Optional.empty();
         }
         List<String> codes;
+        var names = new java.util.LinkedHashMap<String, String>();
         if (column.isEmpty()) {
-            codes = sorted(Canonical.readSpreadsheet(file, codeList).stream()
-                    .filter(row -> row.role() == Canonical.Role.CODE).map(Canonical.Row::value).toList());
+            var rows = Canonical.readSpreadsheet(file, codeList);
+            codes = sorted(rows.stream().filter(row -> row.role() == Canonical.Role.CODE).map(Canonical.Row::value)
+                    .toList());
+            rows.stream().filter(row -> row.role() == Canonical.Role.NAME)
+                    .forEach(row -> names.putIfAbsent(row.code(), collapse(row.value())));
         } else {
-            Optional<List<String>> labelled = labelledColumn(file, column);
+            Optional<List<String>> labelled = labelledColumn(file, column, names);
             if (labelled.isEmpty()) {
                 return Optional.empty(); // This release's sheet does not yet carry that syntax's column.
             }
             codes = labelled.get();
         }
-        return Optional.of(new Published(relative(file) + (column.isEmpty() ? "" : " [" + column + "]"), codes));
+        return Optional.of(new Published(relative(file) + (column.isEmpty() ? "" : " [" + column + "]"), codes,
+                java.util.Map.copyOf(names)));
     }
 
     /**
      * Reads the column headed {@code label} in one of the first three rows, as the sheets with a header per syntax
      * need: the Time sheet heads its UBL column {@code "2005 Code"} and its CII column {@code "2475 Code"} in its
-     * second row, below a row naming the syntaxes.
+     * second row, below a row naming the syntaxes. Each code's name is the column to its right, headed "Value" there.
      */
-    private static Optional<List<String>> labelledColumn(Path csv, String label) throws IOException {
+    private static Optional<List<String>> labelledColumn(Path csv, String label, java.util.Map<String, String> names)
+            throws IOException {
         List<List<String>> table = Canonical.parseCsv(Files.readString(csv, StandardCharsets.UTF_8));
         for (int header = 0; header < Math.min(3, table.size()); header++) {
             int column = table.get(header).stream().map(String::strip).toList().indexOf(label);
@@ -157,11 +173,18 @@ public final class CodeListReleases {
             for (List<String> row : table.subList(header + 1, table.size())) {
                 if (row.size() > column && !row.get(column).isBlank()) {
                     codes.add(row.get(column).strip());
+                    if (row.size() > column + 1 && !row.get(column + 1).isBlank()) {
+                        names.putIfAbsent(row.get(column).strip(), collapse(row.get(column + 1)));
+                    }
                 }
             }
             return Optional.of(sorted(codes));
         }
         return Optional.empty();
+    }
+
+    private static String collapse(String value) {
+        return value.replaceAll("\\s+", " ").strip();
     }
 
     private static List<String> sorted(java.util.Collection<String> codes) {

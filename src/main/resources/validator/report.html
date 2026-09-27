@@ -70,13 +70,20 @@
   tr.group th { text-align: left; background: var(--panel); font-weight: 600; white-space: normal;
                 border-top: 2px solid var(--line); }
   tr.group:target th, tr.group.flash th { outline: 2px solid var(--gc); outline-offset: -2px; }
+  td.differences { text-align: left; white-space: normal; min-width: 22rem; }
+  td.differences ul { list-style: none; margin: 0; padding: 0; }
+  td.differences li { padding: .05rem 0; }
+  td.differences code { font-weight: 600; }
+  td.differences .kind { font-size: .82rem; }
+  .implemented, li.implemented .kind { color: var(--added); }
+  .unimplemented, li.unimplemented .kind { color: var(--removed); }
   footer { margin-top: 3rem; color: var(--quiet); font-size: .85rem; max-width: 48rem; }
 </style>
 </head>
 <body>
 
 <h1>EN 16931 code list releases compared</h1>
-<p>The codes each BR-CL rule of the validation artefacts accepts, compared with the Genericode files and the
+<p>The codes each BR-CL rule of the validation artefacts implements, compared with the Genericode files and the
 spreadsheet the European Commission published. Every date on which either side changed is listed, each compared
 with what was in force on both sides that day. UBL and CII only. Below that, each release's Index sheet is checked
 against what its code list sheets and Genericode files actually changed, and its business terms against
@@ -98,10 +105,10 @@ same date, once as Genericode and once as spreadsheet.</p>
   <ul>
     <li><strong>22</strong> rules of this syntax could be compared with this component. The Genericode column can
         count one fewer: BR-CL-06 checks the Time sheet, which was never published as Genericode.</li>
-    <li><strong>7</strong> of them accept a different set of codes than the component lists.</li>
+    <li><strong>7</strong> of them implement a different set of codes than the component lists.</li>
     <li><strong>11</strong> codes differ across those 7 rules, counted once per rule. A code both BR-CL-03 and BR-CL-04
         get wrong counts twice, because both checks fail an invoice.</li>
-    <li><span class="zero">all 22 agree</span>: every rule accepts exactly the listed codes.
+    <li><span class="zero">all 22 agree</span>: every rule implements exactly the listed codes.
         <span class="absent">not published</span>: that release has no such component; before 2021 the code lists
         were published as spreadsheet only.</li>
   </ul>
@@ -123,9 +130,12 @@ same date, once as Genericode and once as spreadsheet.</p>
 </div>
 
 <h2>Codes that differ</h2>
-<p>Per effective date, grouped by syntax and by the component compared with. “Accepted, not listed”: the
-validator lets an invoice use a code the published code list does not contain. “Listed, but rejected”: an invoice
-using a published code fails validation. The complete lists, including rules that agree, are in
+<p>Per effective date, grouped by syntax and by the component compared with. Each differing code is on a line
+of its own, in code order, with its name from the published code list:
+<span class="implemented">implemented, not published</span> means the validator lets an invoice use a code the
+published list does not contain; <span class="unimplemented">published, not implemented</span> means an invoice using
+a published code fails validation. For a code the compared release does not list, the name comes from the nearest
+release that did. Hover over a line for its source. The complete lists, including rules that agree, are in
 <code>rules.csv</code>.</p>
 {{details}}
 

@@ -1,4 +1,4 @@
-"effective date","changed","validator release","code-list release","syntax","rules","unmapped rules","genericode rules compared","genericode rules agreeing","genericode codes only in validator","genericode codes only in code list","spreadsheet rules compared","spreadsheet rules agreeing","spreadsheet codes only in validator","spreadsheet codes only in code list"
+"effective date","changed","validator release","code-list release","syntax","rules","unmapped rules","genericode rules compared","genericode rules agreeing","genericode codes implemented, not published","genericode codes published, not implemented","spreadsheet rules compared","spreadsheet rules agreeing","spreadsheet codes implemented, not published","spreadsheet codes published, not implemented"
 "2019-03-15","code lists","validation-1.1.0","01_2019-03-15","UBL","19","0","0","0","0","0","19","7","188","115"
 "2019-03-15","code lists","validation-1.1.0","01_2019-03-15","CII","20","0","0","0","0","0","20","7","188","116"
 "2019-04-26","validator","validation-1.2.0","01_2019-03-15","UBL","21","0","0","0","0","0","21","11","97","53"

@@ -89,9 +89,9 @@ public final class ValidatorReport {
         var rows = new ArrayList<List<String>>();
         rows.add(List.of("effective date", "changed", "validator release", "code-list release", "syntax", "rules",
                 "unmapped rules", "genericode rules compared", "genericode rules agreeing",
-                "genericode codes only in validator", "genericode codes only in code list",
-                "spreadsheet rules compared", "spreadsheet rules agreeing", "spreadsheet codes only in validator",
-                "spreadsheet codes only in code list"));
+                "genericode codes implemented, not published", "genericode codes published, not implemented",
+                "spreadsheet rules compared", "spreadsheet rules agreeing", "spreadsheet codes implemented, not published",
+                "spreadsheet codes published, not implemented"));
         for (DatePoint date : report.dates()) {
             for (Syntax syntax : Syntax.values()) {
                 var rules = rulesOf(report, date, syntax);
@@ -112,19 +112,23 @@ public final class ValidatorReport {
     private List<List<String>> rules(ValidatorComparison.Report report) {
         var rows = new ArrayList<List<String>>();
         rows.add(List.of("effective date", "validator release", "code-list release", "syntax", "rule", "code list",
-                "validator codes", "genericode source", "genericode codes", "only in validator (genericode)",
-                "only in genericode", "spreadsheet source", "spreadsheet codes", "only in validator (spreadsheet)",
-                "only in spreadsheet"));
+                "validator codes", "genericode source", "genericode codes", "implemented, not in genericode",
+                "in genericode, not implemented", "genericode names", "spreadsheet source", "spreadsheet codes",
+                "implemented, not in spreadsheet", "in spreadsheet, not implemented", "spreadsheet names"));
         for (RuleComparison rule : report.rules()) {
             var row = new ArrayList<>(List.of(rule.effectiveDate().toString(), rule.validatorTag(),
                     rule.codeListRelease(), rule.syntax().name(), rule.rule(), rule.codeList(),
                     String.valueOf(rule.validatorCodes())));
             for (Side side : new Side[] {rule.genericode(), rule.spreadsheet()}) {
                 if (side == null) {
-                    row.addAll(List.of("", "", "", ""));
+                    row.addAll(List.of("", "", "", "", ""));
                 } else {
                     row.addAll(List.of(side.source(), String.valueOf(side.published()),
-                            String.join(" ", side.onlyInValidator()), String.join(" ", side.onlyPublished())));
+                            String.join(" ", side.onlyInValidator()), String.join(" ", side.onlyPublished()),
+                            side.names().entrySet().stream().map(entry -> entry.getKey() + ": "
+                                    + entry.getValue().name() + (entry.getValue().from().isEmpty() ? ""
+                                            : " [" + entry.getValue().from() + "]"))
+                                    .collect(Collectors.joining("; "))));
                 }
             }
             rows.add(row);
@@ -175,7 +179,7 @@ public final class ValidatorReport {
     }
 
     /**
-     * {@code 7 of 22 rules, 11 codes differ}: how many of the rules compared with one component accept other codes
+     * {@code 7 of 22 rules, 11 codes differ}: how many of the rules compared with one component implement other codes
      * than it lists, and how many codes differ in total, a code counting once for every rule it differs in. The cell
      * links to those rules' codes, and its tooltip names the rules.
      */
@@ -192,15 +196,15 @@ public final class ValidatorReport {
                 : "rules have") + " no counterpart in " + published + ".";
         if (totals.disagreeing() == 0) {
             return "<td class=\"zero\" title=\"" + escape("All " + totals.compared() + " " + syntax
-                    + " rules accept exactly the codes " + published + " list." + uncompared) + "\">all "
+                    + " rules implement exactly the codes " + published + " list." + uncompared) + "\">all "
                     + totals.compared() + " agree</td>";
         }
         String differing = rules.stream().filter(rule -> side.apply(rule) != null && !side.apply(rule).agrees())
                 .map(rule -> rule.rule() + " (" + rule.codeList() + ")").collect(Collectors.joining(", "));
-        String title = totals.disagreeing() + " of " + totals.compared() + " " + syntax + " rules accept other codes than "
+        String title = totals.disagreeing() + " of " + totals.compared() + " " + syntax + " rules implement other codes than "
                 + published + " list: " + differing + ". " + (totals.onlyInValidator() + totals.onlyPublished())
-                + " codes differ: " + totals.onlyInValidator() + " accepted but not listed, " + totals.onlyPublished()
-                + " listed but rejected, each counted once per rule." + uncompared + " Click for the codes.";
+                + " codes differ: " + totals.onlyInValidator() + " implemented but not published, "
+                + totals.onlyPublished() + " published but not implemented, each counted once per rule." + uncompared + " Click for the codes.";
         return "<td class=\"removed\"><a href=\"#" + anchor(date, syntax, component) + "\" title=\"" + escape(title)
                 + "\">" + totals.disagreeing() + " of " + totals.compared() + " rules<br><span class=\"quiet\">"
                 + (totals.onlyInValidator() + totals.onlyPublished()) + " codes differ</span></a></td>";
@@ -226,13 +230,13 @@ public final class ValidatorReport {
                         continue;
                     }
                     rows.append("<tr class=\"group\" id=\"").append(anchor(date, syntax, component))
-                            .append("\"><th colspan=\"5\" scope=\"rowgroup\">").append(syntax)
+                            .append("\"><th colspan=\"4\" scope=\"rowgroup\">").append(syntax)
                             .append(" compared with ").append(component.equals("genericode") ? "the Genericode files"
                                     : "the spreadsheet").append(" of ").append(escape(date.codeLists().directory()))
                             .append(": ").append(totals.disagreeing()).append(" of ").append(totals.compared())
                             .append(" rules differ, ").append(totals.onlyInValidator() + totals.onlyPublished())
-                            .append(" codes (").append(totals.onlyInValidator()).append(" accepted but not listed, ")
-                            .append(totals.onlyPublished()).append(" listed but rejected)</th></tr>\n");
+                            .append(" codes (").append(totals.onlyInValidator()).append(" implemented but not published, ")
+                            .append(totals.onlyPublished()).append(" published but not implemented)</th></tr>\n");
                     for (RuleComparison rule : rules) {
                         appendSide(rows, rule, side.apply(rule));
                     }
@@ -240,7 +244,7 @@ public final class ValidatorReport {
                 for (RuleComparison rule : rules) {
                     if (rule.codeList().isEmpty()) {
                         rows.append("<tr><td>").append(syntax).append(" ").append(escape(rule.rule()))
-                                .append("</td><td class=\"absent\" colspan=\"4\">not in the rule catalogue, ")
+                                .append("</td><td class=\"absent\" colspan=\"3\">not in the rule catalogue, ")
                                 .append(rule.validatorCodes()).append(" codes</td></tr>\n");
                     }
                 }
@@ -250,12 +254,11 @@ public final class ValidatorReport {
                     .append(escape(date.validator().tag())).append(" (from ").append(date.validator().effectiveDate())
                     .append(") · code lists ").append(escape(date.codeLists().directory())).append("</summary>\n");
             if (rows.isEmpty()) {
-                sections.append("<p>Every rule accepts exactly the codes the published code lists contain.</p>\n");
+                sections.append("<p>Every rule implements exactly the codes the published code lists contain.</p>\n");
             } else {
                 sections.append("<div class=\"scroll\"><table><thead><tr><th scope=\"col\">Rule</th>")
                         .append("<th scope=\"col\">Code list</th><th scope=\"col\">Source</th>")
-                        .append("<th scope=\"col\">Accepted, not listed</th>")
-                        .append("<th scope=\"col\">Listed, but rejected</th></tr></thead><tbody>\n")
+                        .append("<th scope=\"col\">Differences</th></tr></thead><tbody>\n")
                         .append(rows).append("</tbody></table></div>\n");
             }
             sections.append("</details>\n");
@@ -270,19 +273,49 @@ public final class ValidatorReport {
         }
         rows.append("<tr><td>").append(escape(rule.rule())).append("</td><td class=\"list\">")
                 .append(escape(rule.codeList())).append("</td><td class=\"list quiet\">").append(escape(side.source()))
-                .append("</td>").append(codes(side.onlyInValidator(), "added"))
-                .append(codes(side.onlyPublished(), "removed")).append("</tr>\n");
+                .append("</td>").append(differences(rule, side)).append("</tr>\n");
     }
 
-    private static String codes(List<String> codes, String kind) {
-        if (codes.isEmpty()) {
-            return "<td class=\"zero\">·</td>";
+    /**
+     * Every differing code on a line of its own, in code order, with its name and what differs about it, so that a
+     * code the validator still implements stands next to the code that replaced it (STD beside STN).
+     */
+    private static String differences(RuleComparison rule, Side side) {
+        var codes = new java.util.TreeMap<String, Boolean>(
+                org.standict.codelist.normalize.GenericodeNormalizer.CODE_ORDER);
+        side.onlyInValidator().forEach(code -> codes.put(code, true));
+        side.onlyPublished().forEach(code -> codes.put(code, false));
+        var lines = new StringBuilder("<td class=\"differences\"><ul>");
+        int shown = 0;
+        for (var entry : codes.entrySet()) {
+            if (shown++ == CODES_SHOWN) {
+                lines.append("<li class=\"quiet\">… ").append(codes.size() - CODES_SHOWN)
+                        .append(" more in rules.csv</li>");
+                break;
+            }
+            String code = entry.getKey();
+            boolean implemented = entry.getValue();
+            var description = side.names().get(code);
+            String kind = implemented ? "implemented, not published" : "published, not implemented";
+            String provenance = description == null || description.from().isEmpty() ? ""
+                    : (description.from().compareTo(rule.codeListRelease()) < 0 ? "last listed in "
+                            : "first listed in ") + description.from();
+            String title = code + (description == null ? ": listed by no release of the " + rule.codeList() + " code list since the first in this tree"
+                    : ": " + description.name() + " (" + (provenance.isEmpty() ? side.source() : provenance) + ")");
+            lines.append("<li class=\"").append(implemented ? "implemented" : "unimplemented").append("\" title=\"")
+                    .append(escape(title)).append("\"><code>").append(escape(code)).append("</code> ");
+            if (description != null) {
+                String name = description.name().length() > 70 ? description.name().substring(0, 69) + "…"
+                        : description.name();
+                lines.append("<span class=\"name\">(").append(escape(name))
+                        .append(provenance.isEmpty() ? "" : ", " + escape(provenance)).append(")</span> ");
+            } else if (implemented) {
+                lines.append("<span class=\"name quiet\">(listed by no release of ").append(escape(rule.codeList()))
+                        .append(")</span> ");
+            }
+            lines.append("<span class=\"kind\">— ").append(kind).append("</span></li>");
         }
-        String shown = String.join(" ", codes.subList(0, Math.min(CODES_SHOWN, codes.size())));
-        String more = codes.size() > CODES_SHOWN ? " <span class=\"quiet\">… " + (codes.size() - CODES_SHOWN)
-                + " more</span>" : "";
-        return "<td class=\"codes " + kind + "\"><span class=\"count\">" + codes.size() + "</span> <code>"
-                + escape(shown) + "</code>" + more + "</td>";
+        return lines.append("</ul></td>").toString();
     }
 
     private static String trigger(ValidatorComparison.Trigger trigger) {
