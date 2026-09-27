@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import org.standict.codelist.index.IndexCheck;
 import org.standict.codelist.index.IndexReport;
 import org.standict.codelist.validator.ValidatorComparison.DatePoint;
@@ -164,8 +165,8 @@ public final class ValidatorReport {
                     .append(escape(date.codeLists().directory())).append("</td>");
             for (Syntax syntax : Syntax.values()) {
                 var rules = rulesOf(report, date, syntax);
-                rows.append(totals(Totals.of(rules, RuleComparison::genericode)))
-                        .append(totals(Totals.of(rules, RuleComparison::spreadsheet)));
+                rows.append(totals(date, syntax, "genericode", rules, RuleComparison::genericode))
+                        .append(totals(date, syntax, "spreadsheet", rules, RuleComparison::spreadsheet));
             }
             rows.append("</tr>\n");
         }
@@ -173,16 +174,41 @@ public final class ValidatorReport {
                 : rows.toString();
     }
 
-    /** {@code 3 / 24 · 7}: disagreeing rules of compared rules, and the codes they disagree on. */
-    private static String totals(Totals totals) {
+    /**
+     * {@code 7 of 22 rules, 11 codes differ}: how many of the rules compared with one component accept other codes
+     * than it lists, and how many codes differ in total, a code counting once for every rule it differs in. The cell
+     * links to those rules' codes, and its tooltip names the rules.
+     */
+    private static String totals(DatePoint date, Syntax syntax, String component, List<RuleComparison> rules,
+            Function<RuleComparison, Side> side) {
+        Totals totals = Totals.of(rules, side);
+        String published = component.equals("genericode") ? "the Genericode files" : "the spreadsheet";
         if (totals.compared() == 0) {
-            return "<td class=\"absent\">not published</td>";
+            return "<td class=\"absent\" title=\"" + escape(date.codeLists().directory() + " publishes no "
+                    + (component.equals("genericode") ? "Genericode files" : "spreadsheet")) + "\">not published</td>";
         }
+        int notCompared = (int) rules.stream().filter(rule -> side.apply(rule) == null).count();
+        String uncompared = notCompared == 0 ? "" : " " + notCompared + " further " + (notCompared == 1 ? "rule has"
+                : "rules have") + " no counterpart in " + published + ".";
         if (totals.disagreeing() == 0) {
-            return "<td class=\"zero\">all " + totals.compared() + " agree</td>";
+            return "<td class=\"zero\" title=\"" + escape("All " + totals.compared() + " " + syntax
+                    + " rules accept exactly the codes " + published + " list." + uncompared) + "\">all "
+                    + totals.compared() + " agree</td>";
         }
-        return "<td class=\"removed\">" + totals.disagreeing() + " / " + totals.compared() + " <span class=\"quiet\">· "
-                + (totals.onlyInValidator() + totals.onlyPublished()) + " codes</span></td>";
+        String differing = rules.stream().filter(rule -> side.apply(rule) != null && !side.apply(rule).agrees())
+                .map(rule -> rule.rule() + " (" + rule.codeList() + ")").collect(Collectors.joining(", "));
+        String title = totals.disagreeing() + " of " + totals.compared() + " " + syntax + " rules accept other codes than "
+                + published + " list: " + differing + ". " + (totals.onlyInValidator() + totals.onlyPublished())
+                + " codes differ: " + totals.onlyInValidator() + " accepted but not listed, " + totals.onlyPublished()
+                + " listed but rejected, each counted once per rule." + uncompared + " Click for the codes.";
+        return "<td class=\"removed\"><a href=\"#" + anchor(date, syntax, component) + "\" title=\"" + escape(title)
+                + "\">" + totals.disagreeing() + " of " + totals.compared() + " rules<br><span class=\"quiet\">"
+                + (totals.onlyInValidator() + totals.onlyPublished()) + " codes differ</span></a></td>";
+    }
+
+    /** {@code d2026-05-15-ubl-genericode}: the detail rows of one date, syntax and component. */
+    private static String anchor(DatePoint date, Syntax syntax, String component) {
+        return "d" + date.effectiveDate() + "-" + syntax.directory() + "-" + component;
     }
 
     private String details(ValidatorComparison.Report report) {
@@ -191,15 +217,32 @@ public final class ValidatorReport {
         for (DatePoint date : report.dates().reversed()) {
             var rows = new StringBuilder();
             for (Syntax syntax : Syntax.values()) {
-                for (RuleComparison rule : rulesOf(report, date, syntax)) {
-                    if (rule.codeList().isEmpty()) {
-                        rows.append("<tr><td>").append(syntax).append("</td><td>").append(escape(rule.rule()))
-                                .append("</td><td class=\"absent\" colspan=\"4\">not in the rule catalogue, ")
-                                .append(rule.validatorCodes()).append(" codes</td></tr>\n");
+                var rules = rulesOf(report, date, syntax);
+                for (String component : List.of("genericode", "spreadsheet")) {
+                    Function<RuleComparison, Side> side = component.equals("genericode") ? RuleComparison::genericode
+                            : RuleComparison::spreadsheet;
+                    Totals totals = Totals.of(rules, side);
+                    if (totals.disagreeing() == 0) {
                         continue;
                     }
-                    appendSide(rows, syntax, rule, "genericode", rule.genericode());
-                    appendSide(rows, syntax, rule, "spreadsheet", rule.spreadsheet());
+                    rows.append("<tr class=\"group\" id=\"").append(anchor(date, syntax, component))
+                            .append("\"><th colspan=\"5\" scope=\"rowgroup\">").append(syntax)
+                            .append(" compared with ").append(component.equals("genericode") ? "the Genericode files"
+                                    : "the spreadsheet").append(" of ").append(escape(date.codeLists().directory()))
+                            .append(": ").append(totals.disagreeing()).append(" of ").append(totals.compared())
+                            .append(" rules differ, ").append(totals.onlyInValidator() + totals.onlyPublished())
+                            .append(" codes (").append(totals.onlyInValidator()).append(" accepted but not listed, ")
+                            .append(totals.onlyPublished()).append(" listed but rejected)</th></tr>\n");
+                    for (RuleComparison rule : rules) {
+                        appendSide(rows, rule, side.apply(rule));
+                    }
+                }
+                for (RuleComparison rule : rules) {
+                    if (rule.codeList().isEmpty()) {
+                        rows.append("<tr><td>").append(syntax).append(" ").append(escape(rule.rule()))
+                                .append("</td><td class=\"absent\" colspan=\"4\">not in the rule catalogue, ")
+                                .append(rule.validatorCodes()).append(" codes</td></tr>\n");
+                    }
                 }
             }
             sections.append("<details id=\"d").append(date.effectiveDate()).append("\"").append(latest ? " open" : "")
@@ -209,10 +252,10 @@ public final class ValidatorReport {
             if (rows.isEmpty()) {
                 sections.append("<p>Every rule accepts exactly the codes the published code lists contain.</p>\n");
             } else {
-                sections.append("<div class=\"scroll\"><table><thead><tr><th scope=\"col\">Syntax</th>")
-                        .append("<th scope=\"col\">Rule</th><th scope=\"col\">Code list</th>")
-                        .append("<th scope=\"col\">Compared with</th><th scope=\"col\">Accepted, not published</th>")
-                        .append("<th scope=\"col\">Published, not accepted</th></tr></thead><tbody>\n")
+                sections.append("<div class=\"scroll\"><table><thead><tr><th scope=\"col\">Rule</th>")
+                        .append("<th scope=\"col\">Code list</th><th scope=\"col\">Source</th>")
+                        .append("<th scope=\"col\">Accepted, not listed</th>")
+                        .append("<th scope=\"col\">Listed, but rejected</th></tr></thead><tbody>\n")
                         .append(rows).append("</tbody></table></div>\n");
             }
             sections.append("</details>\n");
@@ -221,16 +264,14 @@ public final class ValidatorReport {
         return sections.toString();
     }
 
-    private static void appendSide(StringBuilder rows, Syntax syntax, RuleComparison rule, String component, Side side) {
+    private static void appendSide(StringBuilder rows, RuleComparison rule, Side side) {
         if (side == null || side.agrees()) {
             return;
         }
-        rows.append("<tr><td>").append(syntax).append("</td><td>").append(escape(rule.rule()))
-                .append("</td><td class=\"list\">").append(escape(rule.codeList()))
-                .append("</td><td><span class=\"component ").append(component).append("\" title=\"")
-                .append(escape(side.source())).append("\">").append(component).append("</span></td>")
-                .append(codes(side.onlyInValidator(), "added")).append(codes(side.onlyPublished(), "removed"))
-                .append("</tr>\n");
+        rows.append("<tr><td>").append(escape(rule.rule())).append("</td><td class=\"list\">")
+                .append(escape(rule.codeList())).append("</td><td class=\"list quiet\">").append(escape(side.source()))
+                .append("</td>").append(codes(side.onlyInValidator(), "added"))
+                .append(codes(side.onlyPublished(), "removed")).append("</tr>\n");
     }
 
     private static String codes(List<String> codes, String kind) {
