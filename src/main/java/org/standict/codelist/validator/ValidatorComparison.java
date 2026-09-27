@@ -63,13 +63,39 @@ public final class ValidatorComparison {
      * @param codeList empty when the rule is not in the catalogue
      * @param genericode {@code null} when the release publishes no Genericode file for this list
      * @param spreadsheet {@code null} when the release publishes no sheet for this list
+     * @param sourceUrl the rule's Schematron file of the tagged release on the web, or {@code null} without one
+     * @param lines the line of that file each code of the rule is listed on
+     * @param listLine the line where the rule lists its first code, where a missing code would go
      */
     public record RuleComparison(LocalDate effectiveDate, String validatorTag, String codeListRelease, Syntax syntax,
-            String rule, String codeList, int validatorCodes, Side genericode, Side spreadsheet) {}
+            String rule, String codeList, int validatorCodes, Side genericode, Side spreadsheet, String sourceUrl,
+            Map<String, Integer> lines, int listLine) {
+        /** A link to the line listing {@code code}, or to the rule's list when the rule lacks it; {@code null} without source. */
+        public String link(String code) {
+            if (sourceUrl == null) {
+                return null;
+            }
+            int line = lines.getOrDefault(code, listLine);
+            return line > 0 ? sourceUrl + "#L" + line : sourceUrl;
+        }
+    }
 
     public record Report(List<DatePoint> dates, List<RuleComparison> rules) {}
 
     private final Map<String, Optional<CodeListReleases.Published>> published = new HashMap<>();
+    private final String repositoryUrl;
+
+    public ValidatorComparison() {
+        this(null);
+    }
+
+    /**
+     * @param repositoryUrl the validator repository on GitHub, such as
+     *     {@code https://github.com/ConnectingEurope/eInvoicing-EN16931}, or {@code null} for a report without links
+     */
+    public ValidatorComparison(String repositoryUrl) {
+        this.repositoryUrl = repositoryUrl;
+    }
 
     /**
      * @param extracted the rules of every validator release, by release tag and syntax
@@ -111,10 +137,13 @@ public final class ValidatorComparison {
     private RuleComparison compare(LocalDate date, ValidatorCatalog.Release validator,
             CodeListReleases.Release release, Syntax syntax, SchematronCodeLists.RuleCodes rule,
             ValidatorCatalog catalog, CodeListReleases codeLists) throws IOException {
+        // Linked by tag, not branch: line numbers differ between releases, and a tag keeps pointing at this one.
+        String sourceUrl = repositoryUrl == null ? null
+                : repositoryUrl + "/blob/" + validator.tag() + "/" + syntax.repositoryPath();
         var mapping = catalog.mapping(syntax, rule.rule());
         if (mapping.isEmpty()) {
             return new RuleComparison(date, validator.tag(), release.directory(), syntax, rule.rule(), "",
-                    rule.codes().size(), null, null);
+                    rule.codes().size(), null, null, sourceUrl, rule.lines(), rule.listLine());
         }
         String codeList = mapping.get().codeList();
         String column = mapping.get().spreadsheetColumn();
@@ -124,7 +153,8 @@ public final class ValidatorComparison {
                 rule.codes().size(),
                 genericode.isEmpty() ? null : side(rule.codes(), genericode.get(), codeLists, release, codeList, column, true),
                 spreadsheet.isEmpty() ? null
-                        : side(rule.codes(), spreadsheet.get(), codeLists, release, codeList, column, false));
+                        : side(rule.codes(), spreadsheet.get(), codeLists, release, codeList, column, false),
+                sourceUrl, rule.lines(), rule.listLine());
     }
 
     private Optional<CodeListReleases.Published> genericode(CodeListReleases codeLists,

@@ -71,6 +71,30 @@ class ValidatorPipelineTest {
     }
 
     /** The Time sheet has no Genericode counterpart, and CII is compared with the UNTDID 2475 column only. */
+    /** With a GitHub origin, each differing code links to its line in the release's Schematron file, by tag. */
+    @Test
+    void linksImplementedCodesToTheirLineInTheTaggedRelease() throws Exception {
+        git("remote", "add", "origin", "git@github.com:ConnectingEurope/eInvoicing-EN16931.git");
+
+        var result = new ValidatorPipeline(catalog).run(repository, output);
+
+        var rule = rule(result, "2024-06-01", Syntax.UBL, "BR-CL-01");
+        String url = "https://github.com/ConnectingEurope/eInvoicing-EN16931/blob/validation-B/"
+                + Syntax.UBL.repositoryPath();
+        assertEquals(url + "#L4", rule.link("389"), "the list of BR-CL-01 is on line 4");
+        String page = Files.readString(output.resolve("validator/index.html"));
+        assertTrue(page.contains("href=\"" + url + "#L4\""), "implemented links to the line");
+    }
+
+    /** Without a GitHub origin the report carries no links rather than broken ones. */
+    @Test
+    void linksNothingWithoutAGitHubOrigin() throws Exception {
+        var result = new ValidatorPipeline(catalog).run(repository, output);
+
+        assertNull(rule(result, "2024-06-01", Syntax.UBL, "BR-CL-01").link("389"));
+        assertFalse(Files.readString(output.resolve("validator/index.html")).contains("github.com/"));
+    }
+
     @Test
     void comparesEachSyntaxWithItsOwnSpreadsheetColumn() throws Exception {
         var result = new ValidatorPipeline(catalog).run(repository, output);

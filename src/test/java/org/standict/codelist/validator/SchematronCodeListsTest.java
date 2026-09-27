@@ -41,6 +41,23 @@ class SchematronCodeListsTest {
                 "image/png"), rules.get(0).codes());
     }
 
+    /** Each code is found on its own line, even in a test that spans lines and contains a {@code >}. */
+    @Test
+    void recordsTheLineEachCodeIsListedOn() throws Exception {
+        var rules = reader.read(schematron("""
+                <rule context="cac:TaxCategory/cbc:ID">
+                  <assert
+                    test="count(.) > 0 and contains( ' AE L M ',concat(' ',normalize-space(.),' ') ) or
+                          contains(' B S ', concat(' ', normalize-space(.), ' '))"
+                    id="BR-CL-17">x</assert>
+                </rule>
+                """), "test");
+
+        // Line 1 holds the pattern element, line 2 the rule, line 3 the assert tag.
+        assertEquals(java.util.Map.of("AE", 4, "L", 4, "M", 4, "B", 5, "S", 5), rules.get(0).lines());
+        assertEquals(4, rules.get(0).listLine());
+    }
+
     /** An assertion without a code list, such as a cardinality check, is not a code-list rule. */
     @Test
     void ignoresAssertionsWithoutACodeList() throws Exception {

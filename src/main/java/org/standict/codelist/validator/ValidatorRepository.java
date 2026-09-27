@@ -31,6 +31,23 @@ public final class ValidatorRepository {
         return root;
     }
 
+    /**
+     * The repository's web address on GitHub, from its {@code origin} remote, for linking to a line of a tagged file;
+     * empty when there is no such remote. Both {@code https://github.com/o/r(.git)} and {@code git@github.com:o/r.git}
+     * are understood.
+     */
+    public java.util.Optional<String> webUrl() {
+        try {
+            String remote = new String(git("remote", "get-url", "origin"), StandardCharsets.UTF_8).strip();
+            var matcher = java.util.regex.Pattern.compile("^(?:https://github\\.com/|git@github\\.com:)([^/]+/[^/]+?)(?:\\.git)?/?$")
+                    .matcher(remote);
+            return matcher.matches() ? java.util.Optional.of("https://github.com/" + matcher.group(1))
+                    : java.util.Optional.empty();
+        } catch (IOException e) {
+            return java.util.Optional.empty(); // No origin: the report simply carries no links.
+        }
+    }
+
     /** The commit a tag names, so a report can state exactly which revision it read. */
     public String commit(String tag) throws IOException {
         return new String(git("rev-parse", "--verify", "--quiet", "refs/tags/" + tag + "^{commit}"),

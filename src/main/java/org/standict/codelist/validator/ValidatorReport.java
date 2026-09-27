@@ -143,7 +143,8 @@ public final class ValidatorReport {
         rows.add(List.of("effective date", "validator release", "code-list release", "syntax", "rule", "code list",
                 "validator codes", "genericode source", "genericode codes", "implemented, not in genericode",
                 "in genericode, not implemented", "genericode names", "spreadsheet source", "spreadsheet codes",
-                "implemented, not in spreadsheet", "in spreadsheet, not implemented", "spreadsheet names"));
+                "implemented, not in spreadsheet", "in spreadsheet, not implemented", "spreadsheet names",
+                "validator source"));
         for (RuleComparison rule : report.rules()) {
             var row = new ArrayList<>(List.of(rule.effectiveDate().toString(), rule.validatorTag(),
                     rule.codeListRelease(), rule.syntax().name(), rule.rule(), rule.codeList(),
@@ -160,6 +161,7 @@ public final class ValidatorReport {
                                     .collect(Collectors.joining("; "))));
                 }
             }
+            row.add(rule.link("") == null ? "" : rule.link(""));
             rows.add(row);
         }
         return rows;
@@ -363,11 +365,18 @@ public final class ValidatorReport {
             String code = entry.getKey();
             boolean implemented = entry.getValue();
             var description = side.names().get(code);
-            String kind = implemented ? "implemented, not published" : "published, not implemented";
+            String link = rule.link(code);
+            String where = rule.rule() + " in " + rule.syntax().fileName() + " of " + rule.validatorTag();
+            String kind = implemented
+                    ? linked("implemented", link, code + " is listed by " + where + ", line "
+                            + rule.lines().getOrDefault(code, 0)) + ", not published"
+                    : "published, " + linked("not implemented", link, code + " is missing from the list of " + where
+                            + ", which starts on line " + rule.listLine());
             String provenance = description == null || description.from().isEmpty() ? ""
                     : (description.from().compareTo(rule.codeListRelease()) < 0 ? "last listed in "
                             : "first listed in ") + description.from();
-            String title = code + (description == null ? ": listed by no release of the " + rule.codeList() + " code list since the first in this tree"
+            String title = code + (description == null ? ": listed by no EU release of the " + rule.codeList()
+                    + " code list in this comparison"
                     : ": " + description.name() + " (" + (provenance.isEmpty() ? side.source() : provenance) + ")");
             lines.append("<li class=\"").append(implemented ? "implemented" : "unimplemented").append("\" title=\"")
                     .append(escape(title)).append("\"><code>").append(escape(code)).append("</code> ");
@@ -377,12 +386,19 @@ public final class ValidatorReport {
                 lines.append("<span class=\"name\">(").append(escape(name))
                         .append(provenance.isEmpty() ? "" : ", " + escape(provenance)).append(")</span> ");
             } else if (implemented) {
-                lines.append("<span class=\"name quiet\">(listed by no release of ").append(escape(rule.codeList()))
+                lines.append("<span class=\"name quiet\">(listed by no EU release of ").append(escape(rule.codeList()))
                         .append(")</span> ");
             }
             lines.append("<span class=\"kind\">— ").append(kind).append("</span></li>");
         }
         return lines.append("</ul></td>").toString();
+    }
+
+    /** {@code text} as a link to {@code url} in a new tab, or plain when there is no link. */
+    private static String linked(String text, String url, String title) {
+        return url == null ? text
+                : "<a class=\"source\" href=\"" + escape(url) + "\" target=\"_blank\" rel=\"noopener\" title=\""
+                        + escape(title) + "\">" + text + "</a>";
     }
 
     private static String trigger(ValidatorComparison.Trigger trigger) {

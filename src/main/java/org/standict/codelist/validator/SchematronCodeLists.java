@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -43,8 +44,14 @@ public final class SchematronCodeLists {
      *
      * @param context the XPath context of the Schematron rule, so a reader can see what is being checked
      * @param codes distinct, in base-36 code order
+     * @param lines the line of the file on which each code is listed, for linking to it
      */
-    public record RuleCodes(String rule, String context, List<String> codes) {}
+    public record RuleCodes(String rule, String context, List<String> codes, Map<String, Integer> lines) {
+        /** The first line on which the rule lists a code: where a code it lacks would have to be added. */
+        public int listLine() {
+            return lines.values().stream().mapToInt(Integer::intValue).min().orElse(0);
+        }
+    }
 
     /** Every code-list assertion of the file, in the order of their rule identifiers. */
     public List<RuleCodes> read(byte[] schematron, String where) throws IOException {
@@ -86,14 +93,89 @@ public final class SchematronCodeLists {
                         .add(parent.getAttribute("context").replaceAll("\\s+", " ").strip());
             }
         }
+        String text = new String(schematron, java.nio.charset.StandardCharsets.UTF_8);
         var rules = new ArrayList<RuleCodes>();
         for (Map.Entry<String, LinkedHashSet<String>> entry : codes.entrySet()) {
             rules.add(new RuleCodes(entry.getKey(),
                     String.join(" | ", contexts.getOrDefault(entry.getKey(), new LinkedHashSet<>())),
-                    entry.getValue().stream().sorted(GenericodeNormalizer.CODE_ORDER).toList()));
+                    entry.getValue().stream().sorted(GenericodeNormalizer.CODE_ORDER).toList(),
+                    lines(text, entry.getKey(), entry.getValue())));
         }
         rules.sort(java.util.Comparator.comparing(RuleCodes::rule));
         return List.copyOf(rules);
+    }
+
+    private static final Pattern LITERAL = Pattern.compile("'([^']*)'");
+
+    /**
+     * The line on which each code of a rule is listed. The parsed document has no line numbers, so the rule's
+     * {@code assert} start tags are found in the text, reading attribute values whole because an XPath test may contain
+     * a {@code >}, and each code is looked up in the quoted literals of their tests.
+     */
+    static Map<String, Integer> lines(String text, String rule, java.util.Collection<String> codes) {
+        var wanted = new java.util.HashSet<>(codes);
+        var lines = new java.util.LinkedHashMap<String, Integer>();
+        int[] lineStarts = lineStarts(text);
+        Pattern id = Pattern.compile("\\bid\\s*=\\s*[\"']" + Pattern.quote(rule) + "[\"']");
+        for (int start = text.indexOf("<assert"); start >= 0; start = text.indexOf("<assert", start + 1)) {
+            int end = endOfTag(text, start);
+            String tag = text.substring(start, end);
+            if (!id.matcher(tag).find()) {
+                continue;
+            }
+            Matcher literal = LITERAL.matcher(tag);
+            while (literal.find()) {
+                int base = start + literal.start(1);
+                String value = literal.group(1);
+                // A comparison's literal is one code, which may itself contain a space; an enumeration's is many.
+                if (wanted.contains(value.strip())) {
+                    lines.putIfAbsent(value.strip(), line(lineStarts, base + value.indexOf(value.strip())));
+                }
+                Matcher token = TOKEN.matcher(value);
+                while (token.find()) {
+                    if (wanted.contains(token.group())) {
+                        lines.putIfAbsent(token.group(), line(lineStarts, base + token.start()));
+                    }
+                }
+            }
+        }
+        return java.util.Collections.unmodifiableMap(lines);
+    }
+
+    private static final Pattern TOKEN = Pattern.compile("\\S+");
+
+    private static int[] lineStarts(String text) {
+        var starts = new java.util.ArrayList<Integer>(List.of(0));
+        for (int i = 0; i < text.length(); i++) {
+            if (text.charAt(i) == '\n') {
+                starts.add(i + 1);
+            }
+        }
+        return starts.stream().mapToInt(Integer::intValue).toArray();
+    }
+
+    /** The 1-based line of {@code offset}. */
+    private static int line(int[] lineStarts, int offset) {
+        int index = java.util.Arrays.binarySearch(lineStarts, offset);
+        return index >= 0 ? index + 1 : -index - 1;
+    }
+
+    /** The index just past the {@code >} closing the start tag at {@code start}, skipping quoted attribute values. */
+    private static int endOfTag(String text, int start) {
+        char quote = 0;
+        for (int i = start; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (quote != 0) {
+                if (c == quote) {
+                    quote = 0;
+                }
+            } else if (c == '"' || c == '\'') {
+                quote = c;
+            } else if (c == '>') {
+                return i + 1;
+            }
+        }
+        return text.length();
     }
 
     /** The codes an XPath test accepts, from its enumerations and its comparisons with a literal. */

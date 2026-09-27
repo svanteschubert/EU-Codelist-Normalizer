@@ -4,8 +4,8 @@
   "page" : "index.html",
   "files" : [ {
     "path" : "index.html",
-    "bytes" : 961356,
-    "sha256" : "d0745ca20f62f6d66b634fc7dc906bedaa48b19a20dacf542ee5b2938c77d0e1",
+    "bytes" : 1796170,
+    "sha256" : "1c09f93487810fc5f015d60b1a1b42a5c087dc469164c92f63e358db63630978",
     "description" : "the comparison report; open it in a browser"
   }, {
     "path" : "summary.csv",
@@ -14,8 +14,8 @@
     "description" : "per effective date and syntax: rules compared, rules agreeing, codes that differ"
   }, {
     "path" : "rules.csv",
-    "bytes" : 259414,
-    "sha256" : "af15fc98ba8fe4e670fbd5d1fb3ea4e41df4457fb84e33827fd1ad1e5df7e30f",
+    "bytes" : 402998,
+    "sha256" : "f8c4be62b0b56c1c4719fb922f399f2252377d66550c71e78929eb84a5e9f4c6",
     "description" : "per effective date, syntax and rule: every differing code, with its name"
   }, {
     "path" : "index-claims.csv",

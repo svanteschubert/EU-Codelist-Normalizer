@@ -124,7 +124,7 @@ public final class ValidatorPipeline {
                 }
                 extracted.put(release.tag(), bySyntax);
             }
-            var report = new ValidatorComparison().compare(catalog, extracted, codeLists);
+            var report = new ValidatorComparison(repository.webUrl().orElse(null)).compare(catalog, extracted, codeLists);
             var indexCheck = new IndexCheck().check(codeLists);
             new ValidatorReport().write(report, indexCheck, staging);
             new ReportFolder().writeManifest(staging, "index.html");
