@@ -43,8 +43,8 @@ GitHub/
 └── EU-Codelist-Normalizer/
 ```
 
-Maven 3.6+ and Java 17+ are required. The project pins jenv to Java 27, as used for
-development. The shell script resolves `JAVA_HOME` through jenv when installed.
+Maven 3.6+ and Java 25 are required. The project pins jenv to Java 25 through
+`.java-version`, matching the downloader. The shell script resolves `JAVA_HOME` through jenv when installed.
 
 ```bash
 ./run-normalize.sh
