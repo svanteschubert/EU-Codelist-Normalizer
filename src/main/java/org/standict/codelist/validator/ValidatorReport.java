@@ -31,6 +31,26 @@ import org.standict.codelist.validator.ValidatorComparison.Side;
  */
 public final class ValidatorReport {
     private static final String TEMPLATE = "/validator/report.html";
+
+    /** One file the report page links to, relative to the page. */
+    public record LinkedFile(String path, String description) {}
+
+    /**
+     * Every file the page links to, so that a copy of the page with these files is complete wherever it is served. The
+     * configuration tables are the resources the comparison was made with, copied next to the results.
+     */
+    public static final List<LinkedFile> LINKED_FILES = List.of(
+            new LinkedFile("summary.csv", "per effective date and syntax: rules compared, rules agreeing, codes that differ"),
+            new LinkedFile("rules.csv", "per effective date, syntax and rule: every differing code, with its name"),
+            new LinkedFile("index-claims.csv",
+                    "per release revision and Index row: stated against actual changes in sheet and Genericode"),
+            new LinkedFile("business-terms.csv",
+                    "per release revision and Index row: business terms against EN 16931-1:2017 and the previous release"),
+            new LinkedFile("index-releases.csv", "per release revision: the dates its Index states, structural findings"),
+            new LinkedFile("configuration/validator-releases.csv", "the date each validator release applies from"),
+            new LinkedFile("configuration/rule-catalog.csv", "which code list each BR-CL rule enforces"),
+            new LinkedFile("configuration/business-terms-2017.csv",
+                    "the business terms of EN 16931-1:2017 that use each code list"));
     /** Enough codes to recognise a pattern in the page; the complete lists are in {@code rules.csv}. */
     private static final int CODES_SHOWN = 24;
 
@@ -50,6 +70,15 @@ public final class ValidatorReport {
             writeCsv(directory.resolve("index-claims.csv"), sections.claimsCsv());
             writeCsv(directory.resolve("business-terms.csv"), sections.businessTermsCsv());
             writeCsv(directory.resolve("index-releases.csv"), sections.releasesCsv());
+        }
+        for (String resource : List.of("validator-releases.csv", "rule-catalog.csv", "business-terms-2017.csv")) {
+            try (InputStream stream = ValidatorReport.class.getResourceAsStream("/validator/" + resource)) {
+                if (stream == null) {
+                    throw new IOException("Missing resource /validator/" + resource);
+                }
+                Files.createDirectories(directory.resolve("configuration"));
+                Files.write(directory.resolve("configuration").resolve(resource), stream.readAllBytes());
+            }
         }
         Files.writeString(directory.resolve("index.html"), html(report, sections), StandardCharsets.UTF_8);
     }
@@ -153,6 +182,11 @@ public final class ValidatorReport {
                         .distinct().count()))
                 .replace("{{summary}}", summaryRows(report))
                 .replace("{{details}}", details(report))
+                .replace("{{files}}", LINKED_FILES.stream().filter(file -> sections != null
+                        || !file.path().matches("index-.*|business-terms\\.csv"))
+                        .map(file -> "<li><a href=\"" + escape(file.path()) + "\"><code>" + escape(file.path())
+                                + "</code></a>: " + escape(file.description()) + "</li>")
+                        .collect(Collectors.joining("\n")))
                 .replace("{{indexSummary}}", sections == null ? "" : sections.summaryHtml())
                 .replace("{{indexClaims}}", sections == null ? "" : sections.claimsHtml())
                 .replace("{{businessTerms}}", sections == null ? "" : sections.businessTermsHtml())
@@ -290,7 +324,7 @@ public final class ValidatorReport {
         for (var entry : codes.entrySet()) {
             if (shown++ == CODES_SHOWN) {
                 lines.append("<li class=\"quiet\">… ").append(codes.size() - CODES_SHOWN)
-                        .append(" more in rules.csv</li>");
+                        .append(" more in <a href=\"rules.csv\">rules.csv</a></li>");
                 break;
             }
             String code = entry.getKey();

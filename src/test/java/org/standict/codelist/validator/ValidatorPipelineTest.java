@@ -109,6 +109,50 @@ class ValidatorPipelineTest {
         assertEquals(40, index.path("releases").get(0).path("commit").asText().length());
     }
 
+    /**
+     * The shared folder must work on its own: every relative link of its page resolves to a file inside it, and the
+     * manifest names each file with its hash.
+     */
+    @Test
+    void publishesAFolderWhoseLinksAllResolve() throws Exception {
+        Path folder = temp.resolve("docs/en16931-code-list-comparison");
+
+        var result = new ValidatorPipeline(catalog).run(repository, output, folder);
+
+        assertEquals(folder.resolve(ReportFolder.PAGE), result.page());
+        String page = Files.readString(result.page());
+        var links = new java.util.TreeSet<String>();
+        var matcher = java.util.regex.Pattern.compile("href=\"([^\"#][^\"]*)\"").matcher(page);
+        while (matcher.find()) {
+            links.add(matcher.group(1));
+        }
+        assertTrue(links.containsAll(List.of("rules.csv", "summary.csv", "index-claims.csv", "manifest.json",
+                "configuration/rule-catalog.csv", "configuration/business-terms-2017.csv")), links.toString());
+        for (String link : links) {
+            assertTrue(Files.isRegularFile(folder.resolve(link)), "broken link " + link);
+        }
+        var manifest = json.readTree(folder.resolve("manifest.json").toFile());
+        assertEquals(ReportFolder.PAGE, manifest.path("page").asText());
+        for (var file : manifest.path("files")) {
+            byte[] contents = Files.readAllBytes(folder.resolve(file.path("path").asText()));
+            assertEquals(java.util.HexFormat.of().formatHex(
+                    java.security.MessageDigest.getInstance("SHA-256").digest(contents)), file.path("sha256").asText());
+        }
+        assertFalse(Files.exists(folder.resolve("validator-index.json")), "only the report, not the extraction");
+
+        new ValidatorPipeline(catalog).run(repository, output, folder); // Replaces its own folder.
+        assertTrue(Files.isRegularFile(folder.resolve(ReportFolder.PAGE)));
+    }
+
+    @Test
+    void refusesToReplaceAFolderItDidNotPublish() throws Exception {
+        Path folder = Files.createDirectories(temp.resolve("docs/shared"));
+        Files.writeString(folder.resolve("notes.txt"), "hand-maintained");
+
+        assertThrows(IOException.class, () -> new ValidatorPipeline(catalog).run(repository, output, folder));
+        assertTrue(Files.exists(folder.resolve("notes.txt")));
+    }
+
     /** Re-running replaces its own output with the same bytes, so the tree can be versioned in Git. */
     @Test
     void republishesItsOwnOutputRepeatably() throws Exception {

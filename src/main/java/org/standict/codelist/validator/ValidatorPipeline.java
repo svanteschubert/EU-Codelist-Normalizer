@@ -54,8 +54,11 @@ public final class ValidatorPipeline {
         this.catalog = catalog;
     }
 
+    /**
+     * @param page the page of the shareable report folder, or {@code null} when none was requested
+     */
     public record Result(int releases, int rules, ValidatorComparison.Report report, IndexCheck.Report index,
-            Path directory) {}
+            Path directory, Path page) {}
 
     /**
      * @param validatorCheckout checkout of the eInvoicing-EN16931 repository, which is only ever read
@@ -63,6 +66,13 @@ public final class ValidatorPipeline {
      *     {@code validator/}
      */
     public Result run(Path validatorCheckout, Path outputRoot) throws IOException {
+        return run(validatorCheckout, outputRoot, null);
+    }
+
+    /**
+     * @param reportFolder where to publish the report as a folder to share, or {@code null} for none
+     */
+    public Result run(Path validatorCheckout, Path outputRoot, Path reportFolder) throws IOException {
         var repository = new ValidatorRepository(validatorCheckout);
         Path output = outputRoot.toRealPath();
         if (output.startsWith(repository.root()) || repository.root().startsWith(output)) {
@@ -117,6 +127,7 @@ public final class ValidatorPipeline {
             var report = new ValidatorComparison().compare(catalog, extracted, codeLists);
             var indexCheck = new IndexCheck().check(codeLists);
             new ValidatorReport().write(report, indexCheck, staging);
+            new ReportFolder().writeManifest(staging, "index.html");
             index.put("compared_dates", report.dates().size());
             index.put("index_revisions_checked", indexCheck.revisions().size());
             index.put("index_rows_checked", indexCheck.revisions().stream().mapToInt(r -> r.tabs().size()).sum());
@@ -128,7 +139,8 @@ public final class ValidatorPipeline {
                     json.writerWithDefaultPrettyPrinter().writeValueAsString(index) + "\n", StandardCharsets.UTF_8);
             // Publish only after every release has been read and compared.
             replace(staging, destination);
-            return new Result(catalog.releases().size(), rules, report, indexCheck, destination);
+            Path page = reportFolder == null ? null : new ReportFolder().publish(destination, reportFolder);
+            return new Result(catalog.releases().size(), rules, report, indexCheck, destination, page);
         } finally {
             deleteRecursively(staging);
         }

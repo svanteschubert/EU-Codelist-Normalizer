@@ -1,0 +1,51 @@
+{
+  "format_version" : 1,
+  "generator" : "eu-codelist-normalizer --validator",
+  "page" : "en16931-code-list-comparison.html",
+  "files" : [ {
+    "path" : "en16931-code-list-comparison.html",
+    "bytes" : 927589,
+    "sha256" : "8b69c0c27c1020e1af036deb458580007eec58591539a42c739be3d39cbea568",
+    "description" : "the comparison report; open it in a browser"
+  }, {
+    "path" : "summary.csv",
+    "bytes" : 5911,
+    "sha256" : "41f7718977014f63a1e681cfa3e47a394516da402da60a478e00e9ab289e4ef4",
+    "description" : "per effective date and syntax: rules compared, rules agreeing, codes that differ"
+  }, {
+    "path" : "rules.csv",
+    "bytes" : 259414,
+    "sha256" : "af15fc98ba8fe4e670fbd5d1fb3ea4e41df4457fb84e33827fd1ad1e5df7e30f",
+    "description" : "per effective date, syntax and rule: every differing code, with its name"
+  }, {
+    "path" : "index-claims.csv",
+    "bytes" : 54602,
+    "sha256" : "bce7ccda9eae501c0bedabe4e03c5c4feb1d9e80eae80e9ff1ea5dd0cd1c7a49",
+    "description" : "per release revision and Index row: stated against actual changes in sheet and Genericode"
+  }, {
+    "path" : "business-terms.csv",
+    "bytes" : 53698,
+    "sha256" : "6cefa157de271f6ecbede979eb6ccc22736ddc3f76ea245c07d0dec5967e618f",
+    "description" : "per release revision and Index row: business terms against EN 16931-1:2017 and the previous release"
+  }, {
+    "path" : "index-releases.csv",
+    "bytes" : 6667,
+    "sha256" : "718256a73895a1634f6de2a6a7fa66ad51257683f5aa5d98d814d95b122337ca",
+    "description" : "per release revision: the dates its Index states, structural findings"
+  }, {
+    "path" : "configuration/validator-releases.csv",
+    "bytes" : 2223,
+    "sha256" : "0586a4c0bb501451385039d663249f8b455a4bbd71f56b298ce81b84af8610af",
+    "description" : "the date each validator release applies from"
+  }, {
+    "path" : "configuration/rule-catalog.csv",
+    "bytes" : 1723,
+    "sha256" : "f3bd4e662a573bcd5128e0bbb493e35d69db41947bc3933d7a7e6f152d659bb0",
+    "description" : "which code list each BR-CL rule enforces"
+  }, {
+    "path" : "configuration/business-terms-2017.csv",
+    "bytes" : 2687,
+    "sha256" : "107b116b9593a750a9b0b2c17a415a401cc0bdeee1b7e3cc95f8d4785eb9f89f",
+    "description" : "the business terms of EN 16931-1:2017 that use each code list"
+  } ]
+}

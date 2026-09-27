@@ -313,8 +313,23 @@ validator/
 - **Dates:** the effective date the Index states is compared with the date the
   release is filed under. The 2019 workbooks state only a publication date, on `Main`.
 
+The report is also published as a self-contained folder to share, by default
+`docs/en16931-code-list-comparison/` (`--report-folder PATH` to change it):
+
+```text
+docs/en16931-code-list-comparison/
+├── en16931-code-list-comparison.html   # the report; open it in a browser
+├── manifest.json                       # every file with its size and SHA-256
+├── summary.csv  rules.csv  index-claims.csv  business-terms.csv  index-releases.csv
+└── configuration/validator-releases.csv  rule-catalog.csv  business-terms-2017.csv
+```
+
+All links are relative and the page loads nothing from the network, so the folder
+can be copied to any web server or file share as it is.
+
 The tree is replaced as a whole on each run and is byte-identical for the same
-inputs. A `validator/` directory without `validator-index.json` is refused.
+inputs. A `validator/` directory without `validator-index.json` is refused, as is
+a report folder without this generator's `manifest.json`.
 
 ## Development
 
@@ -333,6 +348,7 @@ mvn verify
 - `ValidatorPipeline`, `SchematronCodeLists`, `CodeListReleases`, `ValidatorComparison`,
   `ValidatorReport`: extraction of the validator's code lists and their comparison
   with the published ones.
+- `ReportFolder`: the shareable copy of the report with its manifest.
 - `IndexSheet`, `ChangeClaims`, `ActualChanges`, `IndexCheck`, `BusinessTerms`,
   `IndexReport`: the Index sheet checks.
 

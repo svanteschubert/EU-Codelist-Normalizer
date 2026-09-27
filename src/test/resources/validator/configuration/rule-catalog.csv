@@ -1,0 +1,39 @@
+# Which published code list each code-list rule of the validation artefacts enforces.
+#
+# The validator does not name its code lists; it spells them out inside the test of a BR-CL assertion, for example
+#   contains(' 71 80 81 ... ', concat(' ', normalize-space(.), ' '))
+# The rule identifier is therefore the only stable handle, and this file ties it to the Genericode file and the
+# spreadsheet sheet that publish the same list.
+#
+#   syntax               UBL or CII, or empty when the mapping holds for both.
+#   code list            the Genericode file and spreadsheet sheet name, without extension.
+#   spreadsheet column   empty to find the code column as the statistics do; otherwise the exact header label of the
+#                        column holding this syntax's codes. The Time sheet publishes UNTDID 2005 codes for UBL and
+#                        UNTDID 2475 codes for CII side by side, and the validator checks each syntax against its own.
+#
+# A rule absent from this file is still extracted and reported as unmapped, never ignored.
+"syntax","rule","code list","spreadsheet column"
+"","BR-CL-01","1001",""
+"","BR-CL-03","Currency",""
+"","BR-CL-04","Currency",""
+"","BR-CL-05","Currency",""
+"UBL","BR-CL-06","Time","2005 Code"
+"CII","BR-CL-06","Time","2475 Code"
+"","BR-CL-07","1153",""
+"","BR-CL-08","Text",""
+"","BR-CL-10","ICD",""
+"","BR-CL-11","ICD",""
+"","BR-CL-13","Item",""
+"","BR-CL-14","Country",""
+"","BR-CL-15","Country",""
+"","BR-CL-16","Payment",""
+"","BR-CL-17","5305",""
+"","BR-CL-18","5305",""
+"","BR-CL-19","Allowance",""
+"","BR-CL-20","Charge",""
+"","BR-CL-21","ICD",""
+"","BR-CL-22","VATEX",""
+"","BR-CL-23","Unit",""
+"","BR-CL-24","MIME",""
+"","BR-CL-25","EAS",""
+"","BR-CL-26","ICD",""

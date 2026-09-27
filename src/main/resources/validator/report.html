@@ -77,6 +77,8 @@
   td.differences .kind { font-size: .82rem; }
   .implemented, li.implemented .kind { color: var(--added); }
   .unimplemented, li.unimplemented .kind { color: var(--removed); }
+  ul.files { padding-left: 1.2rem; color: var(--quiet); }
+  ul.files a { color: var(--ink); }
   footer { margin-top: 3rem; color: var(--quiet); font-size: .85rem; max-width: 48rem; }
 </style>
 </head>
@@ -136,14 +138,14 @@ of its own, in code order, with its name from the published code list:
 published list does not contain; <span class="unimplemented">published, not implemented</span> means an invoice using
 a published code fails validation. For a code the compared release does not list, the name comes from the nearest
 release that did. Hover over a line for its source. The complete lists, including rules that agree, are in
-<code>rules.csv</code>.</p>
+<a href="rules.csv"><code>rules.csv</code></a>.</p>
 {{details}}
 
 <h2>Index sheet: stated against actual changes</h2>
 <p>Each workbook's Index sheet states, per tab, whether the list changed (“Changes”) and how (“Remark on
 updates”). Every revision is compared with the release before it: first with its own code list sheet, then with its
 Genericode file, which is also compared with the sheet. Where releases without Genericode lie between two that have
-it, the Genericode file is compared across them. Full details are in <code>index-claims.csv</code>.</p>
+it, the Genericode file is compared across them. Full details are in <a href="index-claims.csv"><code>index-claims.csv</code></a>.</p>
 <div class="scroll">
 <table>
   <thead>
@@ -160,8 +162,8 @@ it, the Genericode file is compared across them. Full details are in <code>index
 
 <h2>Business terms against EN 16931-1:2017</h2>
 <p>The Index column “EN business terms where the code list is used.” against the business terms whose
-description or usage note in Table 2 of EN 16931-1:2017 names the list (<code>business-terms-2017.csv</code>).
-All releases are in <code>business-terms.csv</code>.</p>
+description or usage note in Table 2 of EN 16931-1:2017 names the list (<a href="configuration/business-terms-2017.csv"><code>business-terms-2017.csv</code></a>).
+All releases are in <a href="business-terms.csv"><code>business-terms.csv</code></a>.</p>
 {{businessTerms}}
 
 <h2>Dates stated on the Index sheet</h2>
@@ -179,8 +181,16 @@ The 2019 workbooks state their dates on a separate Main sheet.</p>
 </table>
 </div>
 
+<h2>Files in this report</h2>
+<p>All CSV files are UTF-8, with every field quoted. Codes within a field are separated by spaces, in the order the
+normalized code lists use. Every file is listed with its size and SHA-256 in <a href="manifest.json"><code>manifest.json</code></a>,
+so a copy of this folder can be checked for completeness.</p>
+<ul class="files">
+{{files}}
+</ul>
+
 <footer>Validator codes are read from the tagged releases of the eInvoicing-EN16931 repository; effective dates
-come from <code>validator-releases.csv</code>, and the rule-to-code-list mapping from <code>rule-catalog.csv</code>.
+come from <a href="configuration/validator-releases.csv"><code>validator-releases.csv</code></a>, and the rule-to-code-list mapping from <a href="configuration/rule-catalog.csv"><code>rule-catalog.csv</code></a>.
 Where a rule states several lists — UBL's BR-CL-01 for invoices and credit notes, UBL's BR-CL-10 with the
 additional SEPA scheme — their union is compared.</footer>
 
