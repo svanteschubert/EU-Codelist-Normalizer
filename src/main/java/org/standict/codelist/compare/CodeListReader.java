@@ -18,6 +18,8 @@ import org.xml.sax.helpers.DefaultHandler;
 /**
  * Reads a Genericode code list into the plain code-to-values form the comparison works on.
  *
+ * <p>The order of the columns and of the rows is the file's own, so a caller may rely on it.
+ *
  * <p>Every column is kept, not only the code and its name: a delivery that merely rewords a description changes what
  * implementers read, and a report that only counted codes would call that delivery identical.
  */
@@ -74,7 +76,7 @@ public final class CodeListReader {
                         values.put(column, value);
                     }
                 }
-                if (rows.put(code, Map.copyOf(values)) != null) {
+                if (rows.put(code, java.util.Collections.unmodifiableMap(values)) != null) {
                     throw new IOException("Duplicate " + CODE_COLUMN + " " + code + ": " + where);
                 }
             }
@@ -82,7 +84,7 @@ public final class CodeListReader {
             return new CodeList(
                     identification == null ? "" : String.valueOf(identification.getShortName().getValue()),
                     identification == null || identification.getVersion() == null ? "" : identification.getVersion(),
-                    List.copyOf(columns), Map.copyOf(rows));
+                    List.copyOf(columns), java.util.Collections.unmodifiableMap(rows));
         } catch (IOException e) {
             throw e;
         } catch (Exception e) {

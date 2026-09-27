@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EN 16931 code lists — what changed, and where the components disagree</title>
+<style>
+  :root {
+    --ink: #1a1a1a; --quiet: #6b6b6b; --line: #d8d8d8; --bg: #ffffff; --panel: #f6f6f4;
+    --added: #0a6b3d; --removed: #9b1c1c; --reworded: #8a5a00; --gc: #1f4e79; --xlsx: #5b2d82;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #ececec; --quiet: #a0a0a0; --line: #3a3a3a; --bg: #161616; --panel: #1f1f1f;
+      --added: #5fd39b; --removed: #ff8e8e; --reworded: #e0b25e; --gc: #8ab6e0; --xlsx: #c2a0e8;
+    }
+  }
+  html { background: var(--bg); }
+  body { margin: 0 auto; padding: 2rem 1rem 4rem; max-width: 70rem; background: var(--bg); color: var(--ink);
+         font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+  h1 { font-size: 1.5rem; line-height: 1.25; margin: 0 0 .35rem; }
+  h2 { font-size: 1.1rem; margin: 2.5rem 0 .4rem; }
+  p  { margin: .35rem 0 1rem; color: var(--quiet); max-width: 46rem; }
+  .facts { display: flex; flex-wrap: wrap; gap: .5rem 2rem; padding: .85rem 1rem; margin: 1rem 0 0;
+           background: var(--panel); border: 1px solid var(--line); border-radius: .4rem; }
+  .facts div { font-variant-numeric: tabular-nums; }
+  .facts span { display: block; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--quiet); }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: .93rem; }
+  caption { text-align: left; color: var(--quiet); font-size: .85rem; padding: .3rem 0 .5rem; }
+  th, td { border-bottom: 1px solid var(--line); padding: .35rem .5rem; text-align: right; white-space: nowrap; }
+  th[scope="row"], td:first-child, td.list { text-align: left; }
+  thead th { border-bottom: 2px solid var(--line); font-size: .8rem; text-transform: uppercase;
+             letter-spacing: .03em; color: var(--quiet); font-weight: 600; }
+  thead th.group { text-align: center; border-bottom-width: 1px; }
+  tbody tr:hover { background: var(--panel); }
+  td.added { color: var(--added); font-weight: 600; }
+  td.removed { color: var(--removed); font-weight: 600; }
+  td.reworded { color: var(--reworded); font-weight: 600; }
+  td.zero, td.quiet, .quiet { color: var(--quiet); }
+  td.absent { color: var(--quiet); font-style: italic; text-align: center; }
+  .component { font-size: .82rem; padding: .08rem .4rem; border-radius: .25rem; border: 1px solid currentColor; }
+  .component.genericode { color: var(--gc); }
+  .component.spreadsheet { color: var(--xlsx); }
+  .component.validator { color: var(--quiet); }
+  footer { margin-top: 3rem; color: var(--quiet); font-size: .85rem; }
+</style>
+</head>
+<body>
+
+<h1>EN 16931 code lists — what changed, and where the components disagree</h1>
+<p>Generated from the normalized deliveries. Each effective date holds the code lists the European Commission
+published for that date; where an artefact was corrected, the highest revision counts as the delivery's content.</p>
+
+<div class="facts">
+  <div><span>Deliveries</span>{{deliveries}}</div>
+  <div><span>First effective date</span>{{first}}</div>
+  <div><span>Latest effective date</span>{{last}}</div>
+</div>
+
+<h2>What changed from one effective date to the next</h2>
+<p>Counted per component, because the Genericode package and the spreadsheet are published separately and do not
+always change together. Only steps with at least one change are listed.</p>
+<div class="scroll">
+<table>
+  <caption>added · removed · reworded codes, and how many code lists were touched</caption>
+  <thead>
+    <tr><th scope="col" rowspan="2">Delivery step</th>
+        <th scope="col" class="group" colspan="4">Genericode</th>
+        <th scope="col" class="group" colspan="4">Spreadsheet</th></tr>
+    <tr><th scope="col">+</th><th scope="col">−</th><th scope="col">~</th><th scope="col">lists</th>
+        <th scope="col">+</th><th scope="col">−</th><th scope="col">~</th><th scope="col">lists</th></tr>
+  </thead>
+  <tbody>
+{{changesByDate}}
+  </tbody>
+</table>
+</div>
+
+<h2>Where the two components disagree inside one delivery</h2>
+<p>The same code list is published twice. Where the two disagree, an implementation is right against one and wrong
+against the other, and the delivery does not say which is authoritative. Names are compared with whitespace
+collapsed, so wrapping alone is not counted as a difference.</p>
+<div class="scroll">
+<table>
+  <caption>codes present in only one component, and codes whose name differs</caption>
+  <thead>
+    <tr><th scope="col">Effective date</th><th scope="col">Code list</th>
+        <th scope="col">Only Genericode</th><th scope="col">Only spreadsheet</th>
+        <th scope="col">Name differs</th><th scope="col">Agree</th></tr>
+  </thead>
+  <tbody>
+{{agreement}}
+  </tbody>
+</table>
+</div>
+
+<h2>Code lists published by one component only</h2>
+<p>Not a disagreement about codes but about scope: the list exists in one component and not in the other, for the
+whole delivery.</p>
+<div class="scroll">
+<table>
+  <thead>
+    <tr><th scope="col">Code list</th><th scope="col">Published as</th><th scope="col">Affected</th></tr>
+  </thead>
+  <tbody>
+{{missing}}
+  </tbody>
+</table>
+</div>
+
+<h2>Code list changes in detail</h2>
+<div class="scroll">
+<table>
+  <thead>
+    <tr><th scope="col">From</th><th scope="col">To</th><th scope="col">Component</th><th scope="col">Code list</th>
+        <th scope="col">+</th><th scope="col">−</th><th scope="col">~</th><th scope="col">Unchanged</th></tr>
+  </thead>
+  <tbody>
+{{changeDetail}}
+  </tbody>
+</table>
+</div>
+
+<footer>A third component, the validation artefacts, is not yet read; when it is, it appears as another column
+here without any change to the comparison.</footer>
+
+</body>
+</html>

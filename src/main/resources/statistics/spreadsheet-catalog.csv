@@ -1,0 +1,33 @@
+# Which sheets of the published workbooks hold a code list, and what that list is called.
+#
+# The spreadsheet component is not one workbook but several: the EN16931 code list values, the Electronic Address
+# Scheme list, the VATEX list and the Tax Exemption Reason list. They name their sheets freely, so a sheet is matched
+# to its Genericode counterpart through this file:
+#
+#   metadata   the sheet is not a code list and takes no part in the code comparison. "Index" and "Main" state the
+#              publication and effective date of the delivery, "Definitions" and "Instructions" explain the columns.
+#   code-list  the sheet is a code list; the third column names the Genericode file when the sheet name differs.
+#
+# Sheets absent from this file are code lists whose name already matches a Genericode file, which is the case for the
+# fifteen lists of the EN16931 workbook (1001, 1153, 5305, Allowance, Charge, Country, Currency, EAS, ICD, Item, MIME,
+# Payment, Text, Unit, VATEX).
+#
+# FISCAL ID, Time, VAT CAT and VAT ID are genuine code lists with no Genericode counterpart. They are listed as code
+# lists on purpose, so the report states that they are published in one component only instead of ignoring them.
+#
+# The EAS workbook has renamed its code list sheet three times -- "EAS code list", "CEF code list" and once
+# "CEF EAS code list" -- for the same list. Its code column has been labelled "AES" and "AESC", neither of which is a
+# word for a code; the reader falls back to the first column there, which is correct for all of them.
+"sheet","kind","code list"
+"Index","metadata",""
+"Main","metadata",""
+"Definitions","metadata",""
+"Instructions","metadata",""
+"EAS code list","code-list","EAS"
+"CEF code list","code-list","EAS"
+"CEF EAS code list","code-list","EAS"
+"VATEX code list","code-list","VATEX"
+"FISCAL ID","code-list",""
+"Time","code-list",""
+"VAT CAT","code-list",""
+"VAT ID","code-list",""

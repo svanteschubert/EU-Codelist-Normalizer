@@ -11,6 +11,7 @@ public final class NormalizerMain {
             Path output = Path.of("src/test/resources");
             boolean deliveries = false;
             boolean compare = false;
+            boolean statistics = false;
             for (int i = 0; i < args.length; i++) {
                 switch (args[i]) {
                     case "--help", "-h" -> {
@@ -19,7 +20,9 @@ public final class NormalizerMain {
                                                         [--output PATH]
                                   --deliveries       Write one delivery per effective date instead of per release
                                   --compare          Report what changed between the deliveries written by
-                                                     --deliveries, into compared/
+                                                     --deliveries, into compared/ as CSV
+                                  --statistics       Render the same analysis, plus the agreement between the
+                                                     Genericode and spreadsheet components, as statistics/index.html
                                   --downloader PATH  Downloader repository (default: ../EU-Codelist-Downloader)
                                   --output PATH      Releases (default: src/test/resources)
 
@@ -41,6 +44,7 @@ public final class NormalizerMain {
                     }
                     case "--deliveries" -> deliveries = true;
                     case "--compare" -> compare = true;
+                    case "--statistics" -> statistics = true;
                     case "--downloader", "--output" -> {
                         String option = args[i];
                         if (++i == args.length || args[i].startsWith("--")) {
@@ -51,6 +55,19 @@ public final class NormalizerMain {
                     }
                     default -> throw new IllegalArgumentException("Unknown argument: " + args[i]);
                 }
+            }
+            if (statistics) {
+                Path normalized = output.resolve("normalized");
+                Path html = output.resolve("statistics/index.html");
+                var report = new org.standict.codelist.statistics.Statistics().analyse(normalized);
+                new org.standict.codelist.statistics.HtmlStatisticsReport().write(report, html);
+                System.out.printf("%d deliveries, %d code-list changes, %d disagreements between components, "
+                        + "%d one-sided code lists%n", report.effectiveDates().size(),
+                        report.changes().stream().filter(c -> c.total() > 0).count(),
+                        report.agreements().stream().filter(a -> a.disagreements() > 0).count(),
+                        report.missing().size());
+                System.out.printf("Report: %s%n", html.toAbsolutePath().normalize());
+                return;
             }
             if (compare) {
                 Path normalized = output.resolve("normalized");
