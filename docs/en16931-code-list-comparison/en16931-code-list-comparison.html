@@ -79,6 +79,19 @@
   .unimplemented, li.unimplemented .kind { color: var(--removed); }
   ul.files { padding-left: 1.2rem; color: var(--quiet); }
   ul.files a { color: var(--ink); }
+  nav.contents { margin: 1.25rem 0 0; padding: .6rem 1rem; border: 1px solid var(--line); border-radius: .4rem; }
+  nav.contents p { margin: .1rem 0 .3rem; color: var(--ink); }
+  nav.contents ol { margin: 0; padding-left: 1.3rem; }
+  nav.contents li { margin: .2rem 0; }
+  nav.contents li span { color: var(--quiet); }
+  .agree { color: var(--added); }
+  .disagree { color: var(--removed); font-weight: 600; }
+  table.claims tbody th { text-align: left; white-space: nowrap; }
+  table.claims tr.mismatch th { border-left: 3px solid var(--removed); }
+  table.claims td.actual div { white-space: normal; }
+  table.claims td.actual .added { color: var(--added); }
+  table.claims td.actual .removed { color: var(--removed); }
+  table.claims td.actual .reworded { color: var(--reworded); }
   footer { margin-top: 3rem; color: var(--quiet); font-size: .85rem; max-width: 48rem; }
 </style>
 </head>
@@ -98,7 +111,19 @@ EN 16931-1:2017.</p>
   <div><span>Latest date</span>2026-05-15</div>
 </div>
 
-<h2>Disagreements per effective date</h2>
+<nav class="contents" aria-label="Contents">
+  <p><strong>What this report compares</strong></p>
+  <ol>
+    <li><a href="#validator">Validator against the code lists</a> <span>— the codes each BR-CL rule implements, against the published code lists; on 2026-05-15 (validator 1.3.16) UBL 7 of 21, CII 8 of 22 rules differ from Genericode</span></li>
+    <li><a href="#index-claims">Index sheet against the code lists</a> <span>— 14 of 346 Index rows, in 10 of 19 release revisions, claim changes the spreadsheets and Genericode files do not show, or leave out changes they do</span></li>
+    <li><a href="#business-terms">Business terms against EN 16931-1:2017</a> <span>— in the latest Index, 2 tabs list other business terms than EN 16931-1:2017 (FISCAL ID, VAT CAT)</span></li>
+    <li><a href="#index-dates">Dates stated on the Index sheet</a> <span>— 4 of 19 release revisions state another effective date than the one they are filed under</span></li>
+    <li><a href="#codes">Validator: codes that differ</a> <span>— every differing code, with its name, per date</span></li>
+    <li><a href="#files">Files in this report</a> <span>— the CSV files and configuration tables behind this page</span></li>
+  </ol>
+</nav>
+
+<h2 id="validator">1. Validator against the code lists, per effective date</h2>
 <p>Each code-list rule of the validator (BR-CL-01 to BR-CL-26) checks an invoice field against a list of codes
 written into the rule. Every such list is compared, code by code, with the code list the Commission published for the
 same date, once as Genericode and once as spreadsheet.</p>
@@ -156,7 +181,298 @@ same date, once as Genericode and once as spreadsheet.</p>
 </table>
 </div>
 
-<h2>Codes that differ</h2>
+<h2 id="index-claims">2. Index sheet against the code lists: claimed and actual changes</h2>
+<p>The first sheet of every “EN16931 code list values” workbook, <em>Index</em>, states per tab
+whether the list changed since the previous release (column “Changes”) and how (column “Remark on
+updates”). Here each claim is set against what actually changed: in the tab's own spreadsheet sheet, compared with the
+release before, and in the Genericode file, compared with the last release that had one. A row disagrees when the Index
+names a change that did not happen, misses one that did, or names a code the list does not contain. Every release
+revision is checked, including corrected ones. Rows that disagree come first; the complete table is in
+<a href="index-claims.csv"><code>index-claims.csv</code></a>.</p>
+<div class="scroll">
+<table>
+  <thead>
+    <tr><th scope="col">Release</th><th scope="col">Compared with</th><th scope="col">Index rows</th>
+        <th scope="col">Release findings</th><th scope="col">Business terms vs 2017</th>
+        <th scope="col">Business terms changed</th></tr>
+  </thead>
+  <tbody>
+<tr><th scope="row"><a href="#i17_2026-05-15-r02">17_2026-05-15/r02</a></th><td class="list">16_2025-11-15/r01</td><td class="removed">1 / 19 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">2 / 19 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
+<tr><th scope="row"><a href="#i17_2026-05-15-r01">17_2026-05-15/r01</a></th><td class="list">16_2025-11-15/r01</td><td class="removed">2 / 19 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">2 / 19 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
+<tr><th scope="row"><a href="#i16_2025-11-15-r01">16_2025-11-15/r01</a></th><td class="list">15_2025-05-15/r01</td><td class="removed">1 / 19 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">2 / 19 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
+<tr><th scope="row"><a href="#i15_2025-05-15-r01">15_2025-05-15/r01</a></th><td class="list">14_2024-11-15/r01</td><td class="removed">2 / 19 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">2 / 19 <span class="quiet">tabs differ</span></td><td class="reworded">1 tabs</td></tr>
+<tr><th scope="row"><a href="#i14_2024-11-15-r01">14_2024-11-15/r01</a></th><td class="list">13_2024-05-15/r01</td><td class="zero">all 18 agree</td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
+<tr><th scope="row"><a href="#i13_2024-05-15-r01">13_2024-05-15/r01</a></th><td class="list">12_2023-11-15/r01</td><td class="removed">1 / 18 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
+<tr><th scope="row"><a href="#i12_2023-11-15-r01">12_2023-11-15/r01</a></th><td class="list">11_2023-05-15/r01</td><td class="removed">1 / 18 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
+<tr><th scope="row"><a href="#i11_2023-05-15-r01">11_2023-05-15/r01</a></th><td class="list">10_2022-11-15/r01</td><td class="zero">all 18 agree</td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
+<tr><th scope="row"><a href="#i10_2022-11-15-r01">10_2022-11-15/r01</a></th><td class="list">09_2022-05-16/r01</td><td class="removed">2 / 18 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
+<tr><th scope="row"><a href="#i09_2022-05-16-r01">09_2022-05-16/r01</a></th><td class="list">08_2021-11-15/r01</td><td class="zero">all 18 agree</td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
+<tr><th scope="row"><a href="#i08_2021-11-15-r01">08_2021-11-15/r01</a></th><td class="list">07_2021-05-17/r01</td><td class="zero">all 18 agree</td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
+<tr><th scope="row"><a href="#i07_2021-05-17-r01">07_2021-05-17/r01</a></th><td class="list">06_2020-11-16/r02</td><td class="zero">all 18 agree</td><td class="removed">the Index states the effective date 2021-05-15, the release is filed under 2021-05-17</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
+<tr><th scope="row"><a href="#i06_2020-11-16-r02">06_2020-11-16/r02</a></th><td class="list">05_2020-06-30/r01</td><td class="zero">all 18 agree</td><td class="removed">the Index states the effective date 2020-11-15, the release is filed under 2020-11-16</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
+<tr><th scope="row"><a href="#i06_2020-11-16-r01">06_2020-11-16/r01</a></th><td class="list">05_2020-06-30/r01</td><td class="zero">all 18 agree</td><td class="removed">the Index states the effective date 2020-11-15, the release is filed under 2020-11-16</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
+<tr><th scope="row"><a href="#i05_2020-06-30-r01">05_2020-06-30/r01</a></th><td class="list">04_2020-05-15/r01</td><td class="removed">1 / 18 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
+<tr><th scope="row"><a href="#i04_2020-05-15-r01">04_2020-05-15/r01</a></th><td class="list">03_2019-11-15/r01</td><td class="zero">all 18 agree</td><td class="removed">the Index states the effective date 2020-02-28, the release is filed under 2020-05-15</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
+<tr><th scope="row"><a href="#i03_2019-11-15-r01">03_2019-11-15/r01</a></th><td class="list">02_2019-06-17/r01</td><td class="removed">1 / 18 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
+<tr><th scope="row"><a href="#i02_2019-06-17-r01">02_2019-06-17/r01</a></th><td class="list">01_2019-03-15/r01</td><td class="removed">2 / 18 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
+<tr><th scope="row"><a href="#i01_2019-03-15-r01">01_2019-03-15/r01</a></th><td class="list">—</td><td class="zero">all 18 agree</td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
+
+  </tbody>
+</table>
+</div>
+<details id="i17_2026-05-15-r02" open><summary><strong>17_2026-05-15/r02</strong> against 16_2025-11-15/r01 · <span class="disagree">1 of 19 rows disagree</span></summary>
+<ul class="findings"><li class="info">tabs defined by EN 16931 itself, never published as Genericode: FISCAL ID Time VAT CAT VAT ID</li></ul>
+<div class="scroll"><table class="claims"><thead><tr><th scope="col" rowspan="2">Tab</th><th scope="col" class="group" colspan="2">The Index sheet claims</th><th scope="col" class="group" colspan="2">Actual changes since 16_2025-11-15/r01</th><th scope="col" rowspan="2">What does not match</th></tr><tr><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Spreadsheet</th><th scope="col">Genericode</th></tr></thead><tbody>
+<tr class="mismatch"><th scope="row">ICD</th><td class="list">Yes</td><td class="note">Added 0245, 0246, 0247, 0248</td><td class="note actual"><div class="added">+ <code>0245 0246 0247 0248</code></div><div class="reworded">renamed <code>0241 0243</code></div></td><td class="note actual"><div class="added">+ <code>0245 0246 0247 0248</code></div><div class="reworded">renamed <code>0241 0243</code></div></td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> renamed, not stated: <code>0241 0243</code></li></ul></td></tr>
+<tr class="ok"><th scope="row">Currency</th><td class="list">Yes</td><td class="note">Added XCG, Removed ANG, BGN</td><td class="note actual"><div class="added">+ <code>XCG</code></div><div class="removed">− <code>ANG BGN</code></div></td><td class="note actual"><div class="added">+ <code>XCG</code></div><div class="removed">− <code>ANG BGN</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">EAS</th><td class="list">Yes</td><td class="note">Added 0242, 0245, 0246, 0248</td><td class="note actual"><div class="added">+ <code>0242 0245 0246 0248</code></div></td><td class="note actual"><div class="added">+ <code>0242 0245 0246 0248</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+</tbody></table></div>
+<p class="quiet">16 further rows state no change, and none happened.</p>
+</details>
+<details id="i17_2026-05-15-r01"><summary><strong>17_2026-05-15/r01</strong> against 16_2025-11-15/r01 · <span class="disagree">2 of 19 rows disagree</span></summary>
+<ul class="findings"><li class="info">tabs defined by EN 16931 itself, never published as Genericode: FISCAL ID Time VAT CAT VAT ID</li></ul>
+<div class="scroll"><table class="claims"><thead><tr><th scope="col" rowspan="2">Tab</th><th scope="col" class="group" colspan="2">The Index sheet claims</th><th scope="col" class="group" colspan="2">Actual changes since 16_2025-11-15/r01</th><th scope="col" rowspan="2">What does not match</th></tr><tr><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Spreadsheet</th><th scope="col">Genericode</th></tr></thead><tbody>
+<tr class="mismatch"><th scope="row">Currency</th><td class="list">Yes</td><td class="note">Added XCG, Removed ANG, BGN</td><td class="note actual"><div class="added">+ <code>XCG</code></div><div class="removed">− <code>BGN</code></div></td><td class="note actual"><div class="added">+ <code>XCG</code></div><div class="removed">− <code>BGN</code></div></td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> stated as removed, but still listed: <code>ANG</code></li><li class="mismatch"><span class="component genericode">genericode</span> stated as removed, but Genericode still lists it: <code>ANG</code></li></ul></td></tr>
+<tr class="mismatch"><th scope="row">ICD</th><td class="list">Yes</td><td class="note">Added 0245, 0246, 0247, 0248</td><td class="note actual"><div class="added">+ <code>0245 0246 0247 0248</code></div><div class="reworded">renamed <code>0241 0243</code></div></td><td class="note actual"><div class="added">+ <code>0245 0246 0247 0248</code></div><div class="reworded">renamed <code>0241 0243</code></div></td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> renamed, not stated: <code>0241 0243</code></li></ul></td></tr>
+<tr class="ok"><th scope="row">EAS</th><td class="list">Yes</td><td class="note">Added 0242, 0245, 0246, 0248</td><td class="note actual"><div class="added">+ <code>0242 0245 0246 0248</code></div></td><td class="note actual"><div class="added">+ <code>0242 0245 0246 0248</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+</tbody></table></div>
+<p class="quiet">16 further rows state no change, and none happened.</p>
+</details>
+<details id="i16_2025-11-15-r01"><summary><strong>16_2025-11-15/r01</strong> against 15_2025-05-15/r01 · <span class="disagree">1 of 19 rows disagree</span></summary>
+<ul class="findings"><li class="info">tabs defined by EN 16931 itself, never published as Genericode: FISCAL ID Time VAT CAT VAT ID</li></ul>
+<div class="scroll"><table class="claims"><thead><tr><th scope="col" rowspan="2">Tab</th><th scope="col" class="group" colspan="2">The Index sheet claims</th><th scope="col" class="group" colspan="2">Actual changes since 15_2025-05-15/r01</th><th scope="col" rowspan="2">What does not match</th></tr><tr><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Spreadsheet</th><th scope="col">Genericode</th></tr></thead><tbody>
+<tr class="mismatch"><th scope="row">VATEX</th><td class="list">Yes</td><td class="note">Adding VATEX-135-1</td><td class="note actual"><div class="added">+ <code>VATEX-EU-135-1</code></div><div class="reworded">renamed <code>VATEX-EU-F VATEX-EU-I VATEX-EU-J</code></div></td><td class="note actual"><div class="added">+ <code>VATEX-EU-135-1</code></div><div class="reworded">renamed <code>VATEX-EU-F VATEX-EU-I VATEX-EU-J</code></div></td><td class="note"><ul><li class="mismatch"><span class="component index">index</span> the remark names codes the list does not contain, before or after: <code>VATEX-135-1</code></li><li class="mismatch"><span class="component sheet">sheet</span> added, not stated: <code>VATEX-EU-135-1</code></li><li class="mismatch"><span class="component sheet">sheet</span> renamed, not stated: <code>VATEX-EU-F VATEX-EU-I VATEX-EU-J</code></li></ul></td></tr>
+<tr class="ok"><th scope="row">Country</th><td class="list">Yes</td><td class="note">BS name edited</td><td class="note actual"><div class="reworded">renamed <code>BS</code></div></td><td class="note actual"><div class="reworded">renamed <code>BS</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">Currency</th><td class="list">Yes</td><td class="note">Adding CNH</td><td class="note actual"><div class="added">+ <code>CNH</code></div></td><td class="note actual"><div class="added">+ <code>CNH</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">ICD</th><td class="list">Yes</td><td class="note">Adding 0241, 0242, 0243, 0244</td><td class="note actual"><div class="added">+ <code>0241 0242 0243 0244</code></div></td><td class="note actual"><div class="added">+ <code>0241 0242 0243 0244</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">EAS</th><td class="list">Yes</td><td class="note">Adding 0244 Nigeria</td><td class="note actual"><div class="added">+ <code>0244</code></div></td><td class="note actual"><div class="added">+ <code>0244</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+</tbody></table></div>
+<p class="quiet">14 further rows state no change, and none happened.</p>
+</details>
+<details id="i15_2025-05-15-r01"><summary><strong>15_2025-05-15/r01</strong> against 14_2024-11-15/r01 · <span class="disagree">2 of 19 rows disagree</span></summary>
+<ul class="findings"><li class="info">tabs defined by EN 16931 itself, never published as Genericode: FISCAL ID Time VAT CAT VAT ID</li></ul>
+<div class="scroll"><table class="claims"><thead><tr><th scope="col" rowspan="2">Tab</th><th scope="col" class="group" colspan="2">The Index sheet claims</th><th scope="col" class="group" colspan="2">Actual changes since 14_2024-11-15/r01</th><th scope="col" rowspan="2">What does not match</th></tr><tr><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Spreadsheet</th><th scope="col">Genericode</th></tr></thead><tbody>
+<tr class="mismatch"><th scope="row">Currency</th><td class="list">Yes</td><td class="note">Removed ZWL</td><td class="note actual"><div class="removed">− <code>CUC ZWL</code></div></td><td class="note actual"><div class="removed">− <code>CUC ZWL</code></div></td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> removed, not stated: <code>CUC</code></li></ul></td></tr>
+<tr class="mismatch"><th scope="row">ICD</th><td class="list">Yes</td><td class="note">Added 0239 and 0240</td><td class="note actual"><div class="added">+ <code>0239 0240</code></div><div class="reworded">renamed <code>0096 0233 0236</code></div></td><td class="note actual"><div class="added">+ <code>0239 0240</code></div><div class="reworded">renamed <code>0096 0233 0236</code></div></td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> renamed, not stated: <code>0096 0233 0236</code></li></ul></td></tr>
+<tr class="ok"><th scope="row">1001</th><td class="list">Yes</td><td class="note">Added type codes 471, 472, 473, 500, 501, 502, 503</td><td class="note actual"><div class="added">+ <code>471 472 473 500 501 502 503</code></div></td><td class="note actual"><div class="added">+ <code>471 472 473 500 501 502 503</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">1153</th><td class="list">Yes</td><td class="note">Added AXU</td><td class="note actual"><div class="added">+ <code>AXU</code></div></td><td class="note actual"><div class="added">+ <code>AXU</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">VAT ID</th><td class="list">Fixed</td><td class="note">Part of list separated into new list FISCAL ID</td><td class="note actual"><span class="quiet">no code added, removed or renamed</span></td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="info"><th scope="row">FISCAL ID</th><td class="list">Fixed</td><td class="note">Separated from VAT ID list, see comment below</td><td class="note actual"><div class="added">+ <code>FC</code></div></td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">Item</th><td class="list">Yes</td><td class="note">Added PPI</td><td class="note actual"><div class="added">+ <code>PPI</code></div></td><td class="note actual"><div class="added">+ <code>PPI</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">EAS</th><td class="list">Yes</td><td class="note">Added 0154, 0158, 0240, removed 9901, name changed for 0096</td><td class="note actual"><div class="added">+ <code>0154 0158 0240</code></div><div class="removed">− <code>9901</code></div><div class="reworded">renamed <code>0096</code></div></td><td class="note actual"><div class="added">+ <code>0154 0158 0240</code></div><div class="removed">− <code>9901</code></div><div class="reworded">renamed <code>0096</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="info"><th scope="row">VATEX</th><td class="list">Yes</td><td class="note">Added VATEX-EU-153 and 24 French specific codes</td><td class="note actual"><div class="added">+ <code>VATEX-EU-153 VATEX-FR-298SEXDECIESA VATEX-FR-AE VATEX-FR-CGI261-1 VATEX-FR-CGI261-2 VATEX-FR-CGI261-3 VATEX-FR-CGI261-4 VATEX-FR-CGI261-5 VATEX-FR-CGI261-7 VATEX-FR-CGI261-8 VATEX-FR-CGI261A VATEX-FR-CGI261B VATEX-FR-CGI261C-1 VATEX-FR-CGI261C-2 VATEX-FR-CGI261C-3 VATEX-FR-CGI261D-1 VATEX-FR-CGI261D-1BIS VATEX-FR-CGI261D-2 VATEX-FR-CGI261D-3 VATEX-FR-CGI261D-4 VATEX-FR-CGI261E-1 VATEX-FR-CGI261E-2 VATEX-FR-CGI275 VATEX-FR-CGI277A VATEX-FR-CGI295</code></div></td><td class="note actual"><div class="added">+ <code>VATEX-EU-153 VATEX-FR-298SEXDECIESA VATEX-FR-AE VATEX-FR-CGI261-1 VATEX-FR-CGI261-2 VATEX-FR-CGI261-3 VATEX-FR-CGI261-4 VATEX-FR-CGI261-5 VATEX-FR-CGI261-7 VATEX-FR-CGI261-8 VATEX-FR-CGI261A VATEX-FR-CGI261B VATEX-FR-CGI261C-1 VATEX-FR-CGI261C-2 VATEX-FR-CGI261C-3 VATEX-FR-CGI261D-1 VATEX-FR-CGI261D-1BIS VATEX-FR-CGI261D-2 VATEX-FR-CGI261D-3 VATEX-FR-CGI261D-4 VATEX-FR-CGI261E-1 VATEX-FR-CGI261E-2 VATEX-FR-CGI275 VATEX-FR-CGI277A VATEX-FR-CGI295</code></div></td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> added as many codes as the remark counts (24): <code>VATEX-FR-298SEXDECIESA VATEX-FR-AE VATEX-FR-CGI261-1 VATEX-FR-CGI261-2 VATEX-FR-CGI261-3 VATEX-FR-CGI261-4 VATEX-FR-CGI261-5 VATEX-FR-CGI261-7 VATEX-FR-CGI261-8 VATEX-FR-CGI261A VATEX-FR-CGI261B VATEX-FR-CGI261C-1 VATEX-FR-CGI261C-2 VATEX-FR-CGI261C-3 VATEX-FR-CGI261D-1 VATEX-FR-CGI261D-1BIS VATEX-FR-CGI261D-2 VATEX-FR-CGI261D-3 VATEX-FR-CGI261D-4 VATEX-FR-CGI261E-1 VATEX-FR-CGI261E-2 VATEX-FR-CGI275 VATEX-FR-CGI277A VATEX-FR-CGI295</code></li></ul></td></tr>
+</tbody></table></div>
+<p class="quiet">10 further rows state no change, and none happened.</p>
+</details>
+<details id="i14_2024-11-15-r01"><summary><strong>14_2024-11-15/r01</strong> against 13_2024-05-15/r01 · <span class="agree">every row agrees</span></summary>
+<ul class="findings"><li class="info">tabs defined by EN 16931 itself, never published as Genericode: Time VAT CAT VAT ID</li></ul>
+<div class="scroll"><table class="claims"><thead><tr><th scope="col" rowspan="2">Tab</th><th scope="col" class="group" colspan="2">The Index sheet claims</th><th scope="col" class="group" colspan="2">Actual changes since 13_2024-05-15/r01</th><th scope="col" rowspan="2">What does not match</th></tr><tr><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Spreadsheet</th><th scope="col">Genericode</th></tr></thead><tbody>
+<tr class="ok"><th scope="row">Currency</th><td class="list">Yes</td><td class="note">Adding VED, ZWG. Removing HRK, SLL</td><td class="note actual"><div class="added">+ <code>VED ZWG</code></div><div class="removed">− <code>HRK SLL</code></div></td><td class="note actual"><div class="added">+ <code>VED ZWG</code></div><div class="removed">− <code>HRK SLL</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">ICD</th><td class="list">Yes</td><td class="note">Adding 0231 to 0238</td><td class="note actual"><div class="added">+ <code>0231 0232 0233 0234 0235 0236 0237 0238</code></div></td><td class="note actual"><div class="added">+ <code>0231 0232 0233 0234 0235 0236 0237 0238</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">EAS</th><td class="list">Yes</td><td class="note">Adding 0177 and 0235</td><td class="note actual"><div class="added">+ <code>0177 0235</code></div></td><td class="note actual"><div class="added">+ <code>0177 0235</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">VATEX</th><td class="list">Yes</td><td class="note">Adding VATEX-EU-144, VATEX-EU-146-1E, VATEX-EU-159</td><td class="note actual"><div class="added">+ <code>VATEX-EU-144 VATEX-EU-146-1E VATEX-EU-159</code></div></td><td class="note actual"><div class="added">+ <code>VATEX-EU-144 VATEX-EU-146-1E VATEX-EU-159</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+</tbody></table></div>
+<p class="quiet">14 further rows state no change, and none happened.</p>
+</details>
+<details id="i13_2024-05-15-r01"><summary><strong>13_2024-05-15/r01</strong> against 12_2023-11-15/r01 · <span class="disagree">1 of 18 rows disagree</span></summary>
+<ul class="findings"><li class="info">tabs defined by EN 16931 itself, never published as Genericode: Time VAT CAT VAT ID</li></ul>
+<div class="scroll"><table class="claims"><thead><tr><th scope="col" rowspan="2">Tab</th><th scope="col" class="group" colspan="2">The Index sheet claims</th><th scope="col" class="group" colspan="2">Actual changes since 12_2023-11-15/r01</th><th scope="col" rowspan="2">What does not match</th></tr><tr><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Spreadsheet</th><th scope="col">Genericode</th></tr></thead><tbody>
+<tr class="mismatch"><th scope="row">Currency</th><td class="list">Yes</td><td class="note">Removing Sierra Leone SLL, new code is SLE</td><td class="note actual"><span class="quiet">no code added, removed or renamed</span></td><td class="note actual"><div class="quiet">since 11_2023-05-15, 2 releases</div><span class="quiet">no code added, removed or renamed</span></td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> Changes = Yes, but no code was added, removed or renamed</li><li class="mismatch"><span class="component sheet">sheet</span> stated as added, but already listed before: <code>SLE</code></li><li class="mismatch"><span class="component sheet">sheet</span> stated as removed, but still listed: <code>SLL</code></li><li class="mismatch"><span class="component genericode">genericode</span> stated as removed, but Genericode still lists it (since 11_2023-05-15, 2 releases): <code>SLL</code></li></ul></td></tr>
+<tr class="ok"><th scope="row">Payment</th><td class="list">Yes</td><td class="note">Adding 98</td><td class="note actual"><div class="added">+ <code>98</code></div></td><td class="note actual"><div class="quiet">since 11_2023-05-15, 2 releases</div><div class="added">+ <code>98</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">Item</th><td class="list">Yes</td><td class="note">Adding GMN</td><td class="note actual"><div class="added">+ <code>GMN</code></div></td><td class="note actual"><div class="quiet">since 11_2023-05-15, 2 releases</div><div class="added">+ <code>GMN</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">Charge</th><td class="list">Yes</td><td class="note">Adding PRV</td><td class="note actual"><div class="added">+ <code>PRV</code></div></td><td class="note actual"><div class="quiet">since 11_2023-05-15, 2 releases</div><div class="added">+ <code>PRV</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">EAS</th><td class="list">NO</td><td class="note"><span class="quiet">—</span></td><td class="note actual"><span class="quiet">no code added, removed or renamed</span></td><td class="note actual"><div class="quiet">since 11_2023-05-15, 2 releases</div><div class="added">+ <code>0218</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">VATEX</th><td class="list">Yes</td><td class="note">Adding VATEX-FR-FRANCHISE, VATEX-FR-CNWVAT</td><td class="note actual"><div class="added">+ <code>VATEX-FR-CNWVAT VATEX-FR-FRANCHISE</code></div></td><td class="note actual"><div class="quiet">since 11_2023-05-15, 2 releases</div><div class="added">+ <code>VATEX-FR-CNWVAT VATEX-FR-FRANCHISE</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+</tbody></table></div>
+<p class="quiet">12 further rows state no change, and none happened.</p>
+</details>
+<details id="i12_2023-11-15-r01"><summary><strong>12_2023-11-15/r01</strong> against 11_2023-05-15/r01 · <span class="disagree">1 of 18 rows disagree</span></summary>
+<div class="scroll"><table class="claims"><thead><tr><th scope="col" rowspan="2">Tab</th><th scope="col" class="group" colspan="2">The Index sheet claims</th><th scope="col" class="group" colspan="2">Actual changes since 11_2023-05-15/r01</th><th scope="col" rowspan="2">What does not match</th></tr><tr><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Spreadsheet</th><th scope="col">Genericode</th></tr></thead><tbody>
+<tr class="mismatch"><th scope="row">VAT ID</th><td class="list">Fixed</td><td class="note"><span class="quiet">—</span></td><td class="note actual"><div class="added">+ <code>Subset of UNECE 5153</code></div></td><td class="absent">no Genericode file</td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> Changes = Fixed, but added: <code>Subset of UNECE 5153</code></li></ul></td></tr>
+<tr class="ok"><th scope="row">EAS</th><td class="list">Yes</td><td class="note">Adding 0218 (Latvia)</td><td class="note actual"><div class="added">+ <code>0218</code></div></td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+</tbody></table></div>
+<p class="quiet">16 further rows state no change, and none happened.</p>
+</details>
+<details id="i11_2023-05-15-r01"><summary><strong>11_2023-05-15/r01</strong> against 10_2022-11-15/r01 · <span class="agree">every row agrees</span></summary>
+<ul class="findings"><li class="info">tabs defined by EN 16931 itself, never published as Genericode: Time VAT CAT VAT ID</li></ul>
+<div class="scroll"><table class="claims"><thead><tr><th scope="col" rowspan="2">Tab</th><th scope="col" class="group" colspan="2">The Index sheet claims</th><th scope="col" class="group" colspan="2">Actual changes since 10_2022-11-15/r01</th><th scope="col" rowspan="2">What does not match</th></tr><tr><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Spreadsheet</th><th scope="col">Genericode</th></tr></thead><tbody>
+<tr class="ok"><th scope="row">ICD</th><td class="list">Yes</td><td class="note">Adding 0221 to 230</td><td class="note actual"><div class="added">+ <code>0221 0222 0223 0224 0225 0226 0227 0228 0229 0230</code></div></td><td class="note actual"><div class="added">+ <code>0221 0222 0223 0224 0225 0226 0227 0228 0229 0230</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">Item</th><td class="list">Yes</td><td class="note">Added EMD</td><td class="note actual"><div class="added">+ <code>EMD</code></div></td><td class="note actual"><div class="added">+ <code>EMD</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="info"><th scope="row">EAS</th><td class="list">Yes</td><td class="note">Adding 217, 221, 225 and 230, deprecating 9955</td><td class="note actual"><div class="added">+ <code>0217 0221 0225 0230</code></div><div class="removed">− <code>9955</code></div></td><td class="note actual"><div class="added">+ <code>0217 0221 0225 0230</code></div><div class="removed">− <code>9955</code></div></td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> stated as deprecated, and removed: <code>9955</code></li></ul></td></tr>
+</tbody></table></div>
+<p class="quiet">15 further rows state no change, and none happened.</p>
+</details>
+<details id="i10_2022-11-15-r01"><summary><strong>10_2022-11-15/r01</strong> against 09_2022-05-16/r01 · <span class="disagree">2 of 18 rows disagree</span></summary>
+<ul class="findings"><li class="info">tabs defined by EN 16931 itself, never published as Genericode: Time VAT CAT VAT ID</li></ul>
+<div class="scroll"><table class="claims"><thead><tr><th scope="col" rowspan="2">Tab</th><th scope="col" class="group" colspan="2">The Index sheet claims</th><th scope="col" class="group" colspan="2">Actual changes since 09_2022-05-16/r01</th><th scope="col" rowspan="2">What does not match</th></tr><tr><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Spreadsheet</th><th scope="col">Genericode</th></tr></thead><tbody>
+<tr class="mismatch"><th scope="row">Currency</th><td class="list">Yes</td><td class="note">Added SLE for Sierra Leone (new valuation)</td><td class="note actual"><div class="added">+ <code>SLE</code></div><div class="reworded">renamed <code>SLL</code></div></td><td class="note actual"><div class="added">+ <code>SLE</code></div><div class="reworded">renamed <code>SLL</code></div></td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> renamed, not stated: <code>SLL</code></li></ul></td></tr>
+<tr class="mismatch"><th scope="row">ICD</th><td class="list">Yes</td><td class="note">Added 2017, 2018, 2019 and 2020</td><td class="note actual"><div class="added">+ <code>0217 0218 0219 0220</code></div></td><td class="note actual"><div class="added">+ <code>0217 0218 0219 0220</code></div></td><td class="note"><ul><li class="mismatch"><span class="component index">index</span> the remark names codes the list does not contain, before or after: <code>2017 2018 2019 2020</code></li><li class="mismatch"><span class="component sheet">sheet</span> added, not stated: <code>0217 0218 0219 0220</code></li></ul></td></tr>
+<tr class="ok"><th scope="row">Country</th><td class="list">Yes</td><td class="note">TR name changed to Türkiye</td><td class="note actual"><div class="reworded">renamed <code>TR</code></div></td><td class="note actual"><div class="reworded">renamed <code>TR</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="info"><th scope="row">EAS</th><td class="list">Yes</td><td class="note">Added 9959, deprecated 9906 and 9907</td><td class="note actual"><div class="added">+ <code>9959</code></div><div class="removed">− <code>9906 9907</code></div></td><td class="note actual"><div class="added">+ <code>9959</code></div><div class="removed">− <code>9906 9907</code></div></td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> stated as deprecated, and removed: <code>9906 9907</code></li></ul></td></tr>
+</tbody></table></div>
+<p class="quiet">14 further rows state no change, and none happened.</p>
+</details>
+<details id="i09_2022-05-16-r01"><summary><strong>09_2022-05-16/r01</strong> against 08_2021-11-15/r01 · <span class="agree">every row agrees</span></summary>
+<ul class="findings"><li class="info">tabs defined by EN 16931 itself, never published as Genericode: Time VAT CAT VAT ID</li></ul>
+<div class="scroll"><table class="claims"><thead><tr><th scope="col" rowspan="2">Tab</th><th scope="col" class="group" colspan="2">The Index sheet claims</th><th scope="col" class="group" colspan="2">Actual changes since 08_2021-11-15/r01</th><th scope="col" rowspan="2">What does not match</th></tr><tr><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Spreadsheet</th><th scope="col">Genericode</th></tr></thead><tbody>
+<tr class="ok"><th scope="row">ICD</th><td class="list">Yes</td><td class="note">Added 0214, 0215, 0216</td><td class="note actual"><div class="added">+ <code>0214 0215 0216</code></div></td><td class="note actual"><div class="quiet">since 07_2021-05-17, 2 releases</div><div class="added">+ <code>0214 0215 0216</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">1001</th><td class="list">Yes</td><td class="note">Added 71, 102, 218, 219, 331, 382, 553, 817, 870, 875, 876, 877</td><td class="note actual"><div class="added">+ <code>71 102 218 219 331 382 553 817 870 875 876 877</code></div></td><td class="note actual"><div class="quiet">since 07_2021-05-17, 2 releases</div><div class="added">+ <code>71 102 218 219 331 382 553 817 870 875 876 877</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">Text</th><td class="list">Yes</td><td class="note">Added BAT, BAU, BAV, BAW, BAX, BAY, BAZ, BBA, BBB, BMF, BMG, BMH, CCJ, CCK, CCL, CCM, CCN, CCO</td><td class="note actual"><div class="added">+ <code>BAT BAU BAV BAW BAX BAY BAZ BBA BBB BMF BMG BMH CCJ CCK CCL CCM CCN CCO</code></div></td><td class="note actual"><div class="quiet">since 07_2021-05-17, 2 releases</div><div class="added">+ <code>BAT BAU BAV BAW BAX BAY BAZ BBA BBB BMF BMG BMH CCJ CCK CCL CCM CCN CCO</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">EAS</th><td class="list">Yes</td><td class="note">Added 0147, 0170, 0188, 0205, 0215, 0216</td><td class="note actual"><div class="added">+ <code>0147 0170 0188 0205 0215 0216</code></div></td><td class="note actual"><div class="quiet">since 07_2021-05-17, 2 releases</div><div class="added">+ <code>0147 0170 0188 0205 0215 0216</code></div></td><td class="note"><span class="agree">matches</span></td></tr>
+</tbody></table></div>
+<p class="quiet">14 further rows state no change, and none happened.</p>
+</details>
+<details id="i08_2021-11-15-r01"><summary><strong>08_2021-11-15/r01</strong> against 07_2021-05-17/r01 · <span class="agree">every row agrees</span></summary>
+<p>No row states a change, and no list changed.</p>
+<p class="quiet">18 further rows state no change, and none happened.</p>
+</details>
+<details id="i07_2021-05-17-r01"><summary><strong>07_2021-05-17/r01</strong> against 06_2020-11-16/r02 · <span class="agree">every row agrees</span></summary>
+<ul class="findings"><li class="mismatch">the Index states the effective date 2021-05-15, the release is filed under 2021-05-17</li><li class="info">tabs defined by EN 16931 itself, never published as Genericode: Time VAT CAT VAT ID</li></ul>
+<div class="scroll"><table class="claims"><thead><tr><th scope="col" rowspan="2">Tab</th><th scope="col" class="group" colspan="2">The Index sheet claims</th><th scope="col" class="group" colspan="2">Actual changes since 06_2020-11-16/r02</th><th scope="col" rowspan="2">What does not match</th></tr><tr><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Spreadsheet</th><th scope="col">Genericode</th></tr></thead><tbody>
+<tr class="info"><th scope="row">Country</th><td class="list">Yes</td><td class="note">Added extended country code XI</td><td class="note actual"><div class="added">+ <code>XI</code></div></td><td class="absent">first Genericode release of this list</td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="info"><th scope="row">ICD</th><td class="list">Yes</td><td class="note">Added 0210, 0211, 0212, 0213</td><td class="note actual"><div class="added">+ <code>0210 0211 0212 0213</code></div></td><td class="absent">first Genericode release of this list</td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="info"><th scope="row">Item</th><td class="list">Yes</td><td class="note">Added TSU</td><td class="note actual"><div class="added">+ <code>TSU</code></div></td><td class="absent">first Genericode release of this list</td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="info"><th scope="row">EAS</th><td class="list">Yes</td><td class="note">Added 0210, 0211, 0212, 0213. Deprecated 9956</td><td class="note actual"><div class="added">+ <code>0210 0211 0212 0213</code></div><div class="removed">− <code>9956</code></div></td><td class="absent">first Genericode release of this list</td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> stated as deprecated, and removed: <code>9956</code></li></ul></td></tr>
+<tr class="info"><th scope="row">Unit</th><td class="list">Yes</td><td class="note">Updated to Rec20r16+Rec21r11, adding 49 codes</td><td class="note actual"><div class="added">+ <code>Z9 DBM DBW FNU HAD HMO HWE KWY MKD MKM MKW MNJ MQD MQM MQW MRD MRM MRW MTZ NTU XO1 XO2 XO3 XO4 XO5 XO6 XO7 XO8 XO9 XOG … 19 more</code></div></td><td class="absent">first Genericode release of this list</td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> added as many codes as the remark counts (49): <code>Z9 DBM DBW FNU HAD HMO HWE KWY MKD MKM MKW MNJ MQD MQM MQW MRD MRM MRW MTZ NTU XO1 XO2 XO3 XO4 XO5 XO6 XO7 XO8 XO9 XOG … 19 more</code></li></ul></td></tr>
+</tbody></table></div>
+<p class="quiet">13 further rows state no change, and none happened.</p>
+</details>
+<details id="i06_2020-11-16-r02"><summary><strong>06_2020-11-16/r02</strong> against 05_2020-06-30/r01 · <span class="agree">every row agrees</span></summary>
+<ul class="findings"><li class="mismatch">the Index states the effective date 2020-11-15, the release is filed under 2020-11-16</li></ul>
+<div class="scroll"><table class="claims"><thead><tr><th scope="col" rowspan="2">Tab</th><th scope="col" class="group" colspan="2">The Index sheet claims</th><th scope="col" class="group" colspan="2">Actual changes since 05_2020-06-30/r01</th><th scope="col" rowspan="2">What does not match</th></tr><tr><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Spreadsheet</th><th scope="col">Genericode</th></tr></thead><tbody>
+<tr class="ok"><th scope="row">ICD</th><td class="list">Yes</td><td class="note">Added 0209. Updated 0197, 0205, 0206, 0207 (names added)</td><td class="note actual"><div class="added">+ <code>0209</code></div><div class="reworded">renamed <code>0197 0205 0206 0207</code></div></td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="info"><th scope="row">EAS</th><td class="list">Yes</td><td class="note">Added 0209. Deprecated 9958</td><td class="note actual"><div class="added">+ <code>0209</code></div><div class="removed">− <code>9958</code></div></td><td class="absent">no Genericode file</td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> stated as deprecated, and removed: <code>9958</code></li></ul></td></tr>
+<tr class="ok"><th scope="row">VATEX</th><td class="list">Yes</td><td class="note">Added VATEX-EU-79-C</td><td class="note actual"><div class="added">+ <code>VATEX-EU-79-C</code></div></td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+</tbody></table></div>
+<p class="quiet">15 further rows state no change, and none happened.</p>
+</details>
+<details id="i06_2020-11-16-r01"><summary><strong>06_2020-11-16/r01</strong> against 05_2020-06-30/r01 · <span class="agree">every row agrees</span></summary>
+<ul class="findings"><li class="mismatch">the Index states the effective date 2020-11-15, the release is filed under 2020-11-16</li></ul>
+<div class="scroll"><table class="claims"><thead><tr><th scope="col" rowspan="2">Tab</th><th scope="col" class="group" colspan="2">The Index sheet claims</th><th scope="col" class="group" colspan="2">Actual changes since 05_2020-06-30/r01</th><th scope="col" rowspan="2">What does not match</th></tr><tr><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Spreadsheet</th><th scope="col">Genericode</th></tr></thead><tbody>
+<tr class="ok"><th scope="row">ICD</th><td class="list">Yes</td><td class="note">Added 0209. Updated 0197, 0205, 0206, 0207 (names added)</td><td class="note actual"><div class="added">+ <code>0209</code></div><div class="reworded">renamed <code>0197 0205 0206 0207</code></div></td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="info"><th scope="row">EAS</th><td class="list">Yes</td><td class="note">Added 0209. Deprecated 9958</td><td class="note actual"><div class="added">+ <code>0209</code></div><div class="removed">− <code>9958</code></div></td><td class="absent">no Genericode file</td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> stated as deprecated, and removed: <code>9958</code></li></ul></td></tr>
+</tbody></table></div>
+<p class="quiet">16 further rows state no change, and none happened.</p>
+</details>
+<details id="i05_2020-06-30-r01"><summary><strong>05_2020-06-30/r01</strong> against 04_2020-05-15/r01 · <span class="disagree">1 of 18 rows disagree</span></summary>
+<div class="scroll"><table class="claims"><thead><tr><th scope="col" rowspan="2">Tab</th><th scope="col" class="group" colspan="2">The Index sheet claims</th><th scope="col" class="group" colspan="2">Actual changes since 04_2020-05-15/r01</th><th scope="col" rowspan="2">What does not match</th></tr><tr><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Spreadsheet</th><th scope="col">Genericode</th></tr></thead><tbody>
+<tr class="mismatch"><th scope="row">EAS</th><td class="list">Yes</td><td class="note">Added code 0208</td><td class="note actual"><div class="added">+ <code>0208</code></div><div class="reworded">renamed <code>0007</code></div></td><td class="absent">no Genericode file</td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> renamed, not stated: <code>0007</code></li></ul></td></tr>
+<tr class="ok"><th scope="row">ICD</th><td class="list">Yes</td><td class="note">Added codes 0205, 0206, 0207, 0208</td><td class="note actual"><div class="added">+ <code>0205 0206 0207 0208</code></div></td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+</tbody></table></div>
+<p class="quiet">16 further rows state no change, and none happened.</p>
+</details>
+<details id="i04_2020-05-15-r01"><summary><strong>04_2020-05-15/r01</strong> against 03_2019-11-15/r01 · <span class="agree">every row agrees</span></summary>
+<ul class="findings"><li class="mismatch">the Index states the effective date 2020-02-28, the release is filed under 2020-05-15</li></ul>
+<div class="scroll"><table class="claims"><thead><tr><th scope="col" rowspan="2">Tab</th><th scope="col" class="group" colspan="2">The Index sheet claims</th><th scope="col" class="group" colspan="2">Actual changes since 03_2019-11-15/r01</th><th scope="col" rowspan="2">What does not match</th></tr><tr><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Spreadsheet</th><th scope="col">Genericode</th></tr></thead><tbody>
+<tr class="ok"><th scope="row">Country</th><td class="list">Yes</td><td class="note">Added 1A as temporary code for Kosovo</td><td class="note actual"><div class="added">+ <code>1A</code></div></td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">ICD</th><td class="list">Yes</td><td class="note">Added Identifier scheme name for code 0194</td><td class="note actual"><div class="reworded">renamed <code>0194</code></div></td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">Text</th><td class="list">Yes</td><td class="note">Added codes BAS and BAR</td><td class="note actual"><div class="added">+ <code>BAR BAS</code></div></td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">Payment</th><td class="list">Yes</td><td class="note">Added code 69</td><td class="note actual"><div class="added">+ <code>69</code></div></td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">EAS</th><td class="list">Yes</td><td class="note">Added code 0194</td><td class="note actual"><div class="added">+ <code>0194</code></div></td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="info"><th scope="row">VATEX</th><td class="list">Yes</td><td class="note">All codes changed from lower case to uppercase. No new ones.</td><td class="note actual"><div class="added">+ <code>VATEX-EU-132 VATEX-EU-132-1A VATEX-EU-132-1B VATEX-EU-132-1C VATEX-EU-132-1D VATEX-EU-132-1E VATEX-EU-132-1F VATEX-EU-132-1G VATEX-EU-132-1H VATEX-EU-132-1I VATEX-EU-132-1J VATEX-EU-132-1K VATEX-EU-132-1L VATEX-EU-132-1M VATEX-EU-132-1N VATEX-EU-132-1O VATEX-EU-132-1P VATEX-EU-132-1Q VATEX-EU-143 VATEX-EU-143-1A VATEX-EU-143-1B VATEX-EU-143-1C VATEX-EU-143-1D VATEX-EU-143-1E VATEX-EU-143-1F VATEX-EU-143-1FA VATEX-EU-143-1G VATEX-EU-143-1H VATEX-EU-143-1I VATEX-EU-143-1J … 26 more</code></div><div class="removed">− <code>vatex-eu-132 vatex-eu-132-1a vatex-eu-132-1b vatex-eu-132-1c vatex-eu-132-1d vatex-eu-132-1e vatex-eu-132-1f vatex-eu-132-1g vatex-eu-132-1h vatex-eu-132-1i vatex-eu-132-1j vatex-eu-132-1k vatex-eu-132-1l vatex-eu-132-1m vatex-eu-132-1n vatex-eu-132-1o vatex-eu-132-1p vatex-eu-132-1q vatex-eu-143 vatex-eu-143-1a vatex-eu-143-1b vatex-eu-143-1c vatex-eu-143-1d vatex-eu-143-1e vatex-eu-143-1f vatex-eu-143-1fa vatex-eu-143-1g vatex-eu-143-1h vatex-eu-143-1i vatex-eu-143-1j … 26 more</code></div></td><td class="absent">no Genericode file</td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> 56 codes changed only their case, as stated: <code>VATEX-EU-132 VATEX-EU-132-1A VATEX-EU-132-1B VATEX-EU-132-1C VATEX-EU-132-1D VATEX-EU-132-1E VATEX-EU-132-1F VATEX-EU-132-1G VATEX-EU-132-1H VATEX-EU-132-1I VATEX-EU-132-1J VATEX-EU-132-1K VATEX-EU-132-1L VATEX-EU-132-1M VATEX-EU-132-1N VATEX-EU-132-1O VATEX-EU-132-1P VATEX-EU-132-1Q VATEX-EU-143 VATEX-EU-143-1A VATEX-EU-143-1B VATEX-EU-143-1C VATEX-EU-143-1D VATEX-EU-143-1E VATEX-EU-143-1F VATEX-EU-143-1FA VATEX-EU-143-1G VATEX-EU-143-1H VATEX-EU-143-1I VATEX-EU-143-1J … 26 more</code></li></ul></td></tr>
+</tbody></table></div>
+<p class="quiet">12 further rows state no change, and none happened.</p>
+</details>
+<details id="i03_2019-11-15-r01"><summary><strong>03_2019-11-15/r01</strong> against 02_2019-06-17/r01 · <span class="disagree">1 of 18 rows disagree</span></summary>
+<div class="scroll"><table class="claims"><thead><tr><th scope="col" rowspan="2">Tab</th><th scope="col" class="group" colspan="2">The Index sheet claims</th><th scope="col" class="group" colspan="2">Actual changes since 02_2019-06-17/r01</th><th scope="col" rowspan="2">What does not match</th></tr><tr><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Spreadsheet</th><th scope="col">Genericode</th></tr></thead><tbody>
+<tr class="mismatch"><th scope="row">EAS</th><td class="list">Yes</td><td class="note">Added 0130, 0203 and 0204. Deprecated 9917 and 9921</td><td class="note actual"><div class="added">+ <code>0130 0201 0202 0203 0204</code></div><div class="removed">− <code>9917 9921</code></div></td><td class="absent">no Genericode file</td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> stated as deprecated, and removed: <code>9917 9921</code></li><li class="mismatch"><span class="component sheet">sheet</span> added, not stated: <code>0201 0202</code></li></ul></td></tr>
+<tr class="ok"><th scope="row">ICD</th><td class="list">Yes</td><td class="note">Added 0203 and 0204</td><td class="note actual"><div class="added">+ <code>0203 0204</code></div></td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">VATEX</th><td class="list">Yes</td><td class="note">Added vatex-eu-132, vatex-eu-143, vatex-eu-148, vatex-eu-151</td><td class="note actual"><div class="added">+ <code>vatex-eu-132 vatex-eu-143 vatex-eu-148 vatex-eu-151</code></div></td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+</tbody></table></div>
+<p class="quiet">15 further rows state no change, and none happened.</p>
+</details>
+<details id="i02_2019-06-17-r01"><summary><strong>02_2019-06-17/r01</strong> against 01_2019-03-15/r01 · <span class="disagree">2 of 18 rows disagree</span></summary>
+<ul class="findings"><li class="info">the workbook states no effective date, only the publication date 2019-06-15</li></ul>
+<div class="scroll"><table class="claims"><thead><tr><th scope="col" rowspan="2">Tab</th><th scope="col" class="group" colspan="2">The Index sheet claims</th><th scope="col" class="group" colspan="2">Actual changes since 01_2019-03-15/r01</th><th scope="col" rowspan="2">What does not match</th></tr><tr><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Spreadsheet</th><th scope="col">Genericode</th></tr></thead><tbody>
+<tr class="mismatch"><th scope="row">ICD</th><td class="list">Yes</td><td class="note">0201 and 0202 added, 0100 and 0101 structure corrected, 0199 name corrected.</td><td class="note actual"><div class="added">+ <code>0100 0101 0201 0202</code></div><div class="removed">− <code>01'00 01'01</code></div><div class="reworded">renamed <code>0199</code></div></td><td class="absent">no Genericode file</td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> added, not stated: <code>0100 0101</code></li><li class="mismatch"><span class="component sheet">sheet</span> removed, not stated: <code>01'00 01'01</code></li></ul></td></tr>
+<tr class="mismatch"><th scope="row">EAS</th><td class="list">Yes</td><td class="note">EM and 0199 name corrected. 0183, 0201, 0202 added.</td><td class="note actual"><div class="added">+ <code>0183</code></div></td><td class="absent">no Genericode file</td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> stated as renamed, but its name and columns are unchanged: <code>EM 0199</code></li><li class="mismatch"><span class="component index">index</span> the remark names codes the list does not contain, before or after: <code>0201 0202</code></li></ul></td></tr>
+<tr class="info"><th scope="row">Currency</th><td class="list">No</td><td class="note">Code repetitions removed and country name column removed from listing.</td><td class="note actual"><span class="quiet">no code added, removed or renamed</span><div class="quiet">other columns changed for 179 codes</div></td><td class="absent">no Genericode file</td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> other columns changed for: <code>AED AFN ALL AMD ANG AOA ARS AUD AWG AZN BAM BBD BDT BGN BHD BIF BMD BND BOB BOV BRL BSD BTN BWP BYN BZD CAD CDF CHE CHF … 149 more</code></li></ul></td></tr>
+<tr class="ok"><th scope="row">1153</th><td class="list">Yes</td><td class="note">Added AXS, BTP, EEP</td><td class="note actual"><div class="added">+ <code>AXS BTP EEP</code></div></td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="ok"><th scope="row">Item</th><td class="list">Yes</td><td class="note">Added TST (UNSPSC)</td><td class="note actual"><div class="added">+ <code>TST</code></div></td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+</tbody></table></div>
+<p class="quiet">13 further rows state no change, and none happened.</p>
+</details>
+<details id="i01_2019-03-15-r01"><summary><strong>01_2019-03-15/r01</strong> against nothing · <span class="agree">every row agrees</span></summary>
+<ul class="findings"><li class="info">the workbook states no effective date, only the publication date 2019-03-15</li></ul>
+<div class="scroll"><table class="claims"><thead><tr><th scope="col" rowspan="2">Tab</th><th scope="col" class="group" colspan="2">The Index sheet claims</th><th scope="col" class="group" colspan="2">Actual changes since —</th><th scope="col" rowspan="2">What does not match</th></tr><tr><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Spreadsheet</th><th scope="col">Genericode</th></tr></thead><tbody>
+<tr class="info"><th scope="row">Country</th><td class="list">Yes</td><td class="note">&quot;AN&quot; is split up into CW, SX and BQ</td><td class="absent">first release in this comparison</td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="info"><th scope="row">ICD</th><td class="list">Yes</td><td class="note">codes 0198, 0199 and 0200 added</td><td class="absent">first release in this comparison</td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="info"><th scope="row">Charge</th><td class="list">Yes</td><td class="note">Added CAX,CAY,CAZ,DAC,DAF,DAG,DAH,DAI,DAJ,DAK,DAL,DAM,DAN,DAO,DAP,DAQ</td><td class="absent">first release in this comparison</td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="info"><th scope="row">EAS</th><td class="list">Yes</td><td class="note">Added 0198,0199,0200,9901,AN,AQ,AS,AU,EM removed 9902,9904,9905</td><td class="absent">first release in this comparison</td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+<tr class="info"><th scope="row">VATEX</th><td class="list">Yes</td><td class="note">New list</td><td class="absent">first release in this comparison</td><td class="absent">no Genericode file</td><td class="note"><span class="agree">matches</span></td></tr>
+</tbody></table></div>
+<p class="quiet">13 further rows state no change, and none happened.</p>
+</details>
+
+
+<h2 id="business-terms">3. Business terms against EN 16931-1:2017</h2>
+<p>The Index column “EN business terms where the code list is used.” against the business terms whose
+description or usage note in Table 2 of EN 16931-1:2017 names the list (<a href="configuration/business-terms-2017.csv"><code>business-terms-2017.csv</code></a>).
+All releases are in <a href="business-terms.csv"><code>business-terms.csv</code></a>.</p>
+<div class="scroll"><table><caption>17_2026-05-15/r02</caption><thead><tr><th scope="col">Tab</th><th scope="col">Index</th><th scope="col">EN 16931-1:2017</th><th scope="col">Only in Index</th><th scope="col">Only in 2017</th><th scope="col">2017 evidence</th></tr></thead><tbody>
+<tr><td class="list">Country</td><td class="note">BT-40 BT-55 BT-69 BT-80 BT-159</td><td class="note">BT-40 BT-55 BT-69 BT-80 BT-159</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">country codes: EN ISO 3166-1</td></tr>
+<tr><td class="list">Currency</td><td class="note">BT-5 BT-6</td><td class="note">BT-5 BT-6</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">BT-5 and BT-6: ISO 4217</td></tr>
+<tr><td class="list">ICD</td><td class="note">BT-29-1 BT-30-1 BT-46-1 BT-47-1 BT-60-1 BT-61-1 BT-71-1 BT-157-1</td><td class="note">BT-29-1 BT-30-1 BT-46-1 BT-47-1 BT-60-1 BT-61-1 BT-71-1 BT-157-1</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">scheme identifier sub-rows: list published by the ISO/IEC 6523 maintenance agency</td></tr>
+<tr><td class="list">1001</td><td class="note">BT-3</td><td class="note">BT-3</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">BT-3 usage note: entries in UNTDID 1001</td></tr>
+<tr><td class="list">1153</td><td class="note">BT-18-1 BT-128-1</td><td class="note">BT-18-1 BT-128-1</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">scheme identifier sub-rows of BT-18 and BT-128: UNTDID 1153</td></tr>
+<tr><td class="list">VAT ID</td><td class="note">BT-31 BT-48 BT-63</td><td class="note">BT-31 BT-48 BT-63</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">BT-48 and BT-63: VAT number prefixed by an ISO 3166-1 country code; derived for BT-31, whose note says only: prefixed by a country code</td></tr>
+<tr><td class="list">FISCAL ID</td><td class="note">BT-32</td><td class="note"></td><td class="codes added"><code>BT-32</code></td><td class="zero">·</td><td class="note quiet">BT-32 names no code list</td></tr>
+<tr><td class="list">VAT CAT</td><td class="note">BT-95 BT-102 BT-118 BT-151</td><td class="note"></td><td class="codes added"><code>BT-95 BT-102 BT-118 BT-151</code></td><td class="zero">·</td><td class="note quiet">Table 2 names no code list for the tax scheme; the VAT category codes of BT-95, BT-102, BT-118 and BT-151 are UNTDID 5305</td></tr>
+<tr><td class="list">Time</td><td class="note">BT-8</td><td class="note">BT-8</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">BT-8 usage note: entries of UNTDID 2005</td></tr>
+<tr><td class="list">Text</td><td class="note">BT-21</td><td class="note">BT-21</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">BT-21 usage note: entries in UNTDID 4451</td></tr>
+<tr><td class="list">Payment</td><td class="note">BT-81</td><td class="note">BT-81</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">BT-81 usage note: UNTDID 4461</td></tr>
+<tr><td class="list">5305</td><td class="note">BT-95 BT-102 BT-118 BT-151</td><td class="note">BT-95 BT-102 BT-118 BT-151</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">usage notes: the following entries of UNTDID 5305 are used</td></tr>
+<tr><td class="list">Allowance</td><td class="note">BT-98 BT-140</td><td class="note">BT-98 BT-140</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">usage notes: entries of the UNTDID 5189 code list</td></tr>
+<tr><td class="list">Item</td><td class="note">BT-158-1</td><td class="note">BT-158-1</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">scheme identifier sub-row of BT-158: entries in UNTDID 7143</td></tr>
+<tr><td class="list">Charge</td><td class="note">BT-105 BT-145</td><td class="note">BT-105 BT-145</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">usage notes: entries of the UNTDID 7161 code list</td></tr>
+<tr><td class="list">MIME</td><td class="note">BT-125-1</td><td class="note">BT-125-1</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">sub-row of BT-125: attached document Mime code</td></tr>
+<tr><td class="list">EAS</td><td class="note">BT-34-1 BT-49-1</td><td class="note">BT-34-1 BT-49-1</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">scheme identifier sub-rows of BT-34 and BT-49: list maintained by the Connecting Europe Facility</td></tr>
+<tr><td class="list">VATEX</td><td class="note">BT-121</td><td class="note">BT-121</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">BT-121: code list issued and maintained by the Connecting Europe Facility</td></tr>
+<tr><td class="list">Unit</td><td class="note">BT-130 BT-150</td><td class="note">BT-130 BT-150</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">BT-130: UN/ECE Recommendations 20 and 21; derived for BT-150, which shall be the same as BT-130</td></tr>
+</tbody></table></div>
+<h3>Changes of the column from one release to the next</h3>
+<div class="scroll"><table><thead><tr><th scope="col">Release</th><th scope="col">Tab</th><th scope="col">Added</th><th scope="col">Removed</th></tr></thead><tbody>
+<tr><td class="list">15_2025-05-15/r01</td><td class="list">FISCAL ID</td><td class="codes added"><code>BT-32</code></td><td class="zero">·</td></tr>
+</tbody></table></div>
+<h3>Business terms in Genericode files and code list sheets</h3>
+<p>None. No Genericode file and no code list sheet of any release names a business term, so the Index is the only source to check against EN 16931-1:2017.</p>
+
+
+<h2 id="index-dates">4. Dates stated on the Index sheet</h2>
+<p>The effective date the Index states, against the effective date the Commission's registry files the release under.
+The 2019 workbooks state their dates on a separate Main sheet.</p>
+<div class="scroll">
+<table>
+  <thead>
+    <tr><th scope="col">Release</th><th scope="col">Publication date</th><th scope="col">Index effective date</th>
+        <th scope="col">Filed under</th></tr>
+  </thead>
+  <tbody>
+<tr><th scope="row">17_2026-05-15/r02</th><td>4/14/26</td><td class="quiet">2026-05-15</td><td>2026-05-15</td></tr>
+<tr><th scope="row">17_2026-05-15/r01</th><td>3/26/26</td><td class="quiet">2026-05-15</td><td>2026-05-15</td></tr>
+<tr><th scope="row">16_2025-11-15/r01</th><td>10/21/25</td><td class="quiet">2025-11-15</td><td>2025-11-15</td></tr>
+<tr><th scope="row">15_2025-05-15/r01</th><td>4/4/25</td><td class="quiet">2025-05-15</td><td>2025-05-15</td></tr>
+<tr><th scope="row">14_2024-11-15/r01</th><td>9/27/24</td><td class="quiet">2024-11-15</td><td>2024-11-15</td></tr>
+<tr><th scope="row">13_2024-05-15/r01</th><td>4/10/24</td><td class="quiet">2024-05-15</td><td>2024-05-15</td></tr>
+<tr><th scope="row">12_2023-11-15/r01</th><td>9/15/23</td><td class="quiet">2023-11-15</td><td>2023-11-15</td></tr>
+<tr><th scope="row">11_2023-05-15/r01</th><td>3/24/23</td><td class="quiet">2023-05-15</td><td>2023-05-15</td></tr>
+<tr><th scope="row">10_2022-11-15/r01</th><td>9/20/22</td><td class="quiet">2022-11-15</td><td>2022-11-15</td></tr>
+<tr><th scope="row">09_2022-05-16/r01</th><td>3/4/22</td><td class="quiet">2022-05-16</td><td>2022-05-16</td></tr>
+<tr><th scope="row">08_2021-11-15/r01</th><td>9/10/21</td><td class="quiet">2021-11-15</td><td>2021-11-15</td></tr>
+<tr><th scope="row">07_2021-05-17/r01</th><td>3/5/21</td><td class="removed">2021-05-15</td><td>2021-05-17</td></tr>
+<tr><th scope="row">06_2020-11-16/r02</th><td>9/4/20</td><td class="removed">2020-11-15</td><td>2020-11-16</td></tr>
+<tr><th scope="row">06_2020-11-16/r01</th><td>9/4/20</td><td class="removed">2020-11-15</td><td>2020-11-16</td></tr>
+<tr><th scope="row">05_2020-06-30/r01</th><td>6/1/20</td><td class="quiet">2020-06-30</td><td>2020-06-30</td></tr>
+<tr><th scope="row">04_2020-05-15/r01</th><td>2/15/20</td><td class="removed">2020-02-28</td><td>2020-05-15</td></tr>
+<tr><th scope="row">03_2019-11-15/r01</th><td>10/4/19</td><td class="quiet">2019-11-15</td><td>2019-11-15</td></tr>
+<tr><th scope="row">02_2019-06-17/r01</th><td>6/15/19</td><td class="quiet">—</td><td>2019-06-17</td></tr>
+<tr><th scope="row">01_2019-03-15/r01</th><td>3/15/19</td><td class="quiet">—</td><td>2019-03-15</td></tr>
+
+  </tbody>
+</table>
+</div>
+
+<h2 id="codes">5. Validator: codes that differ, per effective date</h2>
 <p>Per effective date, grouped by syntax and by the component compared with. Each differing code is on a line
 of its own, in code order, with its name from the published code list:
 <span class="implemented">implemented, not published</span> means the validator lets an invoice use a code the
@@ -977,224 +1293,7 @@ release that did. Hover over a line for its source. The complete lists, includin
 </details>
 
 
-<h2>Index sheet: stated against actual changes</h2>
-<p>Each workbook's Index sheet states, per tab, whether the list changed (“Changes”) and how (“Remark on
-updates”). Every revision is compared with the release before it: first with its own code list sheet, then with its
-Genericode file, which is also compared with the sheet. Where releases without Genericode lie between two that have
-it, the Genericode file is compared across them. Full details are in <a href="index-claims.csv"><code>index-claims.csv</code></a>.</p>
-<div class="scroll">
-<table>
-  <thead>
-    <tr><th scope="col">Release</th><th scope="col">Compared with</th><th scope="col">Index rows</th>
-        <th scope="col">Release findings</th><th scope="col">Business terms vs 2017</th>
-        <th scope="col">Business terms changed</th></tr>
-  </thead>
-  <tbody>
-<tr><th scope="row"><a href="#i17_2026-05-15-r02">17_2026-05-15/r02</a></th><td class="list">16_2025-11-15/r01</td><td class="removed">1 / 19 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">2 / 19 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
-<tr><th scope="row"><a href="#i17_2026-05-15-r01">17_2026-05-15/r01</a></th><td class="list">16_2025-11-15/r01</td><td class="removed">2 / 19 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">2 / 19 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
-<tr><th scope="row"><a href="#i16_2025-11-15-r01">16_2025-11-15/r01</a></th><td class="list">15_2025-05-15/r01</td><td class="removed">1 / 19 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">2 / 19 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
-<tr><th scope="row"><a href="#i15_2025-05-15-r01">15_2025-05-15/r01</a></th><td class="list">14_2024-11-15/r01</td><td class="removed">2 / 19 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">2 / 19 <span class="quiet">tabs differ</span></td><td class="reworded">1 tabs</td></tr>
-<tr><th scope="row"><a href="#i14_2024-11-15-r01">14_2024-11-15/r01</a></th><td class="list">13_2024-05-15/r01</td><td class="zero">all 18 agree</td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
-<tr><th scope="row"><a href="#i13_2024-05-15-r01">13_2024-05-15/r01</a></th><td class="list">12_2023-11-15/r01</td><td class="removed">1 / 18 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
-<tr><th scope="row"><a href="#i12_2023-11-15-r01">12_2023-11-15/r01</a></th><td class="list">11_2023-05-15/r01</td><td class="removed">1 / 18 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
-<tr><th scope="row"><a href="#i11_2023-05-15-r01">11_2023-05-15/r01</a></th><td class="list">10_2022-11-15/r01</td><td class="zero">all 18 agree</td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
-<tr><th scope="row"><a href="#i10_2022-11-15-r01">10_2022-11-15/r01</a></th><td class="list">09_2022-05-16/r01</td><td class="removed">2 / 18 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
-<tr><th scope="row"><a href="#i09_2022-05-16-r01">09_2022-05-16/r01</a></th><td class="list">08_2021-11-15/r01</td><td class="zero">all 18 agree</td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
-<tr><th scope="row"><a href="#i08_2021-11-15-r01">08_2021-11-15/r01</a></th><td class="list">07_2021-05-17/r01</td><td class="zero">all 18 agree</td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
-<tr><th scope="row"><a href="#i07_2021-05-17-r01">07_2021-05-17/r01</a></th><td class="list">06_2020-11-16/r02</td><td class="zero">all 18 agree</td><td class="removed">the Index states the effective date 2021-05-15, the release is filed under 2021-05-17</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
-<tr><th scope="row"><a href="#i06_2020-11-16-r02">06_2020-11-16/r02</a></th><td class="list">05_2020-06-30/r01</td><td class="zero">all 18 agree</td><td class="removed">the Index states the effective date 2020-11-15, the release is filed under 2020-11-16</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
-<tr><th scope="row"><a href="#i06_2020-11-16-r01">06_2020-11-16/r01</a></th><td class="list">05_2020-06-30/r01</td><td class="zero">all 18 agree</td><td class="removed">the Index states the effective date 2020-11-15, the release is filed under 2020-11-16</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
-<tr><th scope="row"><a href="#i05_2020-06-30-r01">05_2020-06-30/r01</a></th><td class="list">04_2020-05-15/r01</td><td class="removed">1 / 18 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
-<tr><th scope="row"><a href="#i04_2020-05-15-r01">04_2020-05-15/r01</a></th><td class="list">03_2019-11-15/r01</td><td class="zero">all 18 agree</td><td class="removed">the Index states the effective date 2020-02-28, the release is filed under 2020-05-15</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
-<tr><th scope="row"><a href="#i03_2019-11-15-r01">03_2019-11-15/r01</a></th><td class="list">02_2019-06-17/r01</td><td class="removed">1 / 18 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
-<tr><th scope="row"><a href="#i02_2019-06-17-r01">02_2019-06-17/r01</a></th><td class="list">01_2019-03-15/r01</td><td class="removed">2 / 18 <span class="quiet">rows disagree</span></td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
-<tr><th scope="row"><a href="#i01_2019-03-15-r01">01_2019-03-15/r01</a></th><td class="list">—</td><td class="zero">all 18 agree</td><td class="zero">·</td><td class="removed">1 / 18 <span class="quiet">tabs differ</span></td><td class="zero">·</td></tr>
-
-  </tbody>
-</table>
-</div>
-<details id="i17_2026-05-15-r02" open><summary><strong>17_2026-05-15/r02</strong> against 16_2025-11-15/r01 · 1 of 19 rows disagree</summary>
-<ul class="findings"><li class="info">tabs defined by EN 16931 itself, never published as Genericode: FISCAL ID Time VAT CAT VAT ID</li></ul>
-<div class="scroll"><table><thead><tr><th scope="col">Tab</th><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Findings</th></tr></thead><tbody>
-<tr class="mismatch"><td class="list">ICD</td><td class="list">Yes</td><td class="note">Added 0245, 0246, 0247, 0248</td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> renamed, not stated: <code>0241 0243</code></li></ul></td></tr>
-</tbody></table></div>
-</details>
-<details id="i17_2026-05-15-r01"><summary><strong>17_2026-05-15/r01</strong> against 16_2025-11-15/r01 · 2 of 19 rows disagree</summary>
-<ul class="findings"><li class="info">tabs defined by EN 16931 itself, never published as Genericode: FISCAL ID Time VAT CAT VAT ID</li></ul>
-<div class="scroll"><table><thead><tr><th scope="col">Tab</th><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Findings</th></tr></thead><tbody>
-<tr class="mismatch"><td class="list">Currency</td><td class="list">Yes</td><td class="note">Added XCG, Removed ANG, BGN</td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> stated as removed, but still listed: <code>ANG</code></li><li class="mismatch"><span class="component genericode">genericode</span> stated as removed, but Genericode still lists it: <code>ANG</code></li></ul></td></tr>
-<tr class="mismatch"><td class="list">ICD</td><td class="list">Yes</td><td class="note">Added 0245, 0246, 0247, 0248</td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> renamed, not stated: <code>0241 0243</code></li></ul></td></tr>
-</tbody></table></div>
-</details>
-<details id="i16_2025-11-15-r01"><summary><strong>16_2025-11-15/r01</strong> against 15_2025-05-15/r01 · 1 of 19 rows disagree</summary>
-<ul class="findings"><li class="info">tabs defined by EN 16931 itself, never published as Genericode: FISCAL ID Time VAT CAT VAT ID</li></ul>
-<div class="scroll"><table><thead><tr><th scope="col">Tab</th><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Findings</th></tr></thead><tbody>
-<tr class="mismatch"><td class="list">VATEX</td><td class="list">Yes</td><td class="note">Adding VATEX-135-1</td><td class="note"><ul><li class="mismatch"><span class="component index">index</span> the remark names codes the list does not contain, before or after: <code>VATEX-135-1</code></li><li class="mismatch"><span class="component sheet">sheet</span> added, not stated: <code>VATEX-EU-135-1</code></li><li class="mismatch"><span class="component sheet">sheet</span> renamed, not stated: <code>VATEX-EU-F VATEX-EU-I VATEX-EU-J</code></li></ul></td></tr>
-</tbody></table></div>
-</details>
-<details id="i15_2025-05-15-r01"><summary><strong>15_2025-05-15/r01</strong> against 14_2024-11-15/r01 · 2 of 19 rows disagree</summary>
-<ul class="findings"><li class="info">tabs defined by EN 16931 itself, never published as Genericode: FISCAL ID Time VAT CAT VAT ID</li></ul>
-<div class="scroll"><table><thead><tr><th scope="col">Tab</th><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Findings</th></tr></thead><tbody>
-<tr class="mismatch"><td class="list">Currency</td><td class="list">Yes</td><td class="note">Removed ZWL</td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> removed, not stated: <code>CUC</code></li></ul></td></tr>
-<tr class="mismatch"><td class="list">ICD</td><td class="list">Yes</td><td class="note">Added 0239 and 0240</td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> renamed, not stated: <code>0096 0233 0236</code></li></ul></td></tr>
-<tr class="info"><td class="list">VATEX</td><td class="list">Yes</td><td class="note">Added VATEX-EU-153 and 24 French specific codes</td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> added as many codes as the remark counts (24): <code>VATEX-FR-298SEXDECIESA VATEX-FR-AE VATEX-FR-CGI261-1 VATEX-FR-CGI261-2 VATEX-FR-CGI261-3 VATEX-FR-CGI261-4 VATEX-FR-CGI261-5 VATEX-FR-CGI261-7 VATEX-FR-CGI261-8 VATEX-FR-CGI261A VATEX-FR-CGI261B VATEX-FR-CGI261C-1 VATEX-FR-CGI261C-2 VATEX-FR-CGI261C-3 VATEX-FR-CGI261D-1 VATEX-FR-CGI261D-1BIS VATEX-FR-CGI261D-2 VATEX-FR-CGI261D-3 VATEX-FR-CGI261D-4 VATEX-FR-CGI261E-1 VATEX-FR-CGI261E-2 VATEX-FR-CGI275 VATEX-FR-CGI277A VATEX-FR-CGI295</code></li></ul></td></tr>
-</tbody></table></div>
-</details>
-<details id="i14_2024-11-15-r01"><summary><strong>14_2024-11-15/r01</strong> against 13_2024-05-15/r01 · 0 of 18 rows disagree</summary>
-<ul class="findings"><li class="info">tabs defined by EN 16931 itself, never published as Genericode: Time VAT CAT VAT ID</li></ul>
-<p>Every row of the Index agrees with its sheet and Genericode file.</p>
-</details>
-<details id="i13_2024-05-15-r01"><summary><strong>13_2024-05-15/r01</strong> against 12_2023-11-15/r01 · 1 of 18 rows disagree</summary>
-<ul class="findings"><li class="info">tabs defined by EN 16931 itself, never published as Genericode: Time VAT CAT VAT ID</li></ul>
-<div class="scroll"><table><thead><tr><th scope="col">Tab</th><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Findings</th></tr></thead><tbody>
-<tr class="mismatch"><td class="list">Currency</td><td class="list">Yes</td><td class="note">Removing Sierra Leone SLL, new code is SLE</td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> Changes = Yes, but no code was added, removed or renamed</li><li class="mismatch"><span class="component sheet">sheet</span> stated as added, but already listed before: <code>SLE</code></li><li class="mismatch"><span class="component sheet">sheet</span> stated as removed, but still listed: <code>SLL</code></li><li class="mismatch"><span class="component genericode">genericode</span> stated as removed, but Genericode still lists it (since 11_2023-05-15, 2 releases): <code>SLL</code></li></ul></td></tr>
-</tbody></table></div>
-</details>
-<details id="i12_2023-11-15-r01"><summary><strong>12_2023-11-15/r01</strong> against 11_2023-05-15/r01 · 1 of 18 rows disagree</summary>
-<div class="scroll"><table><thead><tr><th scope="col">Tab</th><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Findings</th></tr></thead><tbody>
-<tr class="mismatch"><td class="list">VAT ID</td><td class="list">Fixed</td><td class="note"></td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> Changes = Fixed, but added: <code>Subset of UNECE 5153</code></li></ul></td></tr>
-</tbody></table></div>
-</details>
-<details id="i11_2023-05-15-r01"><summary><strong>11_2023-05-15/r01</strong> against 10_2022-11-15/r01 · 0 of 18 rows disagree</summary>
-<ul class="findings"><li class="info">tabs defined by EN 16931 itself, never published as Genericode: Time VAT CAT VAT ID</li></ul>
-<div class="scroll"><table><thead><tr><th scope="col">Tab</th><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Findings</th></tr></thead><tbody>
-<tr class="info"><td class="list">EAS</td><td class="list">Yes</td><td class="note">Adding 217, 221, 225 and 230, deprecating 9955</td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> stated as deprecated, and removed: <code>9955</code></li></ul></td></tr>
-</tbody></table></div>
-</details>
-<details id="i10_2022-11-15-r01"><summary><strong>10_2022-11-15/r01</strong> against 09_2022-05-16/r01 · 2 of 18 rows disagree</summary>
-<ul class="findings"><li class="info">tabs defined by EN 16931 itself, never published as Genericode: Time VAT CAT VAT ID</li></ul>
-<div class="scroll"><table><thead><tr><th scope="col">Tab</th><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Findings</th></tr></thead><tbody>
-<tr class="mismatch"><td class="list">Currency</td><td class="list">Yes</td><td class="note">Added SLE for Sierra Leone (new valuation)</td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> renamed, not stated: <code>SLL</code></li></ul></td></tr>
-<tr class="mismatch"><td class="list">ICD</td><td class="list">Yes</td><td class="note">Added 2017, 2018, 2019 and 2020</td><td class="note"><ul><li class="mismatch"><span class="component index">index</span> the remark names codes the list does not contain, before or after: <code>2017 2018 2019 2020</code></li><li class="mismatch"><span class="component sheet">sheet</span> added, not stated: <code>0217 0218 0219 0220</code></li></ul></td></tr>
-<tr class="info"><td class="list">EAS</td><td class="list">Yes</td><td class="note">Added 9959, deprecated 9906 and 9907</td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> stated as deprecated, and removed: <code>9906 9907</code></li></ul></td></tr>
-</tbody></table></div>
-</details>
-<details id="i09_2022-05-16-r01"><summary><strong>09_2022-05-16/r01</strong> against 08_2021-11-15/r01 · 0 of 18 rows disagree</summary>
-<ul class="findings"><li class="info">tabs defined by EN 16931 itself, never published as Genericode: Time VAT CAT VAT ID</li></ul>
-<p>Every row of the Index agrees with its sheet and Genericode file.</p>
-</details>
-<details id="i08_2021-11-15-r01"><summary><strong>08_2021-11-15/r01</strong> against 07_2021-05-17/r01 · 0 of 18 rows disagree</summary>
-<div class="scroll"><table><thead><tr><th scope="col">Tab</th><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Findings</th></tr></thead><tbody>
-<tr class="info"><td class="list">Unit</td><td class="list">No</td><td class="note"></td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> other columns changed for: <code>Z9 DBM DBW FNU HAD HMO HWE KWY MKD MKM MKW MNJ MQD MQM MQW MRD MRM MRW MTZ NTU XO1 XO2 XO3 XO4 XO5 XO6 XO7 XO8 XO9 XOG … 19 more</code></li></ul></td></tr>
-</tbody></table></div>
-</details>
-<details id="i07_2021-05-17-r01"><summary><strong>07_2021-05-17/r01</strong> against 06_2020-11-16/r02 · 0 of 18 rows disagree</summary>
-<ul class="findings"><li class="mismatch">the Index states the effective date 2021-05-15, the release is filed under 2021-05-17</li><li class="info">tabs defined by EN 16931 itself, never published as Genericode: Time VAT CAT VAT ID</li></ul>
-<div class="scroll"><table><thead><tr><th scope="col">Tab</th><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Findings</th></tr></thead><tbody>
-<tr class="info"><td class="list">EAS</td><td class="list">Yes</td><td class="note">Added 0210, 0211, 0212, 0213. Deprecated 9956</td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> stated as deprecated, and removed: <code>9956</code></li></ul></td></tr>
-<tr class="info"><td class="list">Unit</td><td class="list">Yes</td><td class="note">Updated to Rec20r16+Rec21r11, adding 49 codes</td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> added as many codes as the remark counts (49): <code>Z9 DBM DBW FNU HAD HMO HWE KWY MKD MKM MKW MNJ MQD MQM MQW MRD MRM MRW MTZ NTU XO1 XO2 XO3 XO4 XO5 XO6 XO7 XO8 XO9 XOG … 19 more</code></li></ul></td></tr>
-</tbody></table></div>
-</details>
-<details id="i06_2020-11-16-r02"><summary><strong>06_2020-11-16/r02</strong> against 05_2020-06-30/r01 · 0 of 18 rows disagree</summary>
-<ul class="findings"><li class="mismatch">the Index states the effective date 2020-11-15, the release is filed under 2020-11-16</li></ul>
-<div class="scroll"><table><thead><tr><th scope="col">Tab</th><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Findings</th></tr></thead><tbody>
-<tr class="info"><td class="list">EAS</td><td class="list">Yes</td><td class="note">Added 0209. Deprecated 9958</td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> stated as deprecated, and removed: <code>9958</code></li></ul></td></tr>
-</tbody></table></div>
-</details>
-<details id="i06_2020-11-16-r01"><summary><strong>06_2020-11-16/r01</strong> against 05_2020-06-30/r01 · 0 of 18 rows disagree</summary>
-<ul class="findings"><li class="mismatch">the Index states the effective date 2020-11-15, the release is filed under 2020-11-16</li></ul>
-<div class="scroll"><table><thead><tr><th scope="col">Tab</th><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Findings</th></tr></thead><tbody>
-<tr class="info"><td class="list">EAS</td><td class="list">Yes</td><td class="note">Added 0209. Deprecated 9958</td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> stated as deprecated, and removed: <code>9958</code></li></ul></td></tr>
-</tbody></table></div>
-</details>
-<details id="i05_2020-06-30-r01"><summary><strong>05_2020-06-30/r01</strong> against 04_2020-05-15/r01 · 1 of 18 rows disagree</summary>
-<div class="scroll"><table><thead><tr><th scope="col">Tab</th><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Findings</th></tr></thead><tbody>
-<tr class="mismatch"><td class="list">EAS</td><td class="list">Yes</td><td class="note">Added code 0208</td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> renamed, not stated: <code>0007</code></li></ul></td></tr>
-</tbody></table></div>
-</details>
-<details id="i04_2020-05-15-r01"><summary><strong>04_2020-05-15/r01</strong> against 03_2019-11-15/r01 · 0 of 18 rows disagree</summary>
-<ul class="findings"><li class="mismatch">the Index states the effective date 2020-02-28, the release is filed under 2020-05-15</li></ul>
-<div class="scroll"><table><thead><tr><th scope="col">Tab</th><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Findings</th></tr></thead><tbody>
-<tr class="info"><td class="list">VATEX</td><td class="list">Yes</td><td class="note">All codes changed from lower case to uppercase. No new ones.</td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> 56 codes changed only their case, as stated: <code>VATEX-EU-132 VATEX-EU-132-1A VATEX-EU-132-1B VATEX-EU-132-1C VATEX-EU-132-1D VATEX-EU-132-1E VATEX-EU-132-1F VATEX-EU-132-1G VATEX-EU-132-1H VATEX-EU-132-1I VATEX-EU-132-1J VATEX-EU-132-1K VATEX-EU-132-1L VATEX-EU-132-1M VATEX-EU-132-1N VATEX-EU-132-1O VATEX-EU-132-1P VATEX-EU-132-1Q VATEX-EU-143 VATEX-EU-143-1A VATEX-EU-143-1B VATEX-EU-143-1C VATEX-EU-143-1D VATEX-EU-143-1E VATEX-EU-143-1F VATEX-EU-143-1FA VATEX-EU-143-1G VATEX-EU-143-1H VATEX-EU-143-1I VATEX-EU-143-1J … 26 more</code></li></ul></td></tr>
-</tbody></table></div>
-</details>
-<details id="i03_2019-11-15-r01"><summary><strong>03_2019-11-15/r01</strong> against 02_2019-06-17/r01 · 1 of 18 rows disagree</summary>
-<div class="scroll"><table><thead><tr><th scope="col">Tab</th><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Findings</th></tr></thead><tbody>
-<tr class="mismatch"><td class="list">EAS</td><td class="list">Yes</td><td class="note">Added 0130, 0203 and 0204. Deprecated 9917 and 9921</td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> stated as deprecated, and removed: <code>9917 9921</code></li><li class="mismatch"><span class="component sheet">sheet</span> added, not stated: <code>0201 0202</code></li></ul></td></tr>
-</tbody></table></div>
-</details>
-<details id="i02_2019-06-17-r01"><summary><strong>02_2019-06-17/r01</strong> against 01_2019-03-15/r01 · 2 of 18 rows disagree</summary>
-<ul class="findings"><li class="info">the workbook states no effective date, only the publication date 2019-06-15</li></ul>
-<div class="scroll"><table><thead><tr><th scope="col">Tab</th><th scope="col">Changes</th><th scope="col">Remark on updates</th><th scope="col">Findings</th></tr></thead><tbody>
-<tr class="info"><td class="list">Currency</td><td class="list">No</td><td class="note">Code repetitions removed and country name column removed from listing.</td><td class="note"><ul><li class="info"><span class="component sheet">sheet</span> other columns changed for: <code>AED AFN ALL AMD ANG AOA ARS AUD AWG AZN BAM BBD BDT BGN BHD BIF BMD BND BOB BOV BRL BSD BTN BWP BYN BZD CAD CDF CHE CHF … 149 more</code></li></ul></td></tr>
-<tr class="mismatch"><td class="list">ICD</td><td class="list">Yes</td><td class="note">0201 and 0202 added, 0100 and 0101 structure corrected, 0199 name corrected.</td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> added, not stated: <code>0100 0101</code></li><li class="mismatch"><span class="component sheet">sheet</span> removed, not stated: <code>01'00 01'01</code></li></ul></td></tr>
-<tr class="mismatch"><td class="list">EAS</td><td class="list">Yes</td><td class="note">EM and 0199 name corrected. 0183, 0201, 0202 added.</td><td class="note"><ul><li class="mismatch"><span class="component sheet">sheet</span> stated as renamed, but its name and columns are unchanged: <code>EM 0199</code></li><li class="mismatch"><span class="component index">index</span> the remark names codes the list does not contain, before or after: <code>0201 0202</code></li></ul></td></tr>
-</tbody></table></div>
-</details>
-<details id="i01_2019-03-15-r01"><summary><strong>01_2019-03-15/r01</strong> against nothing · 0 of 18 rows disagree</summary>
-<ul class="findings"><li class="info">the workbook states no effective date, only the publication date 2019-03-15</li></ul>
-<p>Every row of the Index agrees with its sheet and Genericode file.</p>
-</details>
-
-
-<h2>Business terms against EN 16931-1:2017</h2>
-<p>The Index column “EN business terms where the code list is used.” against the business terms whose
-description or usage note in Table 2 of EN 16931-1:2017 names the list (<a href="configuration/business-terms-2017.csv"><code>business-terms-2017.csv</code></a>).
-All releases are in <a href="business-terms.csv"><code>business-terms.csv</code></a>.</p>
-<div class="scroll"><table><caption>17_2026-05-15/r02</caption><thead><tr><th scope="col">Tab</th><th scope="col">Index</th><th scope="col">EN 16931-1:2017</th><th scope="col">Only in Index</th><th scope="col">Only in 2017</th><th scope="col">2017 evidence</th></tr></thead><tbody>
-<tr><td class="list">Country</td><td class="note">BT-40 BT-55 BT-69 BT-80 BT-159</td><td class="note">BT-40 BT-55 BT-69 BT-80 BT-159</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">country codes: EN ISO 3166-1</td></tr>
-<tr><td class="list">Currency</td><td class="note">BT-5 BT-6</td><td class="note">BT-5 BT-6</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">BT-5 and BT-6: ISO 4217</td></tr>
-<tr><td class="list">ICD</td><td class="note">BT-29-1 BT-30-1 BT-46-1 BT-47-1 BT-60-1 BT-61-1 BT-71-1 BT-157-1</td><td class="note">BT-29-1 BT-30-1 BT-46-1 BT-47-1 BT-60-1 BT-61-1 BT-71-1 BT-157-1</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">scheme identifier sub-rows: list published by the ISO/IEC 6523 maintenance agency</td></tr>
-<tr><td class="list">1001</td><td class="note">BT-3</td><td class="note">BT-3</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">BT-3 usage note: entries in UNTDID 1001</td></tr>
-<tr><td class="list">1153</td><td class="note">BT-18-1 BT-128-1</td><td class="note">BT-18-1 BT-128-1</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">scheme identifier sub-rows of BT-18 and BT-128: UNTDID 1153</td></tr>
-<tr><td class="list">VAT ID</td><td class="note">BT-31 BT-48 BT-63</td><td class="note">BT-31 BT-48 BT-63</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">BT-48 and BT-63: VAT number prefixed by an ISO 3166-1 country code; derived for BT-31, whose note says only: prefixed by a country code</td></tr>
-<tr><td class="list">FISCAL ID</td><td class="note">BT-32</td><td class="note"></td><td class="codes added"><code>BT-32</code></td><td class="zero">·</td><td class="note quiet">BT-32 names no code list</td></tr>
-<tr><td class="list">VAT CAT</td><td class="note">BT-95 BT-102 BT-118 BT-151</td><td class="note"></td><td class="codes added"><code>BT-95 BT-102 BT-118 BT-151</code></td><td class="zero">·</td><td class="note quiet">Table 2 names no code list for the tax scheme; the VAT category codes of BT-95, BT-102, BT-118 and BT-151 are UNTDID 5305</td></tr>
-<tr><td class="list">Time</td><td class="note">BT-8</td><td class="note">BT-8</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">BT-8 usage note: entries of UNTDID 2005</td></tr>
-<tr><td class="list">Text</td><td class="note">BT-21</td><td class="note">BT-21</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">BT-21 usage note: entries in UNTDID 4451</td></tr>
-<tr><td class="list">Payment</td><td class="note">BT-81</td><td class="note">BT-81</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">BT-81 usage note: UNTDID 4461</td></tr>
-<tr><td class="list">5305</td><td class="note">BT-95 BT-102 BT-118 BT-151</td><td class="note">BT-95 BT-102 BT-118 BT-151</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">usage notes: the following entries of UNTDID 5305 are used</td></tr>
-<tr><td class="list">Allowance</td><td class="note">BT-98 BT-140</td><td class="note">BT-98 BT-140</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">usage notes: entries of the UNTDID 5189 code list</td></tr>
-<tr><td class="list">Item</td><td class="note">BT-158-1</td><td class="note">BT-158-1</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">scheme identifier sub-row of BT-158: entries in UNTDID 7143</td></tr>
-<tr><td class="list">Charge</td><td class="note">BT-105 BT-145</td><td class="note">BT-105 BT-145</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">usage notes: entries of the UNTDID 7161 code list</td></tr>
-<tr><td class="list">MIME</td><td class="note">BT-125-1</td><td class="note">BT-125-1</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">sub-row of BT-125: attached document Mime code</td></tr>
-<tr><td class="list">EAS</td><td class="note">BT-34-1 BT-49-1</td><td class="note">BT-34-1 BT-49-1</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">scheme identifier sub-rows of BT-34 and BT-49: list maintained by the Connecting Europe Facility</td></tr>
-<tr><td class="list">VATEX</td><td class="note">BT-121</td><td class="note">BT-121</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">BT-121: code list issued and maintained by the Connecting Europe Facility</td></tr>
-<tr><td class="list">Unit</td><td class="note">BT-130 BT-150</td><td class="note">BT-130 BT-150</td><td class="zero">·</td><td class="zero">·</td><td class="note quiet">BT-130: UN/ECE Recommendations 20 and 21; derived for BT-150, which shall be the same as BT-130</td></tr>
-</tbody></table></div>
-<h3>Changes of the column from one release to the next</h3>
-<div class="scroll"><table><thead><tr><th scope="col">Release</th><th scope="col">Tab</th><th scope="col">Added</th><th scope="col">Removed</th></tr></thead><tbody>
-<tr><td class="list">15_2025-05-15/r01</td><td class="list">FISCAL ID</td><td class="codes added"><code>BT-32</code></td><td class="zero">·</td></tr>
-</tbody></table></div>
-<h3>Business terms in Genericode files and code list sheets</h3>
-<p>None. No Genericode file and no code list sheet of any release names a business term, so the Index is the only source to check against EN 16931-1:2017.</p>
-
-
-<h2>Dates stated on the Index sheet</h2>
-<p>The effective date the Index states, against the effective date the Commission's registry files the release under.
-The 2019 workbooks state their dates on a separate Main sheet.</p>
-<div class="scroll">
-<table>
-  <thead>
-    <tr><th scope="col">Release</th><th scope="col">Publication date</th><th scope="col">Index effective date</th>
-        <th scope="col">Filed under</th></tr>
-  </thead>
-  <tbody>
-<tr><th scope="row">17_2026-05-15/r02</th><td>4/14/26</td><td class="quiet">2026-05-15</td><td>2026-05-15</td></tr>
-<tr><th scope="row">17_2026-05-15/r01</th><td>3/26/26</td><td class="quiet">2026-05-15</td><td>2026-05-15</td></tr>
-<tr><th scope="row">16_2025-11-15/r01</th><td>10/21/25</td><td class="quiet">2025-11-15</td><td>2025-11-15</td></tr>
-<tr><th scope="row">15_2025-05-15/r01</th><td>4/4/25</td><td class="quiet">2025-05-15</td><td>2025-05-15</td></tr>
-<tr><th scope="row">14_2024-11-15/r01</th><td>9/27/24</td><td class="quiet">2024-11-15</td><td>2024-11-15</td></tr>
-<tr><th scope="row">13_2024-05-15/r01</th><td>4/10/24</td><td class="quiet">2024-05-15</td><td>2024-05-15</td></tr>
-<tr><th scope="row">12_2023-11-15/r01</th><td>9/15/23</td><td class="quiet">2023-11-15</td><td>2023-11-15</td></tr>
-<tr><th scope="row">11_2023-05-15/r01</th><td>3/24/23</td><td class="quiet">2023-05-15</td><td>2023-05-15</td></tr>
-<tr><th scope="row">10_2022-11-15/r01</th><td>9/20/22</td><td class="quiet">2022-11-15</td><td>2022-11-15</td></tr>
-<tr><th scope="row">09_2022-05-16/r01</th><td>3/4/22</td><td class="quiet">2022-05-16</td><td>2022-05-16</td></tr>
-<tr><th scope="row">08_2021-11-15/r01</th><td>9/10/21</td><td class="quiet">2021-11-15</td><td>2021-11-15</td></tr>
-<tr><th scope="row">07_2021-05-17/r01</th><td>3/5/21</td><td class="removed">2021-05-15</td><td>2021-05-17</td></tr>
-<tr><th scope="row">06_2020-11-16/r02</th><td>9/4/20</td><td class="removed">2020-11-15</td><td>2020-11-16</td></tr>
-<tr><th scope="row">06_2020-11-16/r01</th><td>9/4/20</td><td class="removed">2020-11-15</td><td>2020-11-16</td></tr>
-<tr><th scope="row">05_2020-06-30/r01</th><td>6/1/20</td><td class="quiet">2020-06-30</td><td>2020-06-30</td></tr>
-<tr><th scope="row">04_2020-05-15/r01</th><td>2/15/20</td><td class="removed">2020-02-28</td><td>2020-05-15</td></tr>
-<tr><th scope="row">03_2019-11-15/r01</th><td>10/4/19</td><td class="quiet">2019-11-15</td><td>2019-11-15</td></tr>
-<tr><th scope="row">02_2019-06-17/r01</th><td>6/15/19</td><td class="quiet">—</td><td>2019-06-17</td></tr>
-<tr><th scope="row">01_2019-03-15/r01</th><td>3/15/19</td><td class="quiet">—</td><td>2019-03-15</td></tr>
-
-  </tbody>
-</table>
-</div>
-
-<h2>Files in this report</h2>
+<h2 id="files">6. Files in this report</h2>
 <p>All CSV files are UTF-8, with every field quoted. Codes within a field are separated by spaces, in the order the
 normalized code lists use. Every file is listed with its size and SHA-256 in <a href="manifest.json"><code>manifest.json</code></a>,
 so a copy of this folder can be checked for completeness.</p>

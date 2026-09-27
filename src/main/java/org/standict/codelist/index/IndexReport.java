@@ -114,58 +114,152 @@ public final class IndexReport {
         return rows.toString();
     }
 
-    /** One collapsible block per revision, listing the Index rows with findings. */
+    /**
+     * One collapsible block per revision. Each Index row that states a change, or whose list changed, is shown with
+     * what the Index claims next to what the spreadsheet and the Genericode file actually changed since the release
+     * before, and what does not match. Rows that disagree come first.
+     */
     public String claimsHtml() {
         var sections = new StringBuilder();
         boolean latest = true;
         for (RevisionCheck revision : report.revisions().reversed()) {
+            int mismatching = mismatching(revision);
             sections.append("<details id=\"i").append(anchor(revision.revision())).append("\"")
                     .append(latest ? " open" : "").append("><summary><strong>").append(escape(revision.revision()))
                     .append("</strong> against ").append(escape(revision.previous().isEmpty() ? "nothing"
-                            : revision.previous())).append(" · ").append(mismatching(revision)).append(" of ")
-                    .append(revision.tabs().size()).append(" rows disagree</summary>\n");
-            var rows = new StringBuilder();
-            for (TabCheck tab : revision.tabs()) {
-                var shown = tab.findings().stream()
-                        .filter(finding -> finding.severity() == IndexCheck.Severity.MISMATCH
-                                || !finding.message().startsWith("first "))
-                        .toList();
-                if (shown.isEmpty()) {
-                    continue;
-                }
-                rows.append("<tr class=\"").append(tab.verdict().name().toLowerCase(Locale.ROOT))
-                        .append("\"><td class=\"list\">").append(escape(tab.tab())).append("</td><td class=\"list\">")
-                        .append(escape(tab.claims().flagText())).append("</td><td class=\"note\">")
-                        .append(escape(tab.claims().remark())).append("</td><td class=\"note\"><ul>");
-                for (Finding finding : shown) {
-                    rows.append("<li class=\"").append(finding.severity().name().toLowerCase(Locale.ROOT))
-                            .append("\"><span class=\"component ").append(finding.component()).append("\">")
-                            .append(finding.component()).append("</span> ").append(escape(finding.message()));
-                    if (!finding.codes().isEmpty()) {
-                        rows.append(": <code>").append(escape(abbreviate(finding.codes()))).append("</code>");
-                    }
-                    rows.append("</li>");
-                }
-                rows.append("</ul></td></tr>\n");
-            }
+                            : revision.previous())).append(" · ")
+                    .append(mismatching == 0 ? "<span class=\"agree\">every row agrees</span>"
+                            : "<span class=\"disagree\">" + mismatching + " of " + revision.tabs().size()
+                                    + " rows disagree</span>")
+                    .append("</summary>\n");
             var revisionFindings = revision.findings().stream().map(finding -> "<li class=\""
                     + finding.severity().name().toLowerCase(Locale.ROOT) + "\">" + escape(finding.text()) + "</li>")
                     .collect(Collectors.joining());
             if (!revisionFindings.isEmpty()) {
                 sections.append("<ul class=\"findings\">").append(revisionFindings).append("</ul>\n");
             }
-            if (rows.isEmpty()) {
-                sections.append("<p>Every row of the Index agrees with its sheet and Genericode file.</p>\n");
+            var shown = revision.tabs().stream().filter(IndexReport::worthShowing)
+                    .sorted(java.util.Comparator.comparing((TabCheck tab) -> tab.verdict() != IndexCheck.Verdict.MISMATCH))
+                    .toList();
+            if (shown.isEmpty()) {
+                sections.append("<p>No row states a change, and no list changed.</p>\n");
             } else {
-                sections.append("<div class=\"scroll\"><table><thead><tr><th scope=\"col\">Tab</th>")
-                        .append("<th scope=\"col\">Changes</th><th scope=\"col\">Remark on updates</th>")
-                        .append("<th scope=\"col\">Findings</th></tr></thead><tbody>\n").append(rows)
-                        .append("</tbody></table></div>\n");
+                sections.append("<div class=\"scroll\"><table class=\"claims\"><thead><tr>")
+                        .append("<th scope=\"col\" rowspan=\"2\">Tab</th>")
+                        .append("<th scope=\"col\" class=\"group\" colspan=\"2\">The Index sheet claims</th>")
+                        .append("<th scope=\"col\" class=\"group\" colspan=\"2\">Actual changes since ")
+                        .append(escape(revision.previous().isEmpty() ? "—" : revision.previous())).append("</th>")
+                        .append("<th scope=\"col\" rowspan=\"2\">What does not match</th></tr>")
+                        .append("<tr><th scope=\"col\">Changes</th><th scope=\"col\">Remark on updates</th>")
+                        .append("<th scope=\"col\">Spreadsheet</th><th scope=\"col\">Genericode</th></tr>")
+                        .append("</thead><tbody>\n");
+                for (TabCheck tab : shown) {
+                    sections.append("<tr class=\"").append(tab.verdict().name().toLowerCase(Locale.ROOT))
+                            .append("\"><th scope=\"row\">").append(escape(tab.tab())).append("</th><td class=\"list\">")
+                            .append(escape(tab.claims().flagText().isEmpty() ? "—" : tab.claims().flagText()))
+                            .append("</td><td class=\"note\">")
+                            .append(tab.claims().remark().isEmpty() ? "<span class=\"quiet\">—</span>"
+                                    : escape(tab.claims().remark()))
+                            .append("</td>").append(actual(tab.sheet(), "", 1, revision.previous().isEmpty()
+                                    ? "first release in this comparison" : "no sheet"))
+                            .append(actual(tab.genericode(), tab.genericodeBaseline(), tab.genericodeSpan(),
+                                    tab.findings().stream().anyMatch(f -> f.message().startsWith("first Genericode"))
+                                            ? "first Genericode release of this list" : "no Genericode file"))
+                            .append("<td class=\"note\">").append(findingsList(tab)).append("</td></tr>\n");
+                }
+                sections.append("</tbody></table></div>\n");
+            }
+            int quiet = revision.tabs().size() - shown.size();
+            if (quiet > 0) {
+                sections.append("<p class=\"quiet\">").append(quiet).append(quiet == 1 ? " further row states"
+                        : " further rows state").append(" no change, and none happened.</p>\n");
             }
             sections.append("</details>\n");
             latest = false;
         }
         return sections.toString();
+    }
+
+    /** A row is shown when it claims something, when its list changed, or when anything about it does not match. */
+    private static boolean worthShowing(TabCheck tab) {
+        return tab.verdict() == IndexCheck.Verdict.MISMATCH || tab.claims().flag() == ChangeClaims.Flag.YES
+                || !tab.claims().remark().isEmpty() || (tab.sheet() != null && tab.sheet().changesCodes())
+                || (tab.genericode() != null && tab.genericode().changesCodes());
+    }
+
+    /** What one component actually changed: added, removed and renamed codes, one kind per line. */
+    private static String actual(ActualChanges changes, String baseline, int span, String absent) {
+        if (changes == null) {
+            return "<td class=\"absent\">" + escape(absent) + "</td>";
+        }
+        var lines = new StringBuilder("<td class=\"note actual\">");
+        if (!baseline.isEmpty() && span > 1) {
+            lines.append("<div class=\"quiet\">since ").append(escape(baseline)).append(", ").append(span)
+                    .append(" releases</div>");
+        }
+        if (!changes.changesCodes()) {
+            lines.append("<span class=\"quiet\">no code added, removed or renamed</span>");
+        }
+        line(lines, "added", "+", changes.added());
+        line(lines, "removed", "−", changes.removed());
+        line(lines, "reworded", "renamed", changes.renamed());
+        if (!changes.otherColumns().isEmpty()) {
+            lines.append("<div class=\"quiet\">other columns changed for ").append(changes.otherColumns().size())
+                    .append(changes.otherColumns().size() == 1 ? " code" : " codes").append("</div>");
+        }
+        return lines.append("</td>").toString();
+    }
+
+    private static void line(StringBuilder lines, String kind, String label, Collection<String> codes) {
+        if (!codes.isEmpty()) {
+            lines.append("<div class=\"").append(kind).append("\">").append(label).append(" <code>")
+                    .append(escape(abbreviate(List.copyOf(codes)))).append("</code></div>");
+        }
+    }
+
+    private static String findingsList(TabCheck tab) {
+        var shown = tab.findings().stream().filter(finding -> finding.severity() == IndexCheck.Severity.MISMATCH
+                || !finding.message().startsWith("first ")).toList();
+        if (shown.isEmpty()) {
+            return "<span class=\"agree\">matches</span>";
+        }
+        var list = new StringBuilder("<ul>");
+        for (Finding finding : shown) {
+            list.append("<li class=\"").append(finding.severity().name().toLowerCase(Locale.ROOT))
+                    .append("\"><span class=\"component ").append(finding.component()).append("\">")
+                    .append(finding.component()).append("</span> ").append(escape(finding.message()));
+            if (!finding.codes().isEmpty()) {
+                list.append(": <code>").append(escape(abbreviate(finding.codes()))).append("</code>");
+            }
+            list.append("</li>");
+        }
+        return list.append("</ul>").toString();
+    }
+
+    /** Headline numbers for the contents at the top of the page. */
+    public String headline() {
+        int rows = report.revisions().stream().mapToInt(revision -> revision.tabs().size()).sum();
+        long revisions = report.revisions().stream().filter(revision -> mismatching(revision) > 0).count();
+        int disagreeing = report.revisions().stream().mapToInt(IndexReport::mismatching).sum();
+        return disagreeing + " of " + rows + " Index rows, in " + revisions + " of " + report.revisions().size()
+                + " release revisions, claim changes the spreadsheets and Genericode files do not show, or leave out"
+                + " changes they do";
+    }
+
+    public String businessTermsHeadline() {
+        var differing = report.revisions().isEmpty() ? List.<BusinessTerms.Check>of()
+                : report.revisions().get(report.revisions().size() - 1).terms().stream()
+                        .filter(BusinessTerms.Check::differsFrom2017).toList();
+        return differing.isEmpty() ? "the latest Index names exactly the business terms of EN 16931-1:2017"
+                : "in the latest Index, " + differing.size() + " tabs list other business terms than EN 16931-1:2017 ("
+                        + differing.stream().map(BusinessTerms.Check::tab).collect(Collectors.joining(", ")) + ")";
+    }
+
+    public String datesHeadline() {
+        long differing = report.revisions().stream().filter(revision -> revision.index().effectiveDate() != null
+                && !revision.index().effectiveDate().equals(revision.directoryDate())).count();
+        return differing + " of " + report.revisions().size()
+                + " release revisions state another effective date than the one they are filed under";
     }
 
     /**

@@ -182,6 +182,7 @@ public final class ValidatorReport {
                         .distinct().count()))
                 .replace("{{summary}}", summaryRows(report))
                 .replace("{{details}}", details(report))
+                .replace("{{contents}}", contents(report, sections))
                 .replace("{{files}}", LINKED_FILES.stream().filter(file -> sections != null
                         || !file.path().matches("index-.*|business-terms\\.csv"))
                         .map(file -> "<li><a href=\"" + escape(file.path()) + "\"><code>" + escape(file.path())
@@ -191,6 +192,38 @@ public final class ValidatorReport {
                 .replace("{{indexClaims}}", sections == null ? "" : sections.claimsHtml())
                 .replace("{{businessTerms}}", sections == null ? "" : sections.businessTermsHtml())
                 .replace("{{indexDates}}", sections == null ? "" : sections.releasesHtml());
+    }
+
+    /** The page's sections, each with the number a reader looks for first. */
+    private static String contents(ValidatorComparison.Report report, IndexReport sections) {
+        var items = new ArrayList<String>();
+        String validator = "the codes each BR-CL rule implements, against the published code lists";
+        if (!report.dates().isEmpty()) {
+            DatePoint latest = report.dates().get(report.dates().size() - 1);
+            var parts = new ArrayList<String>();
+            for (Syntax syntax : Syntax.values()) {
+                Totals totals = Totals.of(rulesOf(report, latest, syntax), RuleComparison::genericode);
+                if (totals.compared() > 0) {
+                    parts.add(syntax + " " + totals.disagreeing() + " of " + totals.compared());
+                }
+            }
+            validator += "; on " + latest.effectiveDate() + " (validator "
+                    + latest.validator().tag().replaceFirst("^validation-", "") + ") "
+                    + String.join(", ", parts) + " rules differ from Genericode";
+        }
+        items.add(item("validator", "Validator against the code lists", validator));
+        if (sections != null) {
+            items.add(item("index-claims", "Index sheet against the code lists", sections.headline()));
+            items.add(item("business-terms", "Business terms against EN 16931-1:2017", sections.businessTermsHeadline()));
+            items.add(item("index-dates", "Dates stated on the Index sheet", sections.datesHeadline()));
+        }
+        items.add(item("codes", "Validator: codes that differ", "every differing code, with its name, per date"));
+        items.add(item("files", "Files in this report", "the CSV files and configuration tables behind this page"));
+        return String.join("\n", items);
+    }
+
+    private static String item(String anchor, String title, String headline) {
+        return "    <li><a href=\"#" + anchor + "\">" + escape(title) + "</a> <span>— " + escape(headline) + "</span></li>";
     }
 
     private String summaryRows(ValidatorComparison.Report report) {

@@ -79,6 +79,19 @@
   .unimplemented, li.unimplemented .kind { color: var(--removed); }
   ul.files { padding-left: 1.2rem; color: var(--quiet); }
   ul.files a { color: var(--ink); }
+  nav.contents { margin: 1.25rem 0 0; padding: .6rem 1rem; border: 1px solid var(--line); border-radius: .4rem; }
+  nav.contents p { margin: .1rem 0 .3rem; color: var(--ink); }
+  nav.contents ol { margin: 0; padding-left: 1.3rem; }
+  nav.contents li { margin: .2rem 0; }
+  nav.contents li span { color: var(--quiet); }
+  .agree { color: var(--added); }
+  .disagree { color: var(--removed); font-weight: 600; }
+  table.claims tbody th { text-align: left; white-space: nowrap; }
+  table.claims tr.mismatch th { border-left: 3px solid var(--removed); }
+  table.claims td.actual div { white-space: normal; }
+  table.claims td.actual .added { color: var(--added); }
+  table.claims td.actual .removed { color: var(--removed); }
+  table.claims td.actual .reworded { color: var(--reworded); }
   footer { margin-top: 3rem; color: var(--quiet); font-size: .85rem; max-width: 48rem; }
 </style>
 </head>
@@ -98,7 +111,14 @@ EN 16931-1:2017.</p>
   <div><span>Latest date</span>{{last}}</div>
 </div>
 
-<h2>Disagreements per effective date</h2>
+<nav class="contents" aria-label="Contents">
+  <p><strong>What this report compares</strong></p>
+  <ol>
+{{contents}}
+  </ol>
+</nav>
+
+<h2 id="validator">1. Validator against the code lists, per effective date</h2>
 <p>Each code-list rule of the validator (BR-CL-01 to BR-CL-26) checks an invoice field against a list of codes
 written into the rule. Every such list is compared, code by code, with the code list the Commission published for the
 same date, once as Genericode and once as spreadsheet.</p>
@@ -131,21 +151,14 @@ same date, once as Genericode and once as spreadsheet.</p>
 </table>
 </div>
 
-<h2>Codes that differ</h2>
-<p>Per effective date, grouped by syntax and by the component compared with. Each differing code is on a line
-of its own, in code order, with its name from the published code list:
-<span class="implemented">implemented, not published</span> means the validator lets an invoice use a code the
-published list does not contain; <span class="unimplemented">published, not implemented</span> means an invoice using
-a published code fails validation. For a code the compared release does not list, the name comes from the nearest
-release that did. Hover over a line for its source. The complete lists, including rules that agree, are in
-<a href="rules.csv"><code>rules.csv</code></a>.</p>
-{{details}}
-
-<h2>Index sheet: stated against actual changes</h2>
-<p>Each workbook's Index sheet states, per tab, whether the list changed (“Changes”) and how (“Remark on
-updates”). Every revision is compared with the release before it: first with its own code list sheet, then with its
-Genericode file, which is also compared with the sheet. Where releases without Genericode lie between two that have
-it, the Genericode file is compared across them. Full details are in <a href="index-claims.csv"><code>index-claims.csv</code></a>.</p>
+<h2 id="index-claims">2. Index sheet against the code lists: claimed and actual changes</h2>
+<p>The first sheet of every “EN16931 code list values” workbook, <em>Index</em>, states per tab
+whether the list changed since the previous release (column “Changes”) and how (column “Remark on
+updates”). Here each claim is set against what actually changed: in the tab's own spreadsheet sheet, compared with the
+release before, and in the Genericode file, compared with the last release that had one. A row disagrees when the Index
+names a change that did not happen, misses one that did, or names a code the list does not contain. Every release
+revision is checked, including corrected ones. Rows that disagree come first; the complete table is in
+<a href="index-claims.csv"><code>index-claims.csv</code></a>.</p>
 <div class="scroll">
 <table>
   <thead>
@@ -160,13 +173,13 @@ it, the Genericode file is compared across them. Full details are in <a href="in
 </div>
 {{indexClaims}}
 
-<h2>Business terms against EN 16931-1:2017</h2>
+<h2 id="business-terms">3. Business terms against EN 16931-1:2017</h2>
 <p>The Index column “EN business terms where the code list is used.” against the business terms whose
 description or usage note in Table 2 of EN 16931-1:2017 names the list (<a href="configuration/business-terms-2017.csv"><code>business-terms-2017.csv</code></a>).
 All releases are in <a href="business-terms.csv"><code>business-terms.csv</code></a>.</p>
 {{businessTerms}}
 
-<h2>Dates stated on the Index sheet</h2>
+<h2 id="index-dates">4. Dates stated on the Index sheet</h2>
 <p>The effective date the Index states, against the effective date the Commission's registry files the release under.
 The 2019 workbooks state their dates on a separate Main sheet.</p>
 <div class="scroll">
@@ -181,7 +194,17 @@ The 2019 workbooks state their dates on a separate Main sheet.</p>
 </table>
 </div>
 
-<h2>Files in this report</h2>
+<h2 id="codes">5. Validator: codes that differ, per effective date</h2>
+<p>Per effective date, grouped by syntax and by the component compared with. Each differing code is on a line
+of its own, in code order, with its name from the published code list:
+<span class="implemented">implemented, not published</span> means the validator lets an invoice use a code the
+published list does not contain; <span class="unimplemented">published, not implemented</span> means an invoice using
+a published code fails validation. For a code the compared release does not list, the name comes from the nearest
+release that did. Hover over a line for its source. The complete lists, including rules that agree, are in
+<a href="rules.csv"><code>rules.csv</code></a>.</p>
+{{details}}
+
+<h2 id="files">6. Files in this report</h2>
 <p>All CSV files are UTF-8, with every field quoted. Codes within a field are separated by spaces, in the order the
 normalized code lists use. Every file is listed with its size and SHA-256 in <a href="manifest.json"><code>manifest.json</code></a>,
 so a copy of this folder can be checked for completeness.</p>
