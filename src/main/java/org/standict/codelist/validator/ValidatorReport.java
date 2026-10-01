@@ -294,9 +294,9 @@ public final class ValidatorReport {
             if (implemented.compared() == 0) {
                 continue;
             }
-            tiles.append(tile(implemented.differing() == 0, "#" + firstDiffering(latest, syntax, rules), "Implemented",
+            tiles.append(tile(implemented.differing() == 0, "#" + anchor(latest, syntax), "Implemented",
                     syntax + " validator", implemented.differing() == 0 ? "all rules agree"
-                            : implemented.differing() + " of " + implemented.compared() + " rules differ",
+                            : implemented.differing() + " of " + implemented.compared() + " rules wrong",
                     implemented.differing() == 0 ? "every rule accepts exactly the declared codes"
                             : implemented.codes() + " codes implemented otherwise than declared"));
         }
@@ -316,20 +316,6 @@ public final class ValidatorReport {
                 + escape(href) + "\"><span class=\"tile-kind\">"
                 + escape(kind) + "</span><span class=\"tile-title\">" + escape(title) + "</span><span class=\"tile-value\">"
                 + (ok ? "✓ " : "✗ ") + escape(value) + "</span><span class=\"tile-note\">" + escape(note) + "</span></a>\n";
-    }
-
-    /** The anchor of the first component a syntax differs from on a date, or of its Genericode block. */
-    private static String firstDiffering(DatePoint date, Syntax syntax, List<RuleComparison> rules) {
-        for (String component : List.of("genericode", "spreadsheet")) {
-            if (Totals.of(rules, side(component)).disagreeing() > 0) {
-                return anchor(date, syntax, component);
-            }
-        }
-        return anchor(date, syntax, "genericode");
-    }
-
-    private static Function<RuleComparison, Side> side(String component) {
-        return component.equals("genericode") ? RuleComparison::genericode : RuleComparison::spreadsheet;
     }
 
     /**
@@ -385,8 +371,8 @@ public final class ValidatorReport {
                 Implemented implemented = Implemented.of(rules);
                 html.append(cell(syntax.name(), implemented.compared() == 0 ? chip("none", "—", null, null)
                         : chip(implemented.differing() == 0 ? "ok" : "bad", implemented.differing() == 0 ? "all agree"
-                                : implemented.differing() + " of " + implemented.compared() + " rules",
-                                "#" + firstDiffering(date, syntax, rules), implemented.codes() + " codes differ")));
+                                : implemented.differing() + " of " + implemented.compared() + " rules wrong",
+                                "#" + anchor(date, syntax), implemented.codes() + " codes differ")));
             }
             html.append("</summary>\n<div class=\"date-body\">\n");
 
@@ -422,48 +408,57 @@ public final class ValidatorReport {
         return html.toString();
     }
 
-    /** Per syntax and component, the rules that implement other codes than declared, each in a block. */
+    /**
+     * Per syntax, the rules that implement other codes than declared, in one block. A rule is compared with the codes
+     * the release declares for its list: the Genericode file and the spreadsheet, which declare the same codes for
+     * every list published both ways, so that one row speaks for both; the Time list, which has no Genericode file,
+     * with the spreadsheet alone. Should the two ever declare different codes for a list, its rule gets a row for each.
+     */
     private String implemented(ValidatorComparison.Report report, DatePoint date, boolean open) {
         var html = new StringBuilder();
         boolean opened = false;
         for (Syntax syntax : Syntax.values()) {
             var rules = rulesOf(report, date, syntax);
-            for (String component : List.of("genericode", "spreadsheet")) {
-                Function<RuleComparison, Side> side = side(component);
-                Totals totals = Totals.of(rules, side);
-                String title = syntax + " ⇄ " + (component.equals("genericode") ? "Genericode" : "spreadsheet");
-                String id = anchor(date, syntax, component);
-                if (totals.compared() == 0) {
-                    html.append("<p class=\"block-none\" id=\"").append(id).append("\"><span class=\"block-title\">")
-                            .append(escape(title)).append("</span> <span class=\"gist\">")
-                            .append(escape(date.codeLists().directory())).append(" publishes no ")
-                            .append(component.equals("genericode") ? "Genericode files" : "spreadsheet")
-                            .append("</span></p>\n");
-                    continue;
-                }
-                int notCompared = (int) rules.stream().filter(rule -> side.apply(rule) == null).count();
-                String uncompared = notCompared == 0 ? "" : "; " + notCompared + (notCompared == 1 ? " rule has"
-                        : " rules have") + " no counterpart";
-                if (totals.disagreeing() == 0) {
-                    html.append("<p class=\"block-none\" id=\"").append(id).append("\"><span class=\"block-title\">")
-                            .append(escape(title)).append("</span> ").append(chip("ok", "all " + totals.compared()
-                                    + " rules agree", null, null))
-                            .append("<span class=\"gist\">every rule implements exactly the listed codes")
-                            .append(escape(uncompared)).append("</span></p>\n");
-                    continue;
-                }
+            Implemented implemented = Implemented.of(rules);
+            String title = syntax + " ⇄ declared codes";
+            String id = anchor(date, syntax);
+            // The blocks used to be per component; their anchors stay, so that earlier links still open this one.
+            String earlier = "<span id=\"" + anchor(date, syntax, "genericode") + "\"></span><span id=\""
+                    + anchor(date, syntax, "spreadsheet") + "\"></span>";
+            if (implemented.compared() == 0) {
+                html.append("<p class=\"block-none\" id=\"").append(id).append("\">").append(earlier)
+                        .append("<span class=\"block-title\">").append(escape(title))
+                        .append("</span> <span class=\"gist\">").append(escape(date.codeLists().directory()))
+                        .append(" declares none of the lists these rules check</span></p>\n");
+            } else if (implemented.differing() == 0) {
+                html.append("<p class=\"block-none\" id=\"").append(id).append("\">").append(earlier)
+                        .append("<span class=\"block-title\">").append(escape(title)).append("</span> ")
+                        .append(chip("ok", "all " + implemented.compared() + " rules agree", null, null))
+                        .append("<span class=\"gist\">every rule implements exactly the declared codes</span></p>\n");
+            } else {
                 var rows = new StringBuilder();
+                var onlyImplemented = 0;
+                var onlyPublished = 0;
                 for (RuleComparison rule : rules) {
-                    appendSide(rows, rule, side.apply(rule));
+                    appendRule(rows, rule);
+                    var implementedCodes = new java.util.HashSet<String>();
+                    var publishedCodes = new java.util.HashSet<String>();
+                    for (Side side : new Side[] {rule.genericode(), rule.spreadsheet()}) {
+                        if (side != null) {
+                            implementedCodes.addAll(side.onlyInValidator());
+                            publishedCodes.addAll(side.onlyPublished());
+                        }
+                    }
+                    onlyImplemented += implementedCodes.size();
+                    onlyPublished += publishedCodes.size();
                 }
-                String body = "<div class=\"scroll\"><table><thead><tr><th scope=\"col\">Rule</th>"
-                        + "<th scope=\"col\">Code list</th><th scope=\"col\">Compared with</th>"
+                String body = earlier + "<div class=\"scroll\"><table><thead><tr><th scope=\"col\">Rule</th>"
+                        + "<th scope=\"col\">Code list</th><th scope=\"col\">Declared in</th>"
                         + "<th scope=\"col\">Codes that differ</th></tr></thead><tbody>\n" + rows + "</tbody></table></div>\n";
-                String gist = (totals.onlyInValidator() + totals.onlyPublished()) + " codes differ: "
-                        + totals.onlyInValidator() + " implemented but not published, " + totals.onlyPublished()
-                        + " published but not implemented" + uncompared;
-                html.append(block(id, open && !opened, title, chip("bad", totals.disagreeing() + " of "
-                        + totals.compared() + " rules differ", null, null), escape(gist), "implemented", body));
+                String gist = implemented.codes() + " codes differ: " + onlyImplemented + " implemented but not published, "
+                        + onlyPublished + " published but not implemented";
+                html.append(block(id, open && !opened, title, chip("bad", implemented.differing() + " of "
+                        + implemented.compared() + " rules wrong", null, null), escape(gist), "implemented", body));
                 opened = true;
             }
             for (RuleComparison rule : rules) {
@@ -562,18 +557,47 @@ public final class ValidatorReport {
         return tag.replaceFirst("^validation-", "");
     }
 
-    /** {@code d2026-05-15-ubl-genericode}: the block of one date, syntax and component. */
-    private static String anchor(DatePoint date, Syntax syntax, String component) {
-        return "d" + date.effectiveDate() + "-" + syntax.directory() + "-" + component;
+    /** {@code d2026-05-15-ubl}: the block of one date and syntax. */
+    private static String anchor(DatePoint date, Syntax syntax) {
+        return "d" + date.effectiveDate() + "-" + syntax.directory();
     }
 
-    private void appendSide(StringBuilder rows, RuleComparison rule, Side side) {
-        if (side == null || side.agrees()) {
+    /** {@code d2026-05-15-ubl-genericode}: where the block of one date, syntax and component used to be. */
+    private static String anchor(DatePoint date, Syntax syntax, String component) {
+        return anchor(date, syntax) + "-" + component;
+    }
+
+    /**
+     * A rule that implements other codes than declared: one row when the Genericode file and the spreadsheet give the
+     * same differences, shown against the Genericode file, and otherwise a row for each declaration it differs from.
+     */
+    private void appendRule(StringBuilder rows, RuleComparison rule) {
+        Side genericode = rule.genericode();
+        Side spreadsheet = rule.spreadsheet();
+        boolean same = genericode != null && spreadsheet != null
+                && genericode.onlyInValidator().equals(spreadsheet.onlyInValidator())
+                && genericode.onlyPublished().equals(spreadsheet.onlyPublished());
+        if (same) {
+            appendRow(rows, rule, genericode, List.of(genericode, spreadsheet));
+            return;
+        }
+        for (Side side : new Side[] {genericode, spreadsheet}) {
+            if (side != null && !side.agrees()) {
+                appendRow(rows, rule, side, List.of(side));
+            }
+        }
+    }
+
+    /** @param declared the declarations the differences hold for, named in the row */
+    private void appendRow(StringBuilder rows, RuleComparison rule, Side side, List<Side> declared) {
+        if (side.agrees()) {
             return;
         }
         rows.append("<tr><td>").append(escape(rule.rule())).append("</td><td class=\"list\">")
                 .append(escape(rule.codeList())).append("</td><td class=\"list quiet\" title=\"")
-                .append(escape(side.source())).append("\">").append(escape(side.source().replaceFirst(".*/", "")))
+                .append(escape(declared.stream().map(Side::source).collect(Collectors.joining("; ")))).append("\">")
+                .append(declared.stream().map(each -> escape(each.source().replaceFirst(".*/", "")))
+                        .collect(Collectors.joining("<br>")))
                 .append("</td>").append(differences(rule, side)).append("</tr>\n");
     }
 
@@ -598,7 +622,7 @@ public final class ValidatorReport {
                 org.standict.codelist.normalize.GenericodeNormalizer.CODE_ORDER);
         side.onlyInValidator().forEach(code -> codes.put(code, true));
         side.onlyPublished().forEach(code -> codes.put(code, false));
-        var lines = new StringBuilder("<td class=\"differences\"><ul>");
+        var lines = new StringBuilder("<td class=\"differences\"><ol>");
         int shown = 0;
         int remaining = codes.size();
         String where = rule.rule() + " in " + rule.syntax().fileName() + " of " + rule.validatorTag() + commit(rule);
@@ -644,14 +668,18 @@ public final class ValidatorReport {
                         .append(")</span> ");
             }
             lines.append("<span class=\"kind\">— ").append(kind);
-            for (Successions.Pair successor : successions.successorsOf(rule.codeList(), code)) {
-                lines.append("; ").append(escape(successor.kind())).append(" <code>").append(escape(successor.newCode()))
-                        .append("</code>").append(escape(successor.year().isEmpty() ? "" : " in " + successor.year()))
-                        .append(" ").append(wikipedia(successor));
-            }
+            // One phrase per change: "split into BQ, CW, SX in 2010", not one per successor.
+            successions.successorsOf(rule.codeList(), code).stream()
+                    .collect(Collectors.groupingBy(pair -> pair.kind() + "\u0000" + pair.year() + "\u0000" + pair.url(),
+                            java.util.LinkedHashMap::new, Collectors.toList()))
+                    .values().forEach(change -> lines.append("; ").append(escape(change.get(0).kind())).append(" ")
+                            .append(change.stream().map(pair -> "<code>" + escape(pair.newCode()) + "</code>")
+                                    .collect(Collectors.joining(", ")))
+                            .append(escape(change.get(0).year().isEmpty() ? "" : " in " + change.get(0).year()))
+                            .append(" ").append(wikipedia(change.get(0))));
             lines.append("</span></li>");
         }
-        return lines.append("</ul></td>").toString();
+        return lines.append("</ol></td>").toString();
     }
 
     /**

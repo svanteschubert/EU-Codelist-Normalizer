@@ -59,7 +59,7 @@
   /* Timeline: one row per date, opening in place */
   h2 { font-size: 1.1rem; margin: 2.25rem 0 .2rem; }
   .timeline-head, details.date > summary { display: grid; gap: .25rem .75rem; align-items: center;
-          grid-template-columns: 6.5rem minmax(10rem, 1fr) repeat(4, 9.5rem); }
+          grid-template-columns: 6.5rem minmax(10rem, 1fr) repeat(4, 11rem); }
   .timeline-head { font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; color: var(--quiet);
                    padding: .4rem .5rem .3rem 1.6rem; border-bottom: 2px solid var(--line); }
   .timeline-head .h-date { grid-area: 1 / 1 / 3 / 2; align-self: end; }
@@ -149,8 +149,11 @@
   .agree { color: var(--added); }
   table.claims tr.mismatch th { border-left: 3px solid var(--removed); }
   td.differences { min-width: 22rem; }
-  td.differences ul { list-style: none; margin: 0; padding: 0; }
-  td.differences li { padding: .05rem 0; }
+  /* Every code that differs on a numbered line of its own, so that a long one is not taken for two. */
+  td.differences ol { margin: 0; padding-left: 1.6rem; }
+  td.differences li { padding: .15rem 0; }
+  td.differences li::marker { color: var(--quiet); font-size: .85em; }
+  td.differences li.quiet { list-style: none; }
   td.differences code { font-weight: 600; }
   td.differences .kind { font-size: .82rem; }
   /* Every difference between the validator and the declared codes is an error: accepting an undeclared code as much as
@@ -161,7 +164,7 @@
   a.wiki { font-size: .8rem; }
   footer { margin-top: 2.5rem; color: var(--quiet); font-size: .85rem; max-width: 52rem; }
 
-  @media (max-width: 760px) {
+  @media (max-width: 1080px) {
     .timeline-head { display: none; }
     details.date > summary { grid-template-columns: auto 1fr; }
     details.date > summary .c-chip { justify-self: start; }

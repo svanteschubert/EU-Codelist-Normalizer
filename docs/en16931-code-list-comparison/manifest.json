@@ -5,13 +5,13 @@
   "page" : "en16931-code-list-comparison.html",
   "files" : [ {
     "path" : "en16931-code-list-comparison.html",
-    "bytes" : 2908897,
-    "sha256" : "017bf6dd112335c488418555dd48c68ed495f62534bb0316d38cee6295485fde",
+    "bytes" : 2416691,
+    "sha256" : "5bc15fe58a3b6d53b64f0820dedc3cbb241d48b9f7bfaff66f86228f6a41ee49",
     "description" : "the comparison report; open it in a browser"
   }, {
     "path" : "about.html",
-    "bytes" : 11203,
-    "sha256" : "3c8f9c27486f9869bfbe007d179ebb640d84ca7fa266a074345440aacac88641",
+    "bytes" : 11535,
+    "sha256" : "9a271a39704329ae9922a29a8ae509cb251c336e86e423b132627eea80afc08d",
     "description" : "how each comparison works, and what each file holds"
   }, {
     "path" : "summary.csv",

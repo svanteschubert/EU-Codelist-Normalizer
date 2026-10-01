@@ -80,14 +80,17 @@ description or usage note in Table 2 of EN 16931-1:2017 names the list, as recor
 release. Neither the sheets nor the Genericode files name business terms, so the Index is the only source.</p>
 
 <h2 id="implemented">Validator ⇄ declared codes</h2>
-<p>Each BR-CL rule is compared code by code with the list it enforces
-(<a href="configuration/rule-catalog.csv"><code>rule-catalog.csv</code></a>), once against the Genericode file and once
-against the spreadsheet in force on the date. Where a rule states several lists, as UBL's BR-CL-01 for invoices and
-credit notes, their union is compared.</p>
+<p>Each BR-CL rule is compared code by code with the codes declared, on the date, for the list it enforces
+(<a href="configuration/rule-catalog.csv"><code>rule-catalog.csv</code></a>). The Genericode file and the spreadsheet
+declare the same codes for every list published both ways, so one comparison speaks for both; the Time list, which
+BR-CL-06 checks, has no Genericode file and is compared with the spreadsheet. Should the two ever declare different
+codes for a list, its rule is shown against each. <a href="rules.csv"><code>rules.csv</code></a> keeps both comparisons
+for every rule. Where a rule states several lists, as UBL's BR-CL-01 for invoices and credit notes, their union is
+compared.</p>
 <dl>
-  <dt>"7 of 22 rules"</dt>
-  <dd>22 rules of the syntax could be compared with the component; 7 of them implement other codes than it lists. The
-      Genericode count can be one lower: BR-CL-06 checks the Time list, which has no Genericode file.</dd>
+  <dt>"7 of 22 rules wrong"</dt>
+  <dd>22 rules of the syntax could be compared with the declared codes; 7 of them implement other codes, so they accept
+      an invoice they should reject or reject one they should accept.</dd>
   <dt>"11 codes differ"</dt>
   <dd>Counted once per rule: a code wrong in both BR-CL-03 and BR-CL-04 counts twice, because both checks fail an
       invoice.</dd>

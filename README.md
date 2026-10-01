@@ -335,8 +335,10 @@ status chips that opens in place:
   against the Genericode files of the same release, code by code; the Index sheet's
   change notes against what actually changed; the Index's business terms against
   EN 16931-1:2017.
-- **Implemented**: each BR-CL rule of the validator in force, against the Genericode
-  files and against the spreadsheet.
+- **Implemented**: each BR-CL rule of the validator in force, against the declared
+  codes of its list: the Genericode file, or the spreadsheet for the Time list, which
+  has none. Should the two ever declare different codes, the rule is shown against
+  each; `rules.csv` keeps both comparisons.
 
 Four tiles above the timeline summarize the latest date. Each block opens on its own,
 and the explanations live on `about.html` rather than on the report.
