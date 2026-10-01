@@ -5,8 +5,8 @@
   "page" : "en16931-code-list-comparison.html",
   "files" : [ {
     "path" : "en16931-code-list-comparison.html",
-    "bytes" : 2589229,
-    "sha256" : "0abac0976cc2fb6c2503e70bf3a58090364ee5b2e552afb86493873696db5b7f",
+    "bytes" : 2590175,
+    "sha256" : "66004e4be691c19f7f430d0bb7ce7bcfddb2f7189bf5eb1f8b76ce8070766caa",
     "description" : "the comparison report; open it in a browser"
   }, {
     "path" : "about.html",

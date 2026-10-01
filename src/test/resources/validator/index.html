@@ -34,6 +34,15 @@
   p  { margin: .35rem 0 .8rem; max-width: 52rem; }
   a  { color: inherit; }
   .lead { font-size: 1.05rem; max-width: 48rem; }
+  .lead p { margin: .4rem 0; }
+  .lead ol { margin: .2rem 0 .5rem; padding-left: 1.6rem; }
+  /* "What is this about?": the introduction, closed until asked for. */
+  details.about { margin: .4rem 0 1rem; }
+  details.about > summary { cursor: pointer; list-style: none; position: relative; display: inline-block;
+                            padding: .15rem .3rem .15rem 1.3rem; color: var(--quiet); font-weight: 600; }
+  details.about > summary::-webkit-details-marker { display: none; }
+  details.about > summary:hover { color: var(--ink); }
+  details.about[open] > summary { color: var(--ink); }
   .notice { max-width: 52rem; margin: .75rem 0 1rem; padding: .55rem .85rem; border: 1px solid var(--line);
             border-left: 4px solid var(--reworded); border-radius: .4rem; background: var(--panel); font-size: .92rem; }
   .meta, .quiet { color: var(--quiet); font-weight: normal; }
@@ -74,7 +83,7 @@
                            padding-left: 1.6rem; }
   details.date > summary::-webkit-details-marker { display: none; }
   /* The same marker, at the same size, opens a date and a block within it: a triangle that turns down when open. */
-  details.date > summary::before, details.block > summary::before {
+  details.date > summary::before, details.block > summary::before, details.about > summary::before {
     content: ""; position: absolute; width: 0; height: 0; border-style: solid;
     border-width: .42rem 0 .42rem .62rem; border-color: transparent transparent transparent var(--quiet);
     transition: transform .15s ease; }
@@ -82,6 +91,8 @@
   details.date[open] > summary::before { transform: translateY(-50%) rotate(90deg); }
   details.block > summary::before { left: .8rem; top: .95rem; }
   details.block[open] > summary::before { transform: rotate(90deg); }
+  details.about > summary::before { left: .25rem; top: 50%; transform: translateY(-50%); }
+  details.about[open] > summary::before { transform: translateY(-50%) rotate(90deg); }
   details.date > summary:hover::before, details.block > summary:hover::before { border-left-color: var(--ink); }
   details.date > summary:hover { background: var(--panel); }
   details.date[open] > summary { background: var(--panel); }
@@ -181,10 +192,19 @@
 <p class="notice"><strong>Unofficial showcase.</strong> The authoritative code lists and validation artefacts are those
 the European Commission publishes in its <a href="https://ec.europa.eu/digital-building-blocks/sites/spaces/DIGITAL/pages/467108974/Registry+of+supporting+artefacts+to+implement+EN16931">Registry of supporting artefacts to implement EN16931</a>; where
 this page differs, the Registry prevails.</p>
-<p class="lead">The European Commission <strong>declares</strong> the codes an EN 16931 invoice may use, three ways per
-release: as a spreadsheet, as Genericode files, and as the change notes on the spreadsheet's Index sheet. The CEN
-validator <strong>implements</strong> them in its BR-CL rules. This page checks that the three declarations agree, and
-that the validator implements what is declared. <a href="about.html">How it works</a></p>
+<details class="about">
+<summary>What is this about?</summary>
+<div class="lead">
+<p>The European Commission <strong>declares</strong> the codes an EN 16931 invoice may use, three ways per release:</p>
+<ol>
+  <li>as a spreadsheet,</li>
+  <li>as Genericode files, and</li>
+  <li>as the change notes on the spreadsheet's Index sheet.</li>
+</ol>
+<p>The CEN validator <strong>implements</strong> them in its BR-CL rules. This page checks that the three declarations
+agree, and that the validator implements what is declared. <a href="about.html">How it works</a></p>
+</div>
+</details>
 
 <p class="glance-title">At a glance: 2026-05-15 · code lists 17_2026-05-15 · validator 1.3.16</p>
 <div class="glance">
