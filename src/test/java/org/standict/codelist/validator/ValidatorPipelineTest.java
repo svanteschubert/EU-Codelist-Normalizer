@@ -70,7 +70,6 @@ class ValidatorPipelineTest {
         assertEquals(List.of("389"), rule(result, "2024-11-15", Syntax.CII, "BR-CL-01").genericode().onlyPublished());
     }
 
-    /** The Time sheet has no Genericode counterpart, and CII is compared with the UNTDID 2475 column only. */
     /** With a GitHub origin, each differing code links to its line in the release's Schematron file, by tag. */
     @Test
     void linksImplementedCodesToTheirLineInTheTaggedRelease() throws Exception {
@@ -95,6 +94,7 @@ class ValidatorPipelineTest {
         assertFalse(Files.readString(output.resolve("validator/index.html")).contains("github.com/"));
     }
 
+    /** The Time sheet has no Genericode counterpart, and CII is compared with the UNTDID 2475 column only. */
     @Test
     void comparesEachSyntaxWithItsOwnSpreadsheetColumn() throws Exception {
         var result = new ValidatorPipeline(catalog).run(repository, output);
@@ -120,7 +120,17 @@ class ValidatorPipelineTest {
         var summary = Files.readAllLines(root.resolve("summary.csv"));
         assertEquals(1 + 3 * 2, summary.size(), "a header and one row per date and syntax");
         assertTrue(Files.readString(root.resolve("rules.csv")).contains("\"389\""));
-        assertTrue(Files.readString(root.resolve("index.html")).contains("2024-11-15"));
+        // One row per date, newest first, each holding its own blocks.
+        String page = Files.readString(root.resolve("index.html"));
+        var dates = new ArrayList<String>();
+        var matcher = java.util.regex.Pattern.compile("<details class=\"date\" id=\"d([0-9-]+)\"").matcher(page);
+        while (matcher.find()) {
+            dates.add(matcher.group(1));
+        }
+        assertEquals(List.of("2024-11-15", "2024-06-01", "2024-05-15"), dates);
+        int june = page.indexOf("id=\"d2024-06-01\"");
+        int block = page.indexOf("id=\"d2024-06-01-ubl-genericode\"");
+        assertTrue(june < block && block < page.indexOf("id=\"d2024-05-15\""), "the block opens inside its date");
         // The Index of 02 states "Added 389", which its sheet bears out; the Time sheet is not in its Index.
         var claims = Files.readAllLines(root.resolve("index-claims.csv"));
         assertEquals(3, claims.size(), "a header and the 1001 row of each release");
@@ -146,12 +156,18 @@ class ValidatorPipelineTest {
         assertEquals(folder.resolve(ReportFolder.PAGE), result.page());
         String page = Files.readString(result.page());
         var links = new java.util.TreeSet<String>();
-        var matcher = java.util.regex.Pattern.compile("href=\"([^\"#][^\"]*)\"").matcher(page);
+        var matcher = java.util.regex.Pattern.compile("href=\"([^\"#][^\"#]*)").matcher(page);
         while (matcher.find()) {
             links.add(matcher.group(1));
         }
-        assertTrue(links.containsAll(List.of("rules.csv", "summary.csv", "index-claims.csv", "manifest.json",
-                "configuration/rule-catalog.csv", "configuration/business-terms-2017.csv")), links.toString());
+        matcher = java.util.regex.Pattern.compile("href=\"([^\"#][^\"#]*)")
+                .matcher(Files.readString(folder.resolve("about.html")));
+        while (matcher.find()) {
+            links.add(matcher.group(1));
+        }
+        assertTrue(links.containsAll(List.of("about.html", "rules.csv", "summary.csv", "index-claims.csv",
+                "manifest.json", "configuration/rule-catalog.csv", "configuration/business-terms-2017.csv",
+                "configuration/code-successions.csv", ReportFolder.PAGE)), links.toString());
         for (String link : links) {
             assertTrue(Files.isRegularFile(folder.resolve(link)), "broken link " + link);
         }

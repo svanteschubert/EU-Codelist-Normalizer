@@ -54,6 +54,32 @@ class IndexCheckTest {
                 texts(findings));
     }
 
+    /** ICD 01'00 became 0100 in 2019, which the Index stated as "structure corrected". */
+    @Test
+    void acceptsAStatedSpellingCorrectionAndReportsAnUnstatedOne() {
+        var stated = check("Yes", "0201 added, 0100 structure corrected",
+                changes(Set.of("0100", "0201"), Set.of("01'00"), Set.of()), Set.of("01'00"), Set.of("0100", "0201"));
+        assertEquals(List.of(), texts(stated));
+        assertEquals("spelling corrected, as stated: 0100", stated.get(0).text());
+
+        var unstated = check("Yes", "0201 added", changes(Set.of("0100", "0201"), Set.of("01'00"), Set.of()),
+                Set.of("01'00"), Set.of("0100", "0201"));
+        assertEquals(List.of("spelling corrected, not stated: 0100"), texts(unstated));
+    }
+
+    /** The sheet and the Genericode file of one revision must list the same codes. */
+    @Test
+    void reportsCodesTheSheetAndGenericodeDoNotShare() throws Exception {
+        release("01_2021-05-17", "r01", "5/17/21", "", "", "AAA BBB", "AAA CCC", "AA");
+
+        var currency = tab(new IndexCheck().check(CodeListReleases.read(temp)), "01_2021-05-17/r01", "Currency");
+
+        assertEquals(Set.of("BBB"), currency.listed().removed(), "only in the sheet");
+        assertEquals(Set.of("CCC"), currency.listed().added(), "only in Genericode");
+        assertEquals(List.of("listed in the sheet, not in Genericode: BBB",
+                "listed in Genericode, not in the sheet: CCC"), texts(currency.findings()));
+    }
+
     /** A remark that counts instead of naming is accepted when the count is right. */
     @Test
     void acceptsACountThatMatches() {

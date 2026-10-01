@@ -53,9 +53,11 @@ public final class IndexCheck {
      * @param genericode {@code null} when this revision or every earlier release lacks the Genericode file
      * @param genericodeBaseline the release the Genericode file was compared with, or empty
      * @param genericodeSpan how many releases the Genericode comparison spans; 1 for the previous release
+     * @param listed the sheet (before) against the Genericode file (after) of this revision: {@code removed} are the
+     *     codes only the sheet lists, {@code added} those only Genericode lists; {@code null} without Genericode
      */
     public record TabCheck(String tab, ChangeClaims claims, ActualChanges sheet, ActualChanges genericode,
-            String genericodeBaseline, int genericodeSpan, List<Finding> findings) {
+            String genericodeBaseline, int genericodeSpan, List<Finding> findings, ActualChanges listed) {
         public Verdict verdict() {
             return IndexCheck.verdict(findings);
         }
@@ -184,7 +186,10 @@ public final class IndexCheck {
             } else {
                 checkSheet(claims, sheetChanges, tabFindings);
             }
+            ActualChanges listed = null;
             if (ActualChanges.exists(gcNow)) {
+                listed = ActualChanges.between(now, read(gcNow, entry.tab(), true));
+                checkListed(listed, tabFindings);
                 if (gcChanges == null) {
                     tabFindings.add(new Finding(Severity.INFO, "genericode",
                             "first Genericode publication of this list", List.of()));
@@ -209,7 +214,7 @@ public final class IndexCheck {
             }
             tabs.add(new TabCheck(entry.tab(), claims, sheetChanges, gcChanges,
                     gcChanges == null ? "" : genericodeBaseline.directory(), gcChanges == null ? 0 : span,
-                    List.copyOf(tabFindings)));
+                    List.copyOf(tabFindings), listed));
         }
 
         var published = new TreeMap<String, Map<String, List<String>>>();
@@ -298,7 +303,24 @@ public final class IndexCheck {
                     claims.caseChange() ? caseOnly.size() + " codes changed only their case, as stated"
                             : "codes that changed only their case, not stated", List.copyOf(caseOnly)));
         }
-        boolean changed = !added.isEmpty() || !removed.isEmpty() || !sheet.renamed().isEmpty() || !caseOnly.isEmpty();
+        // ICD 01'00 became 0100 in 2019, which the Index stated as "structure corrected": one code, respelled.
+        var respelled = new TreeSet<String>(GenericodeNormalizer.CODE_ORDER);
+        var respelledStated = new TreeSet<String>(GenericodeNormalizer.CODE_ORDER);
+        for (String code : List.copyOf(added)) {
+            List.copyOf(removed).stream().filter(old -> spelling(old).equals(spelling(code))).findFirst().ifPresent(old -> {
+                (claims.reworded().contains(code) || claims.reworded().contains(old) ? respelledStated : respelled)
+                        .add(code);
+                added.remove(code);
+                removed.remove(old);
+            });
+        }
+        if (!respelledStated.isEmpty()) {
+            findings.add(new Finding(Severity.INFO, "sheet", "spelling corrected, as stated",
+                    List.copyOf(respelledStated)));
+        }
+        report(findings, "sheet", "spelling corrected, not stated", respelled);
+        boolean changed = !added.isEmpty() || !removed.isEmpty() || !sheet.renamed().isEmpty() || !caseOnly.isEmpty()
+                || !respelled.isEmpty() || !respelledStated.isEmpty();
         switch (claims.flag()) {
             case YES -> {
                 if (!changed) {
@@ -397,6 +419,12 @@ public final class IndexCheck {
                 sheet.renamed().stream().filter(code -> !claims.reworded().contains(code)).toList());
     }
 
+    /** The codes of the sheet against those of the Genericode file of the same revision. */
+    static void checkListed(ActualChanges listed, List<Finding> findings) {
+        report(findings, "genericode", "listed in the sheet, not in Genericode", listed.removed());
+        report(findings, "genericode", "listed in Genericode, not in the sheet", listed.added());
+    }
+
     /**
      * The Genericode file against the sheet over the same releases, and against what the Index sheets of those
      * releases claimed.
@@ -428,6 +456,11 @@ public final class IndexCheck {
                 claimedAdded.stream().filter(code -> !genericode.after().contains(code)).toList());
         report(findings, "genericode", "stated as removed, but Genericode still lists it" + since,
                 claimedRemoved.stream().filter(code -> genericode.after().contains(code)).toList());
+    }
+
+    /** A code without its punctuation and case: {@code 01'00} and {@code 0100} are spelled alike. */
+    private static String spelling(String code) {
+        return code.replaceAll("[^\\p{Alnum}]", "").toUpperCase(java.util.Locale.ROOT);
     }
 
     private static List<String> difference(Set<String> left, Set<String> right) {

@@ -20,9 +20,10 @@ import java.util.HexFormat;
  * <pre>
  * docs/en16931-code-list-comparison/
  * ├── en16931-code-list-comparison.html
+ * ├── about.html
  * ├── manifest.json
  * ├── summary.csv  rules.csv  index-claims.csv  business-terms.csv  index-releases.csv
- * └── configuration/validator-releases.csv  rule-catalog.csv  business-terms-2017.csv
+ * └── configuration/validator-releases.csv  rule-catalog.csv  business-terms-2017.csv  code-successions.csv
  * </pre>
  *
  * <p>Links are relative and the page loads nothing from the network, so the folder needs no server configuration. The
@@ -72,6 +73,12 @@ public final class ReportFolder {
                 if (Files.isRegularFile(source)) {
                     Files.createDirectories(staging.resolve(linked.path()).getParent());
                     Files.copy(source, staging.resolve(linked.path()));
+                }
+                if (linked.path().endsWith(".html") && Files.isRegularFile(source)) {
+                    // Pages link back to the report under the name it has here.
+                    Path page = staging.resolve(linked.path());
+                    Files.writeString(page, Files.readString(page, StandardCharsets.UTF_8)
+                            .replace("href=\"index.html\"", "href=\"" + PAGE + "\""), StandardCharsets.UTF_8);
                 }
             }
             writeManifest(staging, PAGE);

@@ -4,9 +4,14 @@
   "page" : "index.html",
   "files" : [ {
     "path" : "index.html",
-    "bytes" : 1796170,
-    "sha256" : "1c09f93487810fc5f015d60b1a1b42a5c087dc469164c92f63e358db63630978",
+    "bytes" : 1864944,
+    "sha256" : "e08e46bb10f5eef845cc97e882fab297af794a3b9123ff09f1e2e24f29ab1d87",
     "description" : "the comparison report; open it in a browser"
+  }, {
+    "path" : "about.html",
+    "bytes" : 9087,
+    "sha256" : "2111048b1a8dc088734b70cdb696e7ca83e387889edfc419b0c565f822b185f0",
+    "description" : "how each comparison works, and what each file holds"
   }, {
     "path" : "summary.csv",
     "bytes" : 5911,
@@ -19,8 +24,8 @@
     "description" : "per effective date, syntax and rule: every differing code, with its name"
   }, {
     "path" : "index-claims.csv",
-    "bytes" : 54602,
-    "sha256" : "bce7ccda9eae501c0bedabe4e03c5c4feb1d9e80eae80e9ff1ea5dd0cd1c7a49",
+    "bytes" : 57746,
+    "sha256" : "bdba8647de2a460071a111b67e85a731cc0b3f1559667dff7c4c753ced9a3296",
     "description" : "per release revision and Index row: stated against actual changes in sheet and Genericode"
   }, {
     "path" : "business-terms.csv",
@@ -30,7 +35,7 @@
   }, {
     "path" : "index-releases.csv",
     "bytes" : 6667,
-    "sha256" : "718256a73895a1634f6de2a6a7fa66ad51257683f5aa5d98d814d95b122337ca",
+    "sha256" : "b9f59541b0bcbda01596cea323213e376058dd37819550b601fa0d51d0ee07b7",
     "description" : "per release revision: the dates its Index states, structural findings"
   }, {
     "path" : "configuration/validator-releases.csv",
@@ -47,5 +52,10 @@
     "bytes" : 2687,
     "sha256" : "107b116b9593a750a9b0b2c17a415a401cc0bdeee1b7e3cc95f8d4785eb9f89f",
     "description" : "the business terms of EN 16931-1:2017 that use each code list"
+  }, {
+    "path" : "configuration/code-successions.csv",
+    "bytes" : 2540,
+    "sha256" : "b8c7d8251e9c61bf31896a247a61afd0899fe366d8db332787ac1e32568f2903",
+    "description" : "codes that replaced other codes, with the Wikipedia article on each change"
   } ]
 }

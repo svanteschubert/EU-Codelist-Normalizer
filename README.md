@@ -265,8 +265,23 @@ validator/
 ├── normalized/2026-05-15_validation-1.3.16/{ubl,cii}/BR-CL-01.csv
 ├── summary.csv                 # per effective date and syntax
 ├── rules.csv                   # per effective date, syntax and rule, with the differing codes
-└── index.html
+├── index.html                  # the report
+└── about.html                  # how each comparison works, linked from the report
 ```
+
+The report keeps the codes the Commission **declares** apart from the codes the
+validator **implements**. It lists every effective date, newest first, as one row of
+status chips that opens in place:
+
+- **Declared**, for a date on which a code-list release took effect: the spreadsheet
+  against the Genericode files of the same release, code by code; the Index sheet's
+  change notes against what actually changed; the Index's business terms against
+  EN 16931-1:2017.
+- **Implemented**: each BR-CL rule of the validator in force, against the Genericode
+  files and against the spreadsheet.
+
+Four tiles above the timeline summarize the latest date. Each block opens on its own,
+and the explanations live on `about.html` rather than on the report.
 
 - **Extraction:** the codes of an assertion are the union of its
   `contains(' … ', concat(…))` enumerations and its `@attr = '…'` comparisons
@@ -280,6 +295,13 @@ validator/
   lists the release, otherwise from the validator's README. Every date on which either
   the code lists or the validator changed is compared, each time with what was in force
   on both sides. The highest revision of a code-list release carrying a format is used.
+- **Renames:** a removed code next to the code that replaced it shows as one line,
+  `STD → STN`, with a link to the English Wikipedia article on the change. The pairs
+  come from [`code-successions.csv`](src/main/resources/validator/code-successions.csv)
+  (ISO 4217 redenominations, euro adoptions, the split of the Netherlands Antilles),
+  because the old code is often in no EU release and has no name to match. Codes that
+  differ only in punctuation or case (`01'00` and `0100`) and the only two codes with
+  the same name are paired without it. Pairing changes the display, not the counts.
 - **Mapping:** [`rule-catalog.csv`](src/main/resources/validator/rule-catalog.csv)
   ties each rule to its Genericode file and sheet. BR-CL-06 reads the Time sheet's
   `2005 Code` column for UBL and `2475 Code` for CII. Unmapped rules are reported,
@@ -302,6 +324,8 @@ validator/
   and counts ("adding 49 codes"). Words count as codes only when the list has them;
   missing leading zeros (`Adding 0221 to 230`) are restored, and code-like words the
   list lacks (`2017` for `0217`, `VATEX-135-1`) are reported as unresolved.
+- **Spreadsheet against Genericode:** within every revision, each sheet is compared
+  with its Genericode file, code by code and name by name.
 - **Actual changes:** every revision's TabName sheet is compared with the previous
   release, by column role, ignoring whitespace-only edits. Its Genericode file is
   compared with the latest earlier release that has Genericode, across all Index
@@ -319,9 +343,10 @@ The report is also published as a self-contained folder to share, by default
 ```text
 docs/en16931-code-list-comparison/
 ├── en16931-code-list-comparison.html   # the report; open it in a browser
+├── about.html                          # how it is compared, and every file
 ├── manifest.json                       # every file with its size and SHA-256
 ├── summary.csv  rules.csv  index-claims.csv  business-terms.csv  index-releases.csv
-└── configuration/validator-releases.csv  rule-catalog.csv  business-terms-2017.csv
+└── configuration/validator-releases.csv  rule-catalog.csv  business-terms-2017.csv  code-successions.csv
 ```
 
 All links are relative and the page loads nothing from the network, so the folder

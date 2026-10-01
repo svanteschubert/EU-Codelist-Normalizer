@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How it is compared</title>
+<style>
+  :root { --ink: #1a1a1a; --quiet: #6b6b6b; --line: #d8d8d8; --bg: #ffffff; --panel: #f6f6f4; --accent: #1f4e79; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --ink: #ececec; --quiet: #a0a0a0; --line: #3a3a3a; --bg: #161616;
+                                      --panel: #1f1f1f; --accent: #8ab6e0; }
+  }
+  :root[data-theme="dark"] { --ink: #ececec; --quiet: #a0a0a0; --line: #3a3a3a; --bg: #161616; --panel: #1f1f1f;
+                             --accent: #8ab6e0; }
+  html { background: var(--bg); }
+  body { margin: 0 auto; padding: 2rem 1rem 4rem; max-width: 46rem; background: var(--bg); color: var(--ink);
+         font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+  h1 { font-size: 1.5rem; line-height: 1.25; margin: .5rem 0 1rem; }
+  h2 { font-size: 1.1rem; margin: 2.25rem 0 .4rem; padding-top: .5rem; border-top: 1px solid var(--line); }
+  p, li { max-width: 46rem; }
+  a { color: inherit; }
+  code { font-size: .9em; }
+  :target { scroll-margin-top: 1rem; }
+  h2:target { color: var(--accent); }
+  .back { font-size: .9rem; }
+  dl { margin: .5rem 0; }
+  dt { font-weight: 600; margin-top: .6rem; }
+  dd { margin: .1rem 0 0 1.2rem; }
+  ul.files { padding-left: 1.2rem; }
+</style>
+</head>
+<body>
+<p class="back"><a href="en16931-code-list-comparison.html">← Back to the report</a></p>
+<h1>How the EN 16931 code lists are compared</h1>
+
+<p>An invoice following EN 16931 may only use the codes of the published code lists: currencies, countries, units,
+identifier schemes and so on. Two parties are involved:</p>
+<dl>
+  <dt>Declared: what the European Commission publishes</dt>
+  <dd>Every release of the "EN16931 code lists values" comes in three parts that must agree: the
+      <strong>spreadsheet</strong>, one sheet per code list; the <strong>Genericode</strong> files, the same lists as
+      XML; and the <strong>Index</strong> sheet, which states for each list whether and how it changed since the
+      previous release.</dd>
+  <dt>Implemented: what the validator checks</dt>
+  <dd>The CEN validation artefacts (eInvoicing-EN16931) copy each list into a BR-CL rule. An invoice using a code the
+      rule lacks is rejected, even when the code is declared.</dd>
+</dl>
+<p>The report lists every date on which either side changed, newest first, and compares each with what was in force
+on both sides that day. UBL and CII only.</p>
+
+<h2 id="sheet-genericode">Spreadsheet ⇄ Genericode</h2>
+<p>For each list published both ways, the codes of the sheet and of the Genericode file of the same release are
+compared one by one, and so are their names. A sheet that lists a code several times, as the Currency sheet does once
+per country, counts it once. Some lists are defined by EN 16931 itself and never published as Genericode: VAT ID,
+FISCAL ID, VAT CAT and Time. Before 2021 there was no Genericode at all.</p>
+
+<h2 id="index-notes">Index change notes ⇄ actual changes</h2>
+<p>The Index sheet has a "Changes" column (Yes, No, Fixed) and a "Remark on updates" column, such as
+<em>Added XCG, Removed ANG, BGN</em>. Each remark is read for the codes it calls added, removed, renamed or deprecated,
+and set against what actually changed since the previous release:</p>
+<ul>
+  <li>in the list's <strong>sheet</strong>, against the sheet of the previous release;</li>
+  <li>in its <strong>Genericode</strong> file, against the latest earlier release that had one. When releases without
+      Genericode lie between, the remarks of all of them count.</li>
+</ul>
+<p>A row is wrong when it states a change that did not happen, leaves out one that did, or names a code the list does
+not contain, before or after. A remark that counts instead of naming ("adding 49 codes") is accepted when the count is
+right. Every revision of a release is checked, so a correction such as 17 r02 shows what r01 got wrong. The Index's own
+effective date is checked against the date the release is filed under.</p>
+
+<h2 id="business-terms">Business terms ⇄ EN 16931-1:2017</h2>
+<p>The Index column "EN business terms where the code list is used." is compared with the business terms whose
+description or usage note in Table 2 of EN 16931-1:2017 names the list, as recorded in
+<a href="configuration/business-terms-2017.csv"><code>business-terms-2017.csv</code></a>, and with the previous
+release. Neither the sheets nor the Genericode files name business terms, so the Index is the only source.</p>
+
+<h2 id="implemented">Validator ⇄ declared codes</h2>
+<p>Each BR-CL rule is compared code by code with the list it enforces
+(<a href="configuration/rule-catalog.csv"><code>rule-catalog.csv</code></a>), once against the Genericode file and once
+against the spreadsheet in force on the date. Where a rule states several lists, as UBL's BR-CL-01 for invoices and
+credit notes, their union is compared.</p>
+<dl>
+  <dt>"7 of 22 rules"</dt>
+  <dd>22 rules of the syntax could be compared with the component; 7 of them implement other codes than it lists. The
+      Genericode count can be one lower: BR-CL-06 checks the Time list, which has no Genericode file.</dd>
+  <dt>"11 codes differ"</dt>
+  <dd>Counted once per rule: a code wrong in both BR-CL-03 and BR-CL-04 counts twice, because both checks fail an
+      invoice.</dd>
+  <dt>implemented, not published</dt>
+  <dd>The validator accepts a code the published list does not contain. The link goes to the line listing it in the
+      validator release in force, on GitHub.</dd>
+  <dt>published, not implemented</dt>
+  <dd>An invoice using a declared code fails validation. The link goes to the rule's list, where the code would have
+      to be added.</dd>
+</dl>
+<p>A code's name comes from the compared release, or for a code it no longer lists, from the nearest release that
+did. "Listed by no EU release" means no release in this comparison ever contained it.</p>
+
+<h2 id="renames">Renames</h2>
+<p>A removed code next to an added one is shown as one change, <code>STD → STN</code>, when the second replaced the
+first:</p>
+<ul>
+  <li>the standard behind the list renamed it, such as ISO 4217 redenominating a currency, or a country splitting. These
+      come from <a href="configuration/code-successions.csv"><code>code-successions.csv</code></a>, each with the
+      English Wikipedia article on the change, because the old code is often in no EU release and has no name to
+      match;</li>
+  <li>the two are equal but for punctuation or case, as ICD <code>01'00</code> and <code>0100</code>: a spelling
+      correction;</li>
+  <li>the two are the only removed and added codes carrying the same name.</li>
+</ul>
+<p>Pairing only changes how a difference is shown; it is still counted and checked as a removal and an addition.</p>
+
+<h2 id="dates">Dates</h2>
+<p>The validator's effective dates come from
+<a href="configuration/validator-releases.csv"><code>validator-releases.csv</code></a>, those of the code lists from the
+release they are filed under. The two are not always the same day: validator 1.3.8 applies from 2022-05-15, the code
+lists from 2022-05-16. Every date of either side is listed, so a disagreement shows for as long as it lasted.</p>
+
+<h2 id="files">Files</h2>
+<p>All CSV files are UTF-8 with every field quoted; codes within a field are separated by spaces in code order. Every
+file is listed with its size and SHA-256 in <a href="manifest.json"><code>manifest.json</code></a>, so a copy of this
+folder can be checked for completeness.</p>
+<ul class="files">
+<li><a href="summary.csv"><code>summary.csv</code></a>: per effective date and syntax: rules compared, rules agreeing, codes that differ</li>
+<li><a href="rules.csv"><code>rules.csv</code></a>: per effective date, syntax and rule: every differing code, with its name</li>
+<li><a href="index-claims.csv"><code>index-claims.csv</code></a>: per release revision and Index row: stated against actual changes in sheet and Genericode</li>
+<li><a href="business-terms.csv"><code>business-terms.csv</code></a>: per release revision and Index row: business terms against EN 16931-1:2017 and the previous release</li>
+<li><a href="index-releases.csv"><code>index-releases.csv</code></a>: per release revision: the dates its Index states, structural findings</li>
+<li><a href="configuration/validator-releases.csv"><code>configuration/validator-releases.csv</code></a>: the date each validator release applies from</li>
+<li><a href="configuration/rule-catalog.csv"><code>configuration/rule-catalog.csv</code></a>: which code list each BR-CL rule enforces</li>
+<li><a href="configuration/business-terms-2017.csv"><code>configuration/business-terms-2017.csv</code></a>: the business terms of EN 16931-1:2017 that use each code list</li>
+<li><a href="configuration/code-successions.csv"><code>configuration/code-successions.csv</code></a>: codes that replaced other codes, with the Wikipedia article on each change</li>
+</ul>
+</body>
+</html>
