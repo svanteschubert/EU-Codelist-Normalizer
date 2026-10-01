@@ -149,8 +149,8 @@
   .agree { color: var(--added); }
   table.claims tr.mismatch th { border-left: 3px solid var(--removed); }
   td.differences { min-width: 22rem; }
-  /* Every code that differs on a numbered line of its own, so that a long one is not taken for two. */
-  td.differences ol { margin: 0; padding-left: 1.6rem; }
+  /* Every code that differs on a bulleted line of its own, so that a long one is not taken for two. */
+  td.differences ul { margin: 0; padding-left: 1.2rem; list-style: disc; }
   td.differences li { padding: .15rem 0; }
   td.differences li::marker { color: var(--quiet); font-size: .85em; }
   td.differences li.quiet { list-style: none; }

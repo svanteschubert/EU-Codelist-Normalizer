@@ -622,7 +622,7 @@ public final class ValidatorReport {
                 org.standict.codelist.normalize.GenericodeNormalizer.CODE_ORDER);
         side.onlyInValidator().forEach(code -> codes.put(code, true));
         side.onlyPublished().forEach(code -> codes.put(code, false));
-        var lines = new StringBuilder("<td class=\"differences\"><ol>");
+        var lines = new StringBuilder("<td class=\"differences\"><ul>");
         int shown = 0;
         int remaining = codes.size();
         String where = rule.rule() + " in " + rule.syntax().fileName() + " of " + rule.validatorTag() + commit(rule);
@@ -679,7 +679,7 @@ public final class ValidatorReport {
                             .append(" ").append(wikipedia(change.get(0))));
             lines.append("</span></li>");
         }
-        return lines.append("</ol></td>").toString();
+        return lines.append("</ul></td>").toString();
     }
 
     /**
