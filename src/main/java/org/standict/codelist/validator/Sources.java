@@ -22,15 +22,15 @@ import org.standict.codelist.statistics.Canonical;
 /**
  * Where something the report states is written, as a link a reader can follow.
  *
- * <p>The originals are XLSX workbooks and Genericode ZIP archives, which a browser cannot show by line. The normalizer
- * therefore publishes their extracted text, the sheets as CSV and the Genericode files byte for byte, into the
- * downloader's {@code docs/extracted/}, where GitHub shows every file with line numbers. A code links to the line that
+ * <p>The originals are XLSX workbooks and Genericode ZIP archives, which a browser cannot show by line. Their extracted
+ * text, the sheets as CSV and the Genericode files byte for byte, is versioned with the release tree, in
+ * {@code <release>/rNN/extracted/}, where GitHub shows every file with line numbers. A code links to the line that
  * lists it; a code a file lacks links to that file. Every link names the original it came from, and for a sheet the
  * workbook cell, counted the way the workbook counts it: the extraction drops blank rows and records which, in
- * {@code source.json}, so the cell is exact.
+ * {@code source.json}, so the cell is exact. The originals themselves are linked where the downloader keeps them.
  *
- * <p>Without a downloader checkout on GitHub, or with the copies published outside it, nothing is linked rather than
- * linked wrongly.
+ * <p>A release tree outside a checkout on GitHub is not linked, rather than linked wrongly; nor are the originals when
+ * the downloader is not on GitHub.
  */
 public final class Sources {
     /** A link to where something is written, with a title naming the original file and the cell or line. */
@@ -39,48 +39,74 @@ public final class Sources {
     private static final Pattern KEY = Pattern.compile("<Key\\b[^>]*>.*?<ColumnRef\\s+Ref=\"([^\"]+)\"", Pattern.DOTALL);
 
     private final Path releases;
-    /** {@code https://github.com/<owner>/<repo>/blob/<branch>/}, or {@code null} for no links. */
+    /** {@code https://github.com/<owner>/<repo>/blob/<branch>/} of the repository holding the copies, or {@code null}. */
     private final String blob;
-    /** The published copies' path in the downloader, such as {@code docs/extracted}. */
+    /** The release tree's path in that repository, such as {@code src/test/resources}. */
     private final String copies;
+    /** The same address of the downloader, which keeps the originals, or {@code null}. */
+    private final String originals;
     private final ObjectMapper json = new ObjectMapper();
     private final Map<Path, Csv> csvs = new HashMap<>();
     private final Map<Path, Map<String, Integer>> genericodes = new HashMap<>();
     private final Map<Path, JsonNode> manifests = new HashMap<>();
 
-    Sources(Path releases, String blob, String copies) {
+    Sources(Path releases, String blob, String copies, String originals) {
         this.releases = releases;
         this.blob = blob;
         this.copies = copies;
+        this.originals = originals;
     }
 
     /** A report without links. */
     public static Sources none() {
-        return new Sources(null, null, null);
+        return new Sources(null, null, null, null);
     }
 
     /**
-     * @param releases the normalizer's release tree, whose {@code extracted/} directories are the published copies
-     * @param downloader the downloader checkout, whose GitHub origin serves the copies and the originals
-     * @param copies where the copies are published; links are made only when that lies inside the downloader
+     * @param releases the normalizer's release tree, linked in the GitHub repository whose checkout holds it
+     * @param downloader the downloader checkout, whose GitHub origin serves the original files, or {@code null}
      */
-    public static Sources of(Path releases, Path downloader, Path copies) {
-        if (releases == null || downloader == null || copies == null) {
+    public static Sources of(Path releases, Path downloader) {
+        if (releases == null) {
             return none();
         }
         try {
-            var checkout = new GitCheckout(downloader);
-            var url = checkout.webUrl();
-            var branch = checkout.defaultBranch();
-            Path folder = real(copies);
-            if (url.isEmpty() || branch.isEmpty() || !folder.startsWith(checkout.root())) {
+            Path folder = real(releases);
+            var checkout = checkoutHolding(folder);
+            String blob = checkout == null ? null : blob(checkout);
+            if (blob == null) {
                 return none();
             }
-            return new Sources(releases, url.get() + "/blob/" + branch.get() + "/",
-                    checkout.root().relativize(folder).toString().replace('\\', '/'));
+            String originals = null;
+            if (downloader != null) {
+                try {
+                    originals = blob(new GitCheckout(downloader));
+                } catch (IOException e) {
+                    // Not a checkout: the originals are named, not linked.
+                }
+            }
+            return new Sources(releases, blob, checkout.root().relativize(folder).toString().replace('\\', '/'),
+                    originals);
         } catch (IOException e) {
             return none();
         }
+    }
+
+    /** {@code https://github.com/<owner>/<repo>/blob/<branch>/}, or {@code null} for a checkout not on GitHub. */
+    private static String blob(GitCheckout checkout) {
+        var url = checkout.webUrl();
+        var branch = checkout.defaultBranch();
+        return url.isEmpty() || branch.isEmpty() ? null : url.get() + "/blob/" + branch.get() + "/";
+    }
+
+    /** The checkout {@code folder} lies in, or {@code null}. */
+    private static GitCheckout checkoutHolding(Path folder) throws IOException {
+        for (Path directory = folder; directory != null; directory = directory.getParent()) {
+            if (Files.exists(directory.resolve(".git"))) {
+                return new GitCheckout(directory);
+            }
+        }
+        return null;
     }
 
     public boolean linked() {
@@ -214,8 +240,8 @@ public final class Sources {
         }
         for (String format : List.of("xlsx", "gc")) {
             JsonNode manifest = manifest(revision, format);
-            if (manifest != null && !manifest.path("source_path").asText().isEmpty()) {
-                spots.add(new Spot(blob + encode(manifest.path("source_path").asText()),
+            if (originals != null && manifest != null && !manifest.path("source_path").asText().isEmpty()) {
+                spots.add(new Spot(originals + encode(manifest.path("source_path").asText()),
                         manifest.path("source_filename").asText() + " — the original, as the European Commission "
                                 + "published it"));
             }
@@ -251,7 +277,8 @@ public final class Sources {
     /** GitHub shows a CSV file as a table; {@code ?plain=1} shows its lines, so that a line can be pointed at. */
     private String url(String revision, String format, Path file, int line) {
         String name = file.getFileName().toString();
-        return blob + encode(copies + "/" + revision + "/" + format + "/" + name) + (name.endsWith(".csv") ? "?plain=1" : "")
+        return blob + encode((copies.isEmpty() ? "" : copies + "/") + revision + "/extracted/" + format + "/" + name)
+                + (name.endsWith(".csv") ? "?plain=1" : "")
                 + (line > 0 ? "#L" + line : "");
     }
 

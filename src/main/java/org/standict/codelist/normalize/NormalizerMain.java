@@ -14,15 +14,14 @@ public final class NormalizerMain {
             boolean statistics = false;
             boolean validator = false;
             Path validatorRepository = Path.of("../eInvoicing-EN16931");
-            Path reportFolder = null;
-            Path extractedFolder = null;
+            var reportFolders = new java.util.ArrayList<Path>();
             for (int i = 0; i < args.length; i++) {
                 switch (args[i]) {
                     case "--help", "-h" -> {
                         System.out.println("""
                                 Usage: ./run-normalize.sh [--deliveries|--compare|--statistics|--validator]
                                                         [--downloader PATH] [--validator-repo PATH] [--output PATH]
-                                                        [--report-folder PATH] [--extracted-folder PATH]
+                                                        [--report-folder PATH]
                                   --deliveries       Write one delivery per effective date instead of per release
                                   --compare          Report what changed between the deliveries written by
                                                      --deliveries, into compared/ as CSV
@@ -35,20 +34,16 @@ public final class NormalizerMain {
                                                      against its sheets and Genericode files, and its business
                                                      terms against EN 16931-1:2017; writes validator/ with
                                                      summary.csv, rules.csv, index-claims.csv, business-terms.csv,
-                                                     index-releases.csv and index.html; publishes the
-                                                     extracted text of every release into --extracted-folder
-                                                     and the report with every file it links to into
-                                                     --report-folder. Findings link to the line of those
-                                                     copies, and of the validator at the release's commit,
-                                                     on GitHub
+                                                     index-releases.csv and index.html, and publishes the
+                                                     report with every file it links to into each
+                                                     --report-folder. Findings link to their line in the
+                                                     extracted files of --output, and of the validator at
+                                                     the release's commit, on GitHub
                                   --downloader PATH  Downloader repository (default: ../EU-Codelist-Downloader)
                                   --report-folder PATH
-                                                     Self-contained copy of the --validator report to share
-                                                     (default: <downloader>/docs/en16931-code-list-comparison)
-                                  --extracted-folder PATH
-                                                     Extracted text of every release, for the report's links
-                                                     (default: <downloader>/docs/extracted); links are made
-                                                     only when it lies inside the downloader checkout
+                                                     Self-contained copy of the --validator report to share;
+                                                     repeat it for several identical copies (default:
+                                                     docs/en16931-code-list-comparison)
                                   --validator-repo PATH
                                                      eInvoicing-EN16931 checkout, read through its release tags
                                                      (default: ../eInvoicing-EN16931)
@@ -74,25 +69,27 @@ public final class NormalizerMain {
                     case "--compare" -> compare = true;
                     case "--statistics" -> statistics = true;
                     case "--validator" -> validator = true;
-                    case "--downloader", "--output", "--validator-repo", "--report-folder", "--extracted-folder" -> {
+                    case "--downloader", "--output", "--validator-repo", "--report-folder" -> {
                         String option = args[i];
                         if (++i == args.length || args[i].startsWith("--")) {
                             throw new IllegalArgumentException("Missing value for " + option);
                         }
                         if (option.equals("--downloader")) downloader = Path.of(args[i]);
                         else if (option.equals("--validator-repo")) validatorRepository = Path.of(args[i]);
-                        else if (option.equals("--report-folder")) reportFolder = Path.of(args[i]);
-                        else if (option.equals("--extracted-folder")) extractedFolder = Path.of(args[i]);
+                        else if (option.equals("--report-folder")) reportFolders.add(Path.of(args[i]));
                         else output = Path.of(args[i]);
                     }
                     default -> throw new IllegalArgumentException("Unknown argument: " + args[i]);
                 }
             }
             if (validator) {
-                // Published into the downloader's GitHub Pages folder, where the report's links resolve.
+                // The report goes to this repository's GitHub Pages folder; the downloader is only read, for the
+                // originals the report links to.
+                if (reportFolders.isEmpty()) {
+                    reportFolders.add(Path.of("docs/en16931-code-list-comparison"));
+                }
                 var publication = new org.standict.codelist.validator.ValidatorPipeline.Publication(downloader,
-                        reportFolder != null ? reportFolder : downloader.resolve("docs/en16931-code-list-comparison"),
-                        extractedFolder != null ? extractedFolder : downloader.resolve("docs/extracted"));
+                        reportFolders);
                 var result = new org.standict.codelist.validator.ValidatorPipeline()
                         .run(validatorRepository, output, publication);
                 var latest = result.report().rules().stream()
@@ -116,9 +113,7 @@ public final class NormalizerMain {
                         revisions.stream().flatMap(r -> r.terms().stream())
                                 .filter(org.standict.codelist.index.BusinessTerms.Check::differsFrom2017).count());
                 System.out.printf("Report: %s%n", result.directory().resolve("index.html"));
-                System.out.printf("Extracted copies the report links to: %s%n", result.extracted().toAbsolutePath()
-                        .normalize());
-                System.out.printf("Report folder to share: %s%n", result.page());
+                result.pages().forEach(page -> System.out.printf("Report folder to share: %s%n", page));
                 return;
             }
             if (statistics) {

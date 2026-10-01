@@ -55,23 +55,36 @@ public final class ValidatorPipeline {
     }
 
     /**
-     * @param page the page of the shareable report folder, or {@code null} when none was requested
-     * @param extracted the folder the extracted copies were published to, or {@code null} when none was requested
+     * @param pages the page of every shareable report folder, in the order requested; empty when none was
      */
     public record Result(int releases, int rules, ValidatorComparison.Report report, IndexCheck.Report index,
-            Path directory, Path page, Path extracted) {}
+            Path directory, List<Path> pages) {
+        /** The page of the first report folder, or {@code null} when none was requested. */
+        public Path page() {
+            return pages.isEmpty() ? null : pages.get(0);
+        }
+    }
 
     /**
-     * Where the report and the extracted copies it links to are published, each {@code null} for not at all.
+     * Where the report is published, and where the originals it links to are kept. Its links to the extracted files
+     * point into the release tree itself, on GitHub when the tree lies in a checkout there.
      *
-     * @param downloader the downloader checkout, whose GitHub origin serves the copies and the original files; the
-     *     report links to them only when {@code extractedFolder} lies inside it
-     * @param reportFolder the report as a folder to share
-     * @param extractedFolder the extracted text of every release, which the report's links point into
+     * @param downloader the downloader checkout, whose GitHub origin serves the original files, or {@code null}
+     * @param reportFolders every folder the report is published to as a folder to share, each an identical copy
      */
-    public record Publication(Path downloader, Path reportFolder, Path extractedFolder) {
+    public record Publication(Path downloader, List<Path> reportFolders) {
+        public Publication {
+            reportFolders = reportFolders.stream().map(folder -> folder.toAbsolutePath().normalize()).distinct()
+                    .toList();
+        }
+
+        /** One report folder, or none for {@code null}. */
+        public Publication(Path downloader, Path reportFolder) {
+            this(downloader, reportFolder == null ? List.of() : List.of(reportFolder));
+        }
+
         public static Publication none() {
-            return new Publication(null, null, null);
+            return new Publication(null, List.of());
         }
     }
 
@@ -88,7 +101,7 @@ public final class ValidatorPipeline {
      * @param reportFolder where to publish the report as a folder to share, or {@code null} for none
      */
     public Result run(Path validatorCheckout, Path outputRoot, Path reportFolder) throws IOException {
-        return run(validatorCheckout, outputRoot, new Publication(null, reportFolder, null));
+        return run(validatorCheckout, outputRoot, new Publication(null, reportFolder));
     }
 
     public Result run(Path validatorCheckout, Path outputRoot, Publication publication) throws IOException {
@@ -100,12 +113,8 @@ public final class ValidatorPipeline {
         Path destination = output.resolve(DIRECTORY);
         requireOwnedOrAbsent(destination);
         // Refuse a folder that is not ours before anything is replaced.
-        if (publication.extractedFolder() != null) {
-            ReportFolder.requireOwnedOrAbsent(publication.extractedFolder().toAbsolutePath().normalize(),
-                    ExtractedFolder.KIND);
-        }
-        if (publication.reportFolder() != null) {
-            ReportFolder.requireOwnedOrAbsent(publication.reportFolder().toAbsolutePath().normalize(), ReportFolder.KIND);
+        for (Path folder : publication.reportFolders()) {
+            ReportFolder.requireOwnedOrAbsent(folder, ReportFolder.KIND);
         }
         CodeListReleases codeLists = CodeListReleases.read(output);
 
@@ -156,7 +165,7 @@ public final class ValidatorPipeline {
             var report = new ValidatorComparison(repository.webUrl().orElse(null), commits)
                     .compare(catalog, extracted, codeLists);
             var indexCheck = new IndexCheck().check(codeLists);
-            var sources = Sources.of(output, publication.downloader(), publication.extractedFolder());
+            var sources = Sources.of(output, publication.downloader());
             new ValidatorReport(sources).write(report, indexCheck, staging);
             new ReportFolder().writeManifest(staging, "index.html");
             index.put("compared_dates", report.dates().size());
@@ -168,15 +177,13 @@ public final class ValidatorPipeline {
                     .flatMap(r -> r.terms().stream()).filter(BusinessTerms.Check::differsFrom2017).count());
             Files.writeString(staging.resolve(INDEX),
                     json.writerWithDefaultPrettyPrinter().writeValueAsString(index) + "\n", StandardCharsets.UTF_8);
-            // Publish only after every release has been read and compared, the copies before the report linking to them.
+            // Publish only after every release has been read and compared.
             replace(staging, destination);
-            if (publication.extractedFolder() != null) {
-                new ExtractedFolder().publish(output, publication.extractedFolder());
+            var pages = new java.util.ArrayList<Path>();
+            for (Path folder : publication.reportFolders()) {
+                pages.add(new ReportFolder().publish(destination, folder));
             }
-            Path page = publication.reportFolder() == null ? null
-                    : new ReportFolder().publish(destination, publication.reportFolder());
-            return new Result(catalog.releases().size(), rules, report, indexCheck, destination, page,
-                    publication.extractedFolder());
+            return new Result(catalog.releases().size(), rules, report, indexCheck, destination, List.copyOf(pages));
         } finally {
             deleteRecursively(staging);
         }

@@ -2,16 +2,16 @@
   "format_version" : 1,
   "generator" : "eu-codelist-normalizer --validator",
   "kind" : "report",
-  "page" : "index.html",
+  "page" : "en16931-code-list-comparison.html",
   "files" : [ {
-    "path" : "index.html",
+    "path" : "en16931-code-list-comparison.html",
     "bytes" : 2908897,
     "sha256" : "017bf6dd112335c488418555dd48c68ed495f62534bb0316d38cee6295485fde",
     "description" : "the comparison report; open it in a browser"
   }, {
     "path" : "about.html",
-    "bytes" : 11180,
-    "sha256" : "46b484c00f52db7914ab1d6513558d9948920cc4c202007e64a2bd346dbd9fe2",
+    "bytes" : 11203,
+    "sha256" : "3c8f9c27486f9869bfbe007d179ebb640d84ca7fa266a074345440aacac88641",
     "description" : "how each comparison works, and what each file holds"
   }, {
     "path" : "summary.csv",

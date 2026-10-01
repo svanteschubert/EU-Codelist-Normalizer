@@ -15,7 +15,8 @@ import org.standict.codelist.statistics.Canonical;
 class SourcesTest {
     @TempDir Path temp;
 
-    private static final String BLOB = "https://github.com/o/EU-Codelist-Downloader/blob/master/";
+    private static final String BLOB = "https://github.com/o/EU-Codelist-Normalizer/blob/master/";
+    private static final String ORIGINALS = "https://github.com/o/EU-Codelist-Downloader/blob/master/";
     private static final String REVISION = "17_2026-05-15/r02";
     private Sources sources;
 
@@ -53,14 +54,14 @@ class SourcesTest {
                   </SimpleCodeList>
                 </gc:CodeList>
                 """);
-        sources = new Sources(temp, BLOB, "docs/extracted");
+        sources = new Sources(temp, BLOB, "src/test/resources", ORIGINALS);
     }
 
     @Test
     void linksACodeToItsLineAndNamesItsWorkbookCell() {
         var spot = sources.code(REVISION, "xlsx", "VAT ID", "XCG");
 
-        assertEquals(BLOB + "docs/extracted/17_2026-05-15/r02/xlsx/VAT%20ID.csv?plain=1#L4", spot.url());
+        assertEquals(BLOB + "src/test/resources/17_2026-05-15/r02/extracted/xlsx/VAT%20ID.csv?plain=1#L4", spot.url());
         assertEquals("VAT ID sheet, cell B3 — v17b.xlsx", spot.title());
     }
 
@@ -69,7 +70,7 @@ class SourcesTest {
     void linksAGenericodeCodeToTheLineOfItsKeyValue() {
         var spot = sources.code(REVISION, "gc", "Currency", "ANG");
 
-        assertEquals(BLOB + "docs/extracted/17_2026-05-15/r02/gc/Currency.gc#L7", spot.url());
+        assertEquals(BLOB + "src/test/resources/17_2026-05-15/r02/extracted/gc/Currency.gc#L7", spot.url());
         assertFalse(sources.lists(REVISION, "gc", "Currency", "XCG"));
     }
 
@@ -77,7 +78,7 @@ class SourcesTest {
     void linksAMissingCodeToTheFileThatLacksIt() {
         var spot = sources.code(REVISION, "gc", "Currency", "XCG");
 
-        assertEquals(BLOB + "docs/extracted/17_2026-05-15/r02/gc/Currency.gc", spot.url());
+        assertEquals(BLOB + "src/test/resources/17_2026-05-15/r02/extracted/gc/Currency.gc", spot.url());
         assertTrue(spot.title().startsWith("XCG is not in the Currency.gc"), spot.title());
     }
 
@@ -86,10 +87,10 @@ class SourcesTest {
     void linksAnIndexCellAndTheOriginal() {
         var remark = sources.indexCell(REVISION, "Currency", "Remark on updates");
 
-        assertEquals(BLOB + "docs/extracted/17_2026-05-15/r02/xlsx/Index.csv?plain=1#L4", remark.url());
+        assertEquals(BLOB + "src/test/resources/17_2026-05-15/r02/extracted/xlsx/Index.csv?plain=1#L4", remark.url());
         assertEquals("Index sheet, cell D6 (Remark on updates) — v17b.xlsx", remark.title());
         assertEquals("Index sheet, cell B2 (Effective date) — v17b.xlsx", sources.indexDate(REVISION).title());
-        assertEquals(List.of(BLOB + "src/main/resources/downloaded-files/EN%2016931%20code%20list%20-%20XLSX/v17b.xlsx"),
+        assertEquals(List.of(ORIGINALS + "src/main/resources/downloaded-files/EN%2016931%20code%20list%20-%20XLSX/v17b.xlsx"),
                 sources.originals(REVISION).stream().map(Sources.Spot::url).toList());
     }
 
@@ -97,7 +98,7 @@ class SourcesTest {
     void mapsAComparedNormalizedFileToItsExtractedCopy() {
         var spot = sources.published(REVISION + "/normalized/xlsx/VAT ID.csv", "ANG");
 
-        assertEquals(BLOB + "docs/extracted/17_2026-05-15/r02/xlsx/VAT%20ID.csv?plain=1#L3", spot.url(),
+        assertEquals(BLOB + "src/test/resources/17_2026-05-15/r02/extracted/xlsx/VAT%20ID.csv?plain=1#L3", spot.url(),
                 "the line the code is written on, below the first line of the name wrapped before it");
     }
 

@@ -18,7 +18,7 @@ import java.util.HexFormat;
  * says what it is, next to every file it links to, and a {@code manifest.json} naming each file with its SHA-256.
  *
  * <pre>
- * EU-Codelist-Downloader/docs/en16931-code-list-comparison/
+ * docs/en16931-code-list-comparison/
  * ├── en16931-code-list-comparison.html
  * ├── about.html
  * ├── manifest.json

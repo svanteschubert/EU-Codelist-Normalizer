@@ -9,7 +9,11 @@
   <name>EU Code List Normalizer</name>
   <description>Extracts and normalizes EU Genericode releases and spreadsheet sheets as CSV.</description>
   <licenses>
-    <license><name>Apache License, Version 2.0</name><url>https://www.apache.org/licenses/LICENSE-2.0</url></license>
+    <license><name>GNU Affero General Public License v3.0 or later</name><url>https://www.gnu.org/licenses/agpl-3.0.html</url></license>
+    <license>
+      <name>Apache License, Version 2.0</name><url>https://www.apache.org/licenses/LICENSE-2.0</url>
+      <comments>GenericodeNormalizer.java only, adapted from ph-genericode by Philip Helger; see NOTICE</comments>
+    </license>
   </licenses>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

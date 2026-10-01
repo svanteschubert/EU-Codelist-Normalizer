@@ -178,7 +178,7 @@ public final class IndexReport {
                     .append(".</p>\n");
         }
         String chip = differing == 0 ? ValidatorReport.chip("ok", "same codes", null, null)
-                : ValidatorReport.chip("bad", differing + " of " + compared, null, null);
+                : ValidatorReport.chip("bad", differing + " of " + compared + " lists differ", null, null);
         String gist = differing == 0 ? "all " + compared + " lists published both ways agree"
                 : differing + " of " + compared + " lists contain other codes in the spreadsheet than in Genericode";
         return ValidatorReport.block(id + "-sheet-genericode", open && differing > 0, "Spreadsheet ⇄ Genericode", chip,
@@ -197,8 +197,9 @@ public final class IndexReport {
             }
             body.append(revisionNotes(revision));
         }
-        String chip = mismatching == 0 ? ValidatorReport.chip("ok", "all " + current.tabs().size() + " rows", null, null)
-                : ValidatorReport.chip("bad", mismatching + " of " + current.tabs().size() + " rows", null, null);
+        String chip = mismatching == 0
+                ? ValidatorReport.chip("ok", "all " + current.tabs().size() + " rows correct", null, null)
+                : ValidatorReport.chip("bad", mismatching + " of " + current.tabs().size() + " rows wrong", null, null);
         String gist = mismatching == 0 ? "every stated change happened, and every change was stated"
                 : "rows whose stated change is not what the spreadsheet and Genericode show";
         boolean dates = current.findings().stream().anyMatch(f -> f.severity() == IndexCheck.Severity.MISMATCH);
@@ -340,7 +341,8 @@ public final class IndexReport {
                     .append(escape(String.join("; ", outside))).append("</p>\n");
         }
         String chip = differing.isEmpty() ? ValidatorReport.chip("ok", "as 2017", null, null)
-                : ValidatorReport.chip("bad", differing.size() + " of " + current.terms().size() + " tabs", null, null);
+                : ValidatorReport.chip("bad", differing.size() + " of " + current.terms().size() + " tabs differ", null,
+                        null);
         String gist = (differing.isEmpty() ? "every Index row names the business terms of EN 16931-1:2017"
                 : "Index rows naming other business terms than EN 16931-1:2017")
                 + (changed.isEmpty() ? "" : "; " + changed.size() + " changed since the previous release");

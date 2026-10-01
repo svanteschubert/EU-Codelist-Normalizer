@@ -278,13 +278,14 @@ public final class ValidatorReport {
                 int differing = IndexReport.listedDiffering(current).size();
                 long compared = current.tabs().stream().filter(tab -> tab.listed() != null).count();
                 tiles.append(tile(differing == 0, "#" + declared + "-sheet-genericode", "Declared",
-                        "Spreadsheet ⇄ Genericode", differing == 0 ? "same codes" : differing + " of " + compared,
+                        "Spreadsheet ⇄ Genericode", differing == 0 ? "same codes"
+                                : differing + " of " + compared + " lists differ",
                         differing == 0 ? "all " + compared + " lists published both ways agree"
                                 : "lists with other codes in the spreadsheet than in Genericode"));
             }
             int mismatching = IndexReport.mismatching(current);
             tiles.append(tile(mismatching == 0, "#" + declared + "-index", "Declared", "Index change notes",
-                    mismatching == 0 ? "all correct" : mismatching + " of " + current.tabs().size() + " rows",
+                    mismatching == 0 ? "all correct" : mismatching + " of " + current.tabs().size() + " rows wrong",
                     mismatching == 0 ? "every stated change happened" : "state other changes than the code lists show"));
         }
         for (Syntax syntax : Syntax.values()) {
@@ -295,7 +296,7 @@ public final class ValidatorReport {
             }
             tiles.append(tile(implemented.differing() == 0, "#" + firstDiffering(latest, syntax, rules), "Implemented",
                     syntax + " validator", implemented.differing() == 0 ? "all rules agree"
-                            : implemented.differing() + " of " + implemented.compared() + " rules",
+                            : implemented.differing() + " of " + implemented.compared() + " rules differ",
                     implemented.differing() == 0 ? "every rule accepts exactly the declared codes"
                             : implemented.codes() + " codes implemented otherwise than declared"));
         }
@@ -310,7 +311,9 @@ public final class ValidatorReport {
     }
 
     private static String tile(boolean ok, String href, String kind, String title, String value, String note) {
-        return "<a class=\"tile " + (ok ? "ok" : "bad") + "\" href=\"" + escape(href) + "\"><span class=\"tile-kind\">"
+        // The part, declared or implemented, colours the tile's label as it colours that part of every date.
+        return "<a class=\"tile " + (ok ? "ok" : "bad") + " " + kind.toLowerCase(java.util.Locale.ROOT) + "\" href=\""
+                + escape(href) + "\"><span class=\"tile-kind\">"
                 + escape(kind) + "</span><span class=\"tile-title\">" + escape(title) + "</span><span class=\"tile-value\">"
                 + (ok ? "✓ " : "✗ ") + escape(value) + "</span><span class=\"tile-note\">" + escape(note) + "</span></a>\n";
     }
@@ -387,7 +390,8 @@ public final class ValidatorReport {
             }
             html.append("</summary>\n<div class=\"date-body\">\n");
 
-            html.append("<section class=\"part\"><h3>Declared <span class=\"quiet\">by the European Commission · ");
+            html.append("<section class=\"part declared\"><h3><span class=\"part-name\">Declared</span> ")
+                    .append("<span class=\"part-by\">by the European Commission · ");
             if (current != null) {
                 html.append("code lists ").append(escape(date.codeLists().directory()));
                 var originals = sources.originals(current.revision());
@@ -407,7 +411,8 @@ public final class ValidatorReport {
             }
             html.append("</section>\n");
 
-            html.append("<section class=\"part\"><h3>Implemented <span class=\"quiet\">by the validator · ")
+            html.append("<section class=\"part implemented\"><h3><span class=\"part-name\">Implemented</span> ")
+                    .append("<span class=\"part-by\">by the validator · ")
                     .append(escape(date.validator().tag())).append(newValidator ? ""
                             : ", in force since " + date.validator().effectiveDate())
                     .append("</span></h3>\n").append(implemented(report, date, latest)).append("</section>\n");
@@ -458,7 +463,7 @@ public final class ValidatorReport {
                         + totals.onlyInValidator() + " implemented but not published, " + totals.onlyPublished()
                         + " published but not implemented" + uncompared;
                 html.append(block(id, open && !opened, title, chip("bad", totals.disagreeing() + " of "
-                        + totals.compared() + " rules", null, null), escape(gist), "implemented", body));
+                        + totals.compared() + " rules differ", null, null), escape(gist), "implemented", body));
                 opened = true;
             }
             for (RuleComparison rule : rules) {

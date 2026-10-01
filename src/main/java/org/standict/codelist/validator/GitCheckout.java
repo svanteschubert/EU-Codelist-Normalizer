@@ -55,10 +55,11 @@ public final class GitCheckout {
             return Optional.of(text("symbolic-ref", "--short", "refs/remotes/origin/HEAD").replaceFirst("^origin/", ""));
         } catch (IOException e) {
             try {
-                String branch = text("rev-parse", "--abbrev-ref", "HEAD");
-                return branch.equals("HEAD") ? Optional.empty() : Optional.of(branch);
+                // symbolic-ref also names the branch of a repository without commits, which rev-parse cannot.
+                String branch = text("symbolic-ref", "--short", "-q", "HEAD");
+                return branch.isEmpty() ? Optional.empty() : Optional.of(branch);
             } catch (IOException ignored) {
-                return Optional.empty();
+                return Optional.empty(); // Detached.
             }
         }
     }

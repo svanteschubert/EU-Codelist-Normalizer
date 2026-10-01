@@ -23,6 +23,8 @@
   :target { scroll-margin-top: 1rem; }
   h2:target { color: var(--accent); }
   .back { font-size: .9rem; }
+  .notice { margin: .75rem 0 1rem; padding: .55rem .85rem; border: 1px solid var(--line); border-left: 4px solid var(--accent);
+            border-radius: .4rem; background: var(--panel); font-size: .92rem; }
   dl { margin: .5rem 0; }
   dt { font-weight: 600; margin-top: .6rem; }
   dd { margin: .1rem 0 0 1.2rem; }
@@ -32,6 +34,9 @@
 <body>
 <p class="back"><a href="index.html">← Back to the report</a></p>
 <h1>How the EN 16931 code lists are compared</h1>
+<p class="notice"><strong>Unofficial showcase.</strong> The authoritative code lists and validation artefacts are those
+the European Commission publishes in its <a href="https://ec.europa.eu/digital-building-blocks/sites/spaces/DIGITAL/pages/467108974/Registry+of+supporting+artefacts+to+implement+EN16931">Registry of supporting artefacts to implement EN16931</a>; where
+the report differs, the Registry prevails.</p>
 
 <p>An invoice following EN 16931 may only use the codes of the published code lists: currencies, countries, units,
 identifier schemes and so on. Two parties are involved:</p>
@@ -114,16 +119,18 @@ first:</p>
 <p>Every finding links to where it is written, or to the file that lacks it:</p>
 <dl>
   <dt>A code of the EU code lists</dt>
-  <dd>Its line in the extracted copy of the release: the Genericode file byte for byte as the archive holds it, or the
-      sheet as CSV. GitHub cannot show a line of the original XLSX or ZIP, so these copies are published next to this
-      report, in <code>docs/extracted/</code> of the EU-Codelist-Downloader repository. The link's title names the
-      original, and for a sheet the cell, such as <em>Currency sheet, cell C12</em>. A code a file does not list links to
-      that file.</dd>
+  <dd>Its line in the extracted text of the release: the Genericode file byte for byte as the archive holds it, or the
+      sheet as CSV. GitHub cannot show a line of the original XLSX or ZIP, so the link goes to the text the
+      <a href="https://github.com/svanteschubert/EU-Codelist-Normalizer">EU-Codelist-Normalizer</a> repository extracts
+      and versions, release by release, in <code>src/test/resources/&lt;release&gt;/rNN/extracted/</code>. The link's
+      title names the original, and for a sheet the cell, such as <em>Currency sheet, cell C12</em>. A code a file does
+      not list links to that file.</dd>
   <dt>A remark, a change flag or the business terms of the Index</dt>
   <dd>The tab's row of the Index sheet, with the cell in the link's title.</dd>
   <dt>The originals</dt>
   <dd>Each release links its workbook and Genericode archive, as the European Commission published them, in the
-      downloader repository.</dd>
+      <a href="https://github.com/svanteschubert/EU-Codelist-Downloader">EU-Codelist-Downloader</a> repository, which
+      downloads and keeps them.</dd>
   <dt>A validator rule</dt>
   <dd>The line of its Schematron file at the commit the release tag names, in ConnectingEurope/eInvoicing-EN16931:
       exactly the lines that were in force, even if the tag were ever moved.</dd>

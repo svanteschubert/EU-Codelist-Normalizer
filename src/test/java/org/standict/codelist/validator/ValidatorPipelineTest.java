@@ -91,51 +91,74 @@ class ValidatorPipelineTest {
         var result = new ValidatorPipeline(catalog).run(repository, output);
 
         assertNull(rule(result, "2024-06-01", Syntax.UBL, "BR-CL-01").link("389"));
-        assertFalse(Files.readString(output.resolve("validator/index.html")).contains("github.com/"));
+        assertFalse(Files.readString(output.resolve("validator/index.html")).contains("class=\"source\""),
+                "no link to where a finding is written");
     }
 
     /**
-     * Published into a downloader checkout on GitHub, every finding links to where it is written: a remark to its cell
-     * of the Index, a code to its line in the extracted copy, the release to its original workbook.
+     * With the release tree in a checkout on GitHub, every finding links to where it is written: a remark to its cell
+     * of the Index, a code to its line in the extracted file, and the release to its original workbook, which the
+     * downloader keeps. The downloader itself is only read.
      */
     @Test
-    void linksFindingsToWhereTheDownloaderPublishesThem() throws Exception {
-        Path downloader = Files.createDirectories(temp.resolve("EU-Codelist-Downloader"));
-        git(downloader, "init", "-q", "-b", "master");
-        git(downloader, "remote", "add", "origin", "https://github.com/svanteschubert/EU-Codelist-Downloader.git");
-        write(downloader.resolve("README.md"), "downloader\n");
-        git(downloader, "add", "README.md");
-        git(downloader, "-c", "user.name=Test", "-c", "user.email=test@example.org", "commit", "-q", "-m", "start");
-        Path extracted = downloader.resolve("docs/extracted");
+    void linksFindingsToTheExtractedFilesAndTheOriginals() throws Exception {
+        Path normalizer = checkout("EU-Codelist-Normalizer");
+        Path downloader = checkout("EU-Codelist-Downloader");
+        Path releases = normalizer.resolve("src/test/resources");
+        copy(output, releases);
+        Path report = normalizer.resolve("docs/en16931-code-list-comparison");
+        Path shared = temp.resolve("share/en16931-code-list-comparison");
 
-        var result = new ValidatorPipeline(catalog).run(repository, output, new ValidatorPipeline.Publication(
-                downloader, downloader.resolve("docs/en16931-code-list-comparison"), extracted));
+        var result = new ValidatorPipeline(catalog).run(repository, releases, new ValidatorPipeline.Publication(
+                downloader, List.of(report, shared)));
 
-        assertEquals(extracted, result.extracted());
-        assertEquals(Files.readString(output.resolve("02_2024-11-15/r01/extracted/xlsx/1001.csv")),
-                Files.readString(extracted.resolve("02_2024-11-15/r01/xlsx/1001.csv")), "the copies are verbatim");
-        assertEquals("extracted", json.readTree(extracted.resolve("manifest.json").toFile()).path("kind").asText());
-        String copies = "https://github.com/svanteschubert/EU-Codelist-Downloader/blob/master/docs/extracted/";
+        assertEquals(List.of(report.resolve(ReportFolder.PAGE), shared.resolve(ReportFolder.PAGE)), result.pages());
+        assertEquals(contents(report), contents(shared), "every copy of the report is identical");
+        assertFalse(Files.exists(downloader.resolve("docs")), "nothing is written into the downloader");
+        String extracted = "https://github.com/svanteschubert/EU-Codelist-Normalizer/blob/master/src/test/resources/"
+                + "02_2024-11-15/r01/extracted/";
         String page = Files.readString(result.page());
-        assertTrue(page.contains("href=\"" + copies + "02_2024-11-15/r01/xlsx/Index.csv?plain=1#L2\""),
+        assertTrue(page.contains("href=\"" + extracted + "xlsx/Index.csv?plain=1#L2\""),
                 "the remark links to its row of the Index");
         assertTrue(page.contains("title=\"Index sheet, cell F3 (Remark on updates) — EN16931 test.xlsx\""),
                 "and names its cell, past the blank row the extraction dropped");
-        assertTrue(page.contains("href=\"" + copies + "02_2024-11-15/r01/xlsx/1001.csv?plain=1#L6\""),
+        assertTrue(page.contains("href=\"" + extracted + "xlsx/1001.csv?plain=1#L6\""),
                 "the added 389 links to its line, below two wrapped names");
-        assertTrue(page.contains("href=\"" + copies + "02_2024-11-15/r01/gc/1001.gc#L"),
+        assertTrue(page.contains("href=\"" + extracted + "gc/1001.gc#L"),
                 "CII's unimplemented 389 links to where Genericode publishes it");
         assertTrue(page.contains("href=\"https://github.com/svanteschubert/EU-Codelist-Downloader/blob/master/"
                 + "src/main/resources/downloaded-files/EN%2016931%20code%20list%20-%20XLSX/EN16931%20test.xlsx\""),
-                "the original workbook");
+                "the original workbook, where the downloader keeps it");
 
-        // A copy published elsewhere would be linked wrongly, so it is not linked at all.
-        var elsewhere = new ValidatorPipeline(catalog).run(repository, output, new ValidatorPipeline.Publication(
-                downloader, null, temp.resolve("elsewhere/extracted")));
-        assertFalse(Files.readString(elsewhere.directory().resolve("index.html")).contains(copies));
-        // Nor is one folder ever published over the other.
-        assertThrows(IOException.class, () -> new ValidatorPipeline(catalog).run(repository, output,
-                new ValidatorPipeline.Publication(downloader, null, downloader.resolve("docs/en16931-code-list-comparison"))));
+        // A release tree outside a checkout on GitHub would be linked wrongly, so it is not linked at all.
+        var elsewhere = new ValidatorPipeline(catalog).run(repository, output,
+                new ValidatorPipeline.Publication(downloader, List.of()));
+        assertFalse(Files.readString(elsewhere.directory().resolve("index.html")).contains("class=\"source\" href=\""
+                + "https://github.com/svanteschubert/EU-Codelist-Normalizer"));
+    }
+
+    private static void copy(Path from, Path to) throws IOException {
+        try (var paths = Files.walk(from)) {
+            for (Path path : paths.toList()) {
+                Path target = to.resolve(from.relativize(path).toString());
+                if (Files.isDirectory(path)) {
+                    Files.createDirectories(target);
+                } else {
+                    Files.copy(path, target);
+                }
+            }
+        }
+    }
+
+    /** A Git checkout with one commit, whose origin is the repository of that name on GitHub. */
+    private Path checkout(String name) throws Exception {
+        Path checkout = Files.createDirectories(temp.resolve(name));
+        git(checkout, "init", "-q", "-b", "master");
+        git(checkout, "remote", "add", "origin", "https://github.com/svanteschubert/" + name + ".git");
+        write(checkout.resolve("README.md"), name + "\n");
+        git(checkout, "add", "README.md");
+        git(checkout, "-c", "user.name=Test", "-c", "user.email=test@example.org", "commit", "-q", "-m", "start");
+        return checkout;
     }
 
     /** The Time sheet has no Genericode counterpart, and CII is compared with the UNTDID 2475 column only. */
@@ -212,6 +235,8 @@ class ValidatorPipelineTest {
         assertTrue(links.containsAll(List.of("about.html", "rules.csv", "summary.csv", "index-claims.csv",
                 "manifest.json", "configuration/rule-catalog.csv", "configuration/business-terms-2017.csv",
                 "configuration/code-successions.csv", ReportFolder.PAGE)), links.toString());
+        // Links to the folder's own files must resolve inside it; links to the Registry and to GitHub leave it.
+        links.removeIf(link -> link.startsWith("https://"));
         for (String link : links) {
             assertTrue(Files.isRegularFile(folder.resolve(link)), "broken link " + link);
         }

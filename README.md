@@ -1,5 +1,17 @@
 # EU-Codelist-Normalizer
 
+> **Unofficial showcase.** The authoritative EN 16931 code lists and validation
+> artefacts are those the European Commission publishes in its
+> [Registry of supporting artefacts to implement EN16931](https://ec.europa.eu/digital-building-blocks/sites/spaces/DIGITAL/pages/467108974/Registry+of+supporting+artefacts+to+implement+EN16931).
+> Where this repository or its reports differ, the Registry prevails.
+
+**Report:** [EN 16931 code lists: declared and implemented](https://svanteschubert.github.io/EU-Codelist-Normalizer/en16931-code-list-comparison/en16931-code-list-comparison.html),
+on this repository's GitHub Pages site,
+[svanteschubert.github.io/EU-Codelist-Normalizer](https://svanteschubert.github.io/EU-Codelist-Normalizer/).
+For every effective date it shows whether the spreadsheet, the Genericode files and the
+Index sheet's change notes agree, and whether the CEN validator implements the declared
+codes; each finding links to where it is written.
+
 Normalize the EU's downloaded Genericode code lists into consistently ordered,
 formatted Genericode XML, and extract and sort EN16931 spreadsheet sheets as CSV.
 Releases are grouped by version and effective date under `src/test/resources/`.
@@ -8,12 +20,12 @@ and `normalized/` directories. Comparisons and change reports are future work.
 
 ## Separation of responsibilities
 
-[`EU-Codelist-Downloader`](../EU-Codelist-Downloader) acquires and archives the
-official artefacts. This repository reads its registry, ZIP files and workbooks locally,
-without changing or downloading anything in that sibling repository. The one exception
-is `--validator`, which publishes its report and the extracted text it links to into
-two folders of the downloader's `docs/`, served by GitHub Pages; each carries this
-generator's `manifest.json`, and nothing else there is touched.
+[`EU-Codelist-Downloader`](https://github.com/svanteschubert/EU-Codelist-Downloader)
+acquires and archives the official artefacts. This repository reads its registry, ZIP
+files and workbooks locally, without changing or downloading anything in that sibling
+repository. What this repository makes of them stays here: the extracted and
+normalized releases in `src/test/resources/`, and the comparison report, which links
+to their lines, in `docs/`, served by GitHub Pages.
 
 Normalization uses Philip Helger's
 [`com.helger:ph-genericode:8.1.0`](https://github.com/phax/ph-genericode/tree/ph-genericode-8.1.0)
@@ -170,6 +182,46 @@ files and their empty directories, including previous flat revision and hash-bas
 layouts. Unrelated files and regression fixtures are preserved. Modified or
 missing tracked files and untracked destination collisions fail before
 publication; the error identifies the path that needs attention.
+
+## History branch
+
+The branch `code-history` holds one commit per effective date, oldest first, so that
+Git shows what changed from one release to the next:
+
+```bash
+./build-history-branch.sh
+git diff code-lists-16_2025-11-15 code-lists-17_2026-05-15 -- gc/Currency.gc
+git log --oneline code-history -- xlsx/ICD.csv
+```
+
+Each commit holds the `normalized/` files in force from its date at fixed paths,
+`xlsx/` and `gc/`: those of the last revision of its release, so `17_2026-05-15`
+holds the corrected `r02`. Its `RELEASE.md` names the original files with their URL
+and SHA-256, and the earlier revisions they replace. It is dated by the effective
+date and tagged `code-lists-<release>`. A release without Genericode files, such as
+`08_2021-11-15`, keeps those of the last release that had them, as its `RELEASE.md`
+and commit message state, so the Genericode diff spans the gap instead of deleting
+and re-adding every file.
+
+The branch is derived from the committed release data, so the script needs no
+options and works out what to do by itself. It keeps every commit that is still
+right, the same date from the same revisions with the same files, and never adds a
+date twice. A new release is appended. A correction, such as a new revision of a
+release, rebuilds the branch from that date on, and a branch built one commit per
+revision is rebuilt as a whole. The script prints the commands that publish the
+result: a plain push when it only appended, a force push and the tags to replace
+when it rebuilt. To keep the branch up to date automatically, install a
+`post-commit` hook; after every commit that changes release data it runs the
+script, and stays quiet otherwise:
+
+```bash
+./build-history-branch.sh --install-hook
+./build-history-branch.sh --remove-hook
+```
+
+The branch is built in a temporary worktree, never in your checkout, from committed
+data only, and never pushed. The commits use your Git configuration and are signed
+when `commit.gpgsign` is set.
 
 ## Normalization policy
 
@@ -343,38 +395,40 @@ validator/
 - **Dates:** the effective date the Index states is compared with the date the
   release is filed under. The 2019 workbooks state only a publication date, on `Main`.
 
-The report is published, with the extracted text its links point into, to the
-downloader's GitHub Pages folder (`--report-folder PATH` and `--extracted-folder PATH`
-to change either):
+The report is published to this repository's GitHub Pages folder (`--report-folder
+PATH`, which may be repeated, to change it):
 
 ```text
-EU-Codelist-Downloader/docs/
-├── en16931-code-list-comparison/
-│   ├── en16931-code-list-comparison.html   # the report; open it in a browser
-│   ├── about.html                          # how it is compared, where links go, every file
-│   ├── manifest.json                       # every file with its size and SHA-256
-│   ├── summary.csv  rules.csv  index-claims.csv  business-terms.csv  index-releases.csv
-│   └── configuration/validator-releases.csv  rule-catalog.csv  business-terms-2017.csv  code-successions.csv
-└── extracted/
-    ├── manifest.json
-    └── 17_2026-05-15/r02/{gc,xlsx}/...     # every revision's extracted/, with its source.json
+docs/
+├── index.html  .nojekyll                   # hand-written landing page
+└── en16931-code-list-comparison/
+    ├── en16931-code-list-comparison.html   # the report; open it in a browser
+    ├── about.html                          # how it is compared, where links go, every file
+    ├── manifest.json                       # every file with its size and SHA-256
+    ├── summary.csv  rules.csv  index-claims.csv  business-terms.csv  index-releases.csv
+    └── configuration/validator-releases.csv  rule-catalog.csv  business-terms-2017.csv  code-successions.csv
 ```
+
+To serve it, enable *Settings → Pages → Deploy from a branch*, branch `master`,
+folder `/docs`; the site is then at `https://svanteschubert.github.io/EU-Codelist-Normalizer/`.
 
 Every finding links to where it is written, or to the file that lacks it:
 
-- **EU code lists:** a code to its line in the extracted copy on GitHub (sheets as
-  CSV with `?plain=1#Lnn`, Genericode files with `#Lnn`), a remark or business terms
-  to the tab's row of the Index. The title names the original file and the workbook
-  cell, counted with the omitted rows. Each release links its original XLSX and ZIP
-  in the downloader's `downloaded-files/`. The GitHub address and branch come from
-  the downloader checkout's `origin`; copies published outside it are not linked.
+- **EU code lists:** a code to its line in the release's `extracted/` files on GitHub,
+  `src/test/resources/<release>/rNN/extracted/` (sheets as CSV with `?plain=1#Lnn`,
+  Genericode files with `#Lnn`), a remark or business terms to the tab's row of the
+  Index. The title names the original file and the workbook cell, counted with the
+  omitted rows. Each release links its original XLSX and ZIP in the downloader's
+  `downloaded-files/`. The GitHub addresses and branches come from the `origin` of this
+  checkout and of the downloader's; a release tree outside a checkout on GitHub is not
+  linked.
 - **Validator:** a code to its line of the Schematron file at the commit the release
   tag names, so the link stays exact even if a tag moves.
 
 Links are absolute, so the report folder still works when copied to any web server
 or file share; `index-claims.csv` and `rules.csv` carry the same links.
 
-Both folders, like the `validator/` tree, are replaced as a whole on each run and are
+The report folder, like the `validator/` tree, is replaced as a whole on each run and is
 byte-identical for the same inputs. A `validator/` directory without
 `validator-index.json` is refused, as is a published folder without this generator's
 `manifest.json` of the same kind.
@@ -412,5 +466,14 @@ explained in [13-EAS-README.md](src/test/resources/13-EAS-README.md).
 
 ## License
 
-Apache License 2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE). The downloaded
-code-list contents retain their upstream notices and provenance.
+GNU Affero General Public License, version 3 or later (`AGPL-3.0-or-later`); see
+[LICENSE](LICENSE) and [NOTICE](NOTICE). The license covers this repository's code
+and documentation, with one exception:
+[`GenericodeNormalizer.java`](src/main/java/org/standict/codelist/normalize/GenericodeNormalizer.java)
+is adapted from `Genericode10EN16931CodeListMarshallerTest` of
+[ph-genericode](https://github.com/svanteschubert/ph-genericode), by Svante Schubert
+and Philip Helger, and keeps its copyright notices and its license, the Apache
+License 2.0 ([LICENSE-APACHE-2.0](LICENSE-APACHE-2.0)). The code lists and artefacts
+the European Commission publishes, including the extracted and normalized copies
+under `src/test/resources/`, retain their upstream terms, notices and provenance.
+ph-genericode and Apache POI are used under the Apache License 2.0.

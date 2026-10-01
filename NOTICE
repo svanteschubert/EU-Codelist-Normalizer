@@ -1,11 +1,27 @@
 EU Code List Normalizer
 Copyright 2026 Svante Schubert
 
+Licensed under the GNU Affero General Public License, version 3 or (at your
+option) any later version (SPDX: AGPL-3.0-or-later); see LICENSE. The one
+exception is noted below.
+
+This is an unofficial showcase. The authoritative EN 16931 code lists and
+validation artefacts are those the European Commission publishes in its
+Registry of supporting artefacts to implement EN16931:
+https://ec.europa.eu/digital-building-blocks/sites/spaces/DIGITAL/pages/467108974/Registry+of+supporting+artefacts+to+implement+EN16931
+
+src/main/java/org/standict/codelist/normalize/GenericodeNormalizer.java is
+adapted from Genericode10EN16931CodeListMarshallerTest of ph-genericode
+(https://github.com/svanteschubert/ph-genericode), by Svante Schubert and
+Philip Helger. It keeps its copyright notices, Copyright (C) 2014-2025 Philip
+Helger (www.helger.com), and its license, the Apache License 2.0; see
+LICENSE-APACHE-2.0.
+
 This project uses ph-genericode by Philip Helger under the Apache License 2.0.
 Spreadsheet extraction uses Apache POI under the Apache License 2.0.
-The normalization approach is based on Genericode10EN16931CodeListMarshallerTest
-by Svante Schubert and Philip Helger in svanteschubert/ph-genericode.
 
 The EAS regression fixtures and normalized outputs originate from the European
 Commission's Registry of supporting artefacts to implement EN16931.
-Original annotations and source provenance are preserved.
+Original annotations and source provenance are preserved. The license above
+does not apply to them, nor to any other code list or artefact the European
+Commission publishes.

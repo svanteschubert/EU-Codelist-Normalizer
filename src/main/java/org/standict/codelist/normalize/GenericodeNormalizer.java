@@ -1,8 +1,26 @@
 /*
+ * Copyright (C) 2014-2025 Philip Helger (www.helger.com)
+ * philip[at]helger[dot]com
  * Copyright 2026 Svante Schubert
- * Licensed under the Apache License, Version 2.0.
- * Row normalization follows the EN16931 marshalling example by
- * Svante Schubert and Philip Helger (ph-genericode, Apache-2.0).
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * Adapted from Genericode10EN16931CodeListMarshallerTest of ph-genericode
+ * (https://github.com/svanteschubert/ph-genericode), the EN16931 marshalling
+ * example by Svante Schubert and Philip Helger: the ordering of rows by code
+ * and the Genericode output settings. Changed here: secure XML parsing, a
+ * check for missing and duplicate codes, and a base-36 order without integer
+ * overflow or ambiguous ties.
  */
 package org.standict.codelist.normalize;
 
