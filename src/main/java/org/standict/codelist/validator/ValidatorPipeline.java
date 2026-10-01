@@ -56,9 +56,24 @@ public final class ValidatorPipeline {
 
     /**
      * @param page the page of the shareable report folder, or {@code null} when none was requested
+     * @param extracted the folder the extracted copies were published to, or {@code null} when none was requested
      */
     public record Result(int releases, int rules, ValidatorComparison.Report report, IndexCheck.Report index,
-            Path directory, Path page) {}
+            Path directory, Path page, Path extracted) {}
+
+    /**
+     * Where the report and the extracted copies it links to are published, each {@code null} for not at all.
+     *
+     * @param downloader the downloader checkout, whose GitHub origin serves the copies and the original files; the
+     *     report links to them only when {@code extractedFolder} lies inside it
+     * @param reportFolder the report as a folder to share
+     * @param extractedFolder the extracted text of every release, which the report's links point into
+     */
+    public record Publication(Path downloader, Path reportFolder, Path extractedFolder) {
+        public static Publication none() {
+            return new Publication(null, null, null);
+        }
+    }
 
     /**
      * @param validatorCheckout checkout of the eInvoicing-EN16931 repository, which is only ever read
@@ -66,13 +81,17 @@ public final class ValidatorPipeline {
      *     {@code validator/}
      */
     public Result run(Path validatorCheckout, Path outputRoot) throws IOException {
-        return run(validatorCheckout, outputRoot, null);
+        return run(validatorCheckout, outputRoot, Publication.none());
     }
 
     /**
      * @param reportFolder where to publish the report as a folder to share, or {@code null} for none
      */
     public Result run(Path validatorCheckout, Path outputRoot, Path reportFolder) throws IOException {
+        return run(validatorCheckout, outputRoot, new Publication(null, reportFolder, null));
+    }
+
+    public Result run(Path validatorCheckout, Path outputRoot, Publication publication) throws IOException {
         var repository = new ValidatorRepository(validatorCheckout);
         Path output = outputRoot.toRealPath();
         if (output.startsWith(repository.root()) || repository.root().startsWith(output)) {
@@ -80,6 +99,14 @@ public final class ValidatorPipeline {
         }
         Path destination = output.resolve(DIRECTORY);
         requireOwnedOrAbsent(destination);
+        // Refuse a folder that is not ours before anything is replaced.
+        if (publication.extractedFolder() != null) {
+            ReportFolder.requireOwnedOrAbsent(publication.extractedFolder().toAbsolutePath().normalize(),
+                    ExtractedFolder.KIND);
+        }
+        if (publication.reportFolder() != null) {
+            ReportFolder.requireOwnedOrAbsent(publication.reportFolder().toAbsolutePath().normalize(), ReportFolder.KIND);
+        }
         CodeListReleases codeLists = CodeListReleases.read(output);
 
         Path staging = Files.createTempDirectory(output, ".validator-");
@@ -92,9 +119,11 @@ public final class ValidatorPipeline {
             index.put("syntaxes", "UBL, CII");
             ArrayNode releases = index.putArray("releases");
             int rules = 0;
+            var commits = new LinkedHashMap<String, String>();
             for (ValidatorCatalog.Release release : catalog.releases()) {
                 ObjectNode entry = releases.addObject();
-                entry.put("tag", release.tag()).put("commit", repository.commit(release.tag()))
+                commits.put(release.tag(), repository.commit(release.tag()));
+                entry.put("tag", release.tag()).put("commit", commits.get(release.tag()))
                         .put("effective_date", release.effectiveDate().toString())
                         .put("effective_date_source", release.source()).put("directory", release.directory());
                 var bySyntax = new EnumMap<Syntax, List<SchematronCodeLists.RuleCodes>>(Syntax.class);
@@ -124,9 +153,11 @@ public final class ValidatorPipeline {
                 }
                 extracted.put(release.tag(), bySyntax);
             }
-            var report = new ValidatorComparison(repository.webUrl().orElse(null)).compare(catalog, extracted, codeLists);
+            var report = new ValidatorComparison(repository.webUrl().orElse(null), commits)
+                    .compare(catalog, extracted, codeLists);
             var indexCheck = new IndexCheck().check(codeLists);
-            new ValidatorReport().write(report, indexCheck, staging);
+            var sources = Sources.of(output, publication.downloader(), publication.extractedFolder());
+            new ValidatorReport(sources).write(report, indexCheck, staging);
             new ReportFolder().writeManifest(staging, "index.html");
             index.put("compared_dates", report.dates().size());
             index.put("index_revisions_checked", indexCheck.revisions().size());
@@ -137,10 +168,15 @@ public final class ValidatorPipeline {
                     .flatMap(r -> r.terms().stream()).filter(BusinessTerms.Check::differsFrom2017).count());
             Files.writeString(staging.resolve(INDEX),
                     json.writerWithDefaultPrettyPrinter().writeValueAsString(index) + "\n", StandardCharsets.UTF_8);
-            // Publish only after every release has been read and compared.
+            // Publish only after every release has been read and compared, the copies before the report linking to them.
             replace(staging, destination);
-            Path page = reportFolder == null ? null : new ReportFolder().publish(destination, reportFolder);
-            return new Result(catalog.releases().size(), rules, report, indexCheck, destination, page);
+            if (publication.extractedFolder() != null) {
+                new ExtractedFolder().publish(output, publication.extractedFolder());
+            }
+            Path page = publication.reportFolder() == null ? null
+                    : new ReportFolder().publish(destination, publication.reportFolder());
+            return new Result(catalog.releases().size(), rules, report, indexCheck, destination, page,
+                    publication.extractedFolder());
         } finally {
             deleteRecursively(staging);
         }

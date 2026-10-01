@@ -230,9 +230,11 @@ public final class NormalizationPipeline {
         Path destination = staging.resolve(source.directory("extracted"));
         Path normalized = staging.resolve(source.directory("normalized"));
         for (var sheet : extractor.extract(source.archive(), destination, normalized)) {
-            files.addObject().put("filename", sheet.filename()).put("source_sheet", sheet.sheet())
-                    .put("rows", sheet.rows()).put("columns", sheet.columns())
-                    .put("sha256", sha256(destination.resolve(sheet.filename())));
+            var file = files.addObject().put("filename", sheet.filename()).put("source_sheet", sheet.sheet())
+                    .put("rows", sheet.rows()).put("columns", sheet.columns());
+            // The workbook rows left out as blank, so that a CSV record can be cited by its row in the workbook.
+            sheet.omittedRows().forEach(file.putArray("omitted_rows")::add);
+            file.put("sha256", sha256(destination.resolve(sheet.filename())));
             normalizedFiles.addObject().put("filename", sheet.filename()).put("source_sheet", sheet.sheet())
                     .put("rows", sheet.rows()).put("columns", sheet.columns())
                     .put("sha256", sha256(normalized.resolve(sheet.filename())));

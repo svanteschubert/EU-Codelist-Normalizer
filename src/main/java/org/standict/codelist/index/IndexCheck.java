@@ -51,7 +51,8 @@ public final class IndexCheck {
      *
      * @param sheet {@code null} for the first release, which has nothing to be compared with
      * @param genericode {@code null} when this revision or every earlier release lacks the Genericode file
-     * @param genericodeBaseline the release the Genericode file was compared with, or empty
+     * @param genericodeBaseline the release revision the Genericode file was compared with, such as
+     *     {@code 16_2025-11-15/r01}, or empty
      * @param genericodeSpan how many releases the Genericode comparison spans; 1 for the previous release
      * @param listed the sheet (before) against the Genericode file (after) of this revision: {@code removed} are the
      *     codes only the sheet lists, {@code added} those only Genericode lists; {@code null} without Genericode
@@ -208,12 +209,12 @@ public final class IndexCheck {
                                     }
                                 });
                     }
-                    checkGenericode(gcChanges, sheetOverSpan, claimedOverSpan, span, genericodeBaseline.directory(),
+                    checkGenericode(gcChanges, sheetOverSpan, claimedOverSpan, span, revisionOf(genericodeBaseline),
                             tabFindings);
                 }
             }
             tabs.add(new TabCheck(entry.tab(), claims, sheetChanges, gcChanges,
-                    gcChanges == null ? "" : genericodeBaseline.directory(), gcChanges == null ? 0 : span,
+                    gcChanges == null ? "" : revisionOf(genericodeBaseline), gcChanges == null ? 0 : span,
                     List.copyOf(tabFindings), listed));
         }
 
@@ -491,6 +492,11 @@ public final class IndexCheck {
 
     private static void merge(Map<String, Map<String, List<String>>> into, Map<String, Map<String, List<String>>> from) {
         from.forEach((tab, files) -> into.computeIfAbsent(tab, key -> new TreeMap<>()).putAll(files));
+    }
+
+    /** {@code 16_2025-11-15/r01}: the revision whose Genericode files are a release's, the highest that has them. */
+    private static String revisionOf(CodeListReleases.Release release) {
+        return release.directory() + "/" + release.genericode().getParent().getParent().getFileName();
     }
 
     private static <T> T last(List<T> list) {

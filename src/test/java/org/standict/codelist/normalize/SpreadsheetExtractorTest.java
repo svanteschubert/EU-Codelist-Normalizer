@@ -33,7 +33,10 @@ class SpreadsheetExtractorTest {
         Path output = temp.resolve("csv");
         var results = new SpreadsheetExtractor().extract(source, output);
         assertEquals(3, results.size());
-        assertEquals(new SpreadsheetExtractor.SheetResult("Code list", "Code list.csv", 2, 3), results.get(0));
+        assertEquals(new SpreadsheetExtractor.SheetResult("Code list", "Code list.csv", 2, 3, java.util.List.of(1, 3)),
+                results.get(0));
+        assertEquals(2, results.get(0).workbookRow(0), "the first CSV record is workbook row 2");
+        assertEquals(4, results.get(0).workbookRow(1), "the second skips the blank row 3");
         assertEquals("\"0009\",\"\",\"  Grüß, \"\"世界\"\"\r\nnext line  \"\n"
                 + "\"\",\"0002\",\"\"\n", Files.readString(output.resolve("Code list.csv")));
         assertEquals("\"Keep me\"\n", Files.readString(output.resolve("Hidden notes.csv")));

@@ -193,10 +193,33 @@ public final class Canonical {
      * of such a cell into a row of its own, and its text into a code. Records whose cells are all blank are skipped.
      */
     public static List<List<String>> parseCsv(String text) {
-        var table = new ArrayList<List<String>>();
+        return parseCsvRecords(text).stream().map(CsvRecord::cells)
+                .filter(cells -> cells.stream().anyMatch(value -> !value.isBlank())).toList();
+    }
+
+    /**
+     * One record of a CSV file and the lines it is written on.
+     *
+     * @param line 1-based; a record whose quoted cell spans lines starts the next one further down
+     * @param cellLines the line each cell starts on, which differs from {@code line} after a cell spanning lines
+     */
+    public record CsvRecord(int line, List<String> cells, List<Integer> cellLines) {
+        /** The line {@code column} starts on, or the record's first line when it has no such cell. */
+        public int lineOf(int column) {
+            return column >= 0 && column < cellLines.size() ? cellLines.get(column) : line;
+        }
+    }
+
+    /** Every record of a CSV file, blank ones included, each with the line it starts on. */
+    public static List<CsvRecord> parseCsvRecords(String text) {
+        var records = new ArrayList<CsvRecord>();
         var record = new ArrayList<String>();
         var cell = new StringBuilder();
+        var cellLines = new ArrayList<Integer>();
         boolean quoted = false;
+        int line = 1;
+        int start = 1;
+        int cellStart = 1;
         for (int i = 0; i < text.length(); i++) {
             char character = text.charAt(i);
             if (quoted) {
@@ -209,30 +232,36 @@ public final class Canonical {
                     }
                 } else {
                     cell.append(character);
+                    if (character == '\n') {
+                        line++;
+                    }
                 }
             } else if (character == '"') {
                 quoted = true;
             } else if (character == ',') {
                 record.add(cell.toString());
+                cellLines.add(cellStart);
                 cell.setLength(0);
+                cellStart = line;
             } else if (character == '\n') {
                 record.add(cell.toString());
+                cellLines.add(cellStart);
                 cell.setLength(0);
-                addUnlessBlank(table, record);
+                records.add(new CsvRecord(start, List.copyOf(record), List.copyOf(cellLines)));
                 record = new ArrayList<>();
+                cellLines.clear();
+                start = ++line;
+                cellStart = line;
             } else if (character != '\r') {
                 cell.append(character);
             }
         }
-        record.add(cell.toString());
-        addUnlessBlank(table, record);
-        return table;
-    }
-
-    private static void addUnlessBlank(List<List<String>> table, List<String> record) {
-        if (record.stream().anyMatch(value -> !value.isBlank())) {
-            table.add(List.copyOf(record));
+        if (!record.isEmpty() || cell.length() > 0) {
+            record.add(cell.toString());
+            cellLines.add(cellStart);
+            records.add(new CsvRecord(start, List.copyOf(record), List.copyOf(cellLines)));
         }
+        return List.copyOf(records);
     }
 
     /** Minimal RFC 4180 reader for one line of the catalogue resources, whose cells never span lines. */

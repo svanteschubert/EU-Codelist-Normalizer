@@ -1,16 +1,17 @@
 {
   "format_version" : 1,
   "generator" : "eu-codelist-normalizer --validator",
+  "kind" : "report",
   "page" : "index.html",
   "files" : [ {
     "path" : "index.html",
-    "bytes" : 1864944,
-    "sha256" : "e08e46bb10f5eef845cc97e882fab297af794a3b9123ff09f1e2e24f29ab1d87",
+    "bytes" : 2858824,
+    "sha256" : "dffbbec638c6e1e53f43eb3c068d66b2585ac3b3ff366fbc9ff1a26cca0c3fbb",
     "description" : "the comparison report; open it in a browser"
   }, {
     "path" : "about.html",
-    "bytes" : 9087,
-    "sha256" : "2111048b1a8dc088734b70cdb696e7ca83e387889edfc419b0c565f822b185f0",
+    "bytes" : 10302,
+    "sha256" : "e099f090fcbc150bff06b39fecf0111c94db108f2c5a5d0ccb39e679332575ac",
     "description" : "how each comparison works, and what each file holds"
   }, {
     "path" : "summary.csv",
@@ -19,13 +20,13 @@
     "description" : "per effective date and syntax: rules compared, rules agreeing, codes that differ"
   }, {
     "path" : "rules.csv",
-    "bytes" : 402998,
-    "sha256" : "f8c4be62b0b56c1c4719fb922f399f2252377d66550c71e78929eb84a5e9f4c6",
+    "bytes" : 428978,
+    "sha256" : "3ed6ae1cc595947b4189835f76d59c08f56c9bf21f05eb267ff0a8213df12b26",
     "description" : "per effective date, syntax and rule: every differing code, with its name"
   }, {
     "path" : "index-claims.csv",
-    "bytes" : 57746,
-    "sha256" : "bdba8647de2a460071a111b67e85a731cc0b3f1559667dff7c4c753ced9a3296",
+    "bytes" : 165683,
+    "sha256" : "b3c2fdd7f2847ba7d91b0bd102d168cc5b099f18d59511d7913e738064173269",
     "description" : "per release revision and Index row: stated against actual changes in sheet and Genericode"
   }, {
     "path" : "business-terms.csv",

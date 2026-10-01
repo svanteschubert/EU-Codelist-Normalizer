@@ -65,13 +65,20 @@ public final class ValidatorReport {
     private static final int CODES_SHOWN = 24;
 
     private final Successions successions;
+    private final Sources sources;
 
     public ValidatorReport() throws IOException {
-        this(Successions.load());
+        this(Sources.none());
     }
 
-    ValidatorReport(Successions successions) {
+    /** @param sources where the published codes are written, for the links; {@link Sources#none()} for none */
+    public ValidatorReport(Sources sources) throws IOException {
+        this(Successions.load(), sources);
+    }
+
+    ValidatorReport(Successions successions, Sources sources) {
         this.successions = successions;
+        this.sources = sources;
     }
 
     public void write(ValidatorComparison.Report report, Path directory) throws IOException {
@@ -85,7 +92,7 @@ public final class ValidatorReport {
         Files.createDirectories(directory);
         writeCsv(directory.resolve("summary.csv"), summary(report));
         writeCsv(directory.resolve("rules.csv"), rules(report));
-        var sections = index == null ? null : new IndexReport(index, successions);
+        var sections = index == null ? null : new IndexReport(index, successions, sources);
         if (sections != null) {
             writeCsv(directory.resolve("index-claims.csv"), sections.claimsCsv());
             writeCsv(directory.resolve("business-terms.csv"), sections.businessTermsCsv());
@@ -382,8 +389,13 @@ public final class ValidatorReport {
 
             html.append("<section class=\"part\"><h3>Declared <span class=\"quiet\">by the European Commission · ");
             if (current != null) {
-                html.append("code lists ").append(escape(date.codeLists().directory())).append("</span></h3>\n")
-                        .append(sections.declarationHtml(id, revisions, latest));
+                html.append("code lists ").append(escape(date.codeLists().directory()));
+                var originals = sources.originals(current.revision());
+                if (!originals.isEmpty()) {
+                    html.append(" · originals: ").append(originals.stream().map(spot -> linked(
+                            escape(spot.title().replaceFirst(" — .*", "")), spot)).collect(Collectors.joining(", ")));
+                }
+                html.append("</span></h3>\n").append(sections.declarationHtml(id, revisions, latest));
             } else if (newCodeLists) {
                 html.append("code lists ").append(escape(date.codeLists().directory())).append("</span></h3>\n")
                         .append("<p class=\"block-none\">No Index sheet to check.</p>\n");
@@ -505,6 +517,15 @@ public final class ValidatorReport {
      * ({@code AN → BQ CW SX}); more than four pairs of a kind without a source, such as codes changing case, on one line.
      */
     public static String successionLines(List<Successions.Pair> pairs) {
+        return successionLines(pairs, ValidatorReport::escape, ValidatorReport::escape);
+    }
+
+    /**
+     * @param oldCode renders a code that left, such as a link to the line that listed it
+     * @param newCode renders a code that came
+     */
+    public static String successionLines(List<Successions.Pair> pairs, Function<String, String> oldCode,
+            Function<String, String> newCode) {
         var lines = new StringBuilder();
         var byOld = new java.util.LinkedHashMap<String, List<Successions.Pair>>();
         var many = new java.util.LinkedHashMap<String, List<Successions.Pair>>();
@@ -516,9 +537,9 @@ public final class ValidatorReport {
                         group.forEach(pair -> byOld.computeIfAbsent(pair.oldCode(), key -> new ArrayList<>()).add(pair));
                     }
                 });
-        byOld.forEach((old, group) -> lines.append("<div class=\"reworded\"><code>").append(escape(old))
-                .append("</code> → <code>").append(escape(group.stream().map(Successions.Pair::newCode)
-                        .collect(Collectors.joining(" ")))).append("</code> <span class=\"quiet\">")
+        byOld.forEach((old, group) -> lines.append("<div class=\"reworded\"><code>").append(oldCode.apply(old))
+                .append("</code> → <code>").append(group.stream().map(pair -> newCode.apply(pair.newCode()))
+                        .collect(Collectors.joining(" "))).append("</code> <span class=\"quiet\">")
                 .append(escape(group.get(0).when())).append("</span> ").append(wikipedia(group.get(0))).append("</div>"));
         many.forEach((kind, group) -> lines.append("<div class=\"reworded\">").append(group.size()).append(" codes ")
                 .append(escape(kind)).append(": <code>").append(escape(group.stream().limit(6)
@@ -575,7 +596,7 @@ public final class ValidatorReport {
         var lines = new StringBuilder("<td class=\"differences\"><ul>");
         int shown = 0;
         int remaining = codes.size();
-        String where = rule.rule() + " in " + rule.syntax().fileName() + " of " + rule.validatorTag();
+        String where = rule.rule() + " in " + rule.syntax().fileName() + " of " + rule.validatorTag() + commit(rule);
         for (var entry : codes.entrySet()) {
             String code = entry.getKey();
             if (paired.contains(code) && !groups.containsKey(code)) {
@@ -590,17 +611,18 @@ public final class ValidatorReport {
             if (groups.containsKey(code)) {
                 var group = groups.get(code);
                 remaining -= 1 + group.size();
-                lines.append(successionLine(rule, side, group, implemented, where));
+                lines.append(successionLine(rule, side, group, implemented, where, sources));
                 continue;
             }
             remaining--;
             var description = side.names().get(code);
             String link = rule.link(code);
+            Sources.Spot published = sources.published(side.source(), code);
             String kind = implemented
                     ? linked("implemented", link, code + " is listed by " + where + ", line "
-                            + rule.lines().getOrDefault(code, 0)) + ", not published"
-                    : "published, " + linked("not implemented", link, code + " is missing from the list of " + where
-                            + ", which starts on line " + rule.listLine());
+                            + rule.lines().getOrDefault(code, 0)) + ", " + linked("not published", published)
+                    : linked("published", published) + ", " + linked("not implemented", link, code
+                            + " is missing from the list of " + where + ", which starts on line " + rule.listLine());
             String provenance = description == null || description.from().isEmpty() ? ""
                     : (description.from().compareTo(rule.codeListRelease()) < 0 ? "last listed in "
                             : "first listed in ") + description.from();
@@ -632,14 +654,17 @@ public final class ValidatorReport {
      * line for an old code and its successors, linking each to where the validator lists it or would list it.
      */
     private static String successionLine(RuleComparison rule, Side side, List<Successions.Pair> group,
-            boolean oldImplemented, String where) {
+            boolean oldImplemented, String where, Sources sources) {
         Successions.Pair first = group.get(0);
         String old = first.oldCode();
         var successors = group.stream().map(Successions.Pair::newCode).toList();
         var description = successors.size() == 1 ? side.names().get(successors.get(0)) : null;
+        // The code the published list has links to where it is published; the other one to the validator's line.
+        Function<String, String> render = code -> oldImplemented == code.equals(old) ? escape(code)
+                : linked(escape(code), sources.published(side.source(), code));
         String line = "<li class=\"renamed\" title=\"" + escape(old + " → " + String.join(" ", successors) + ": "
-                + first.description()) + "\"><code>" + escape(old) + "</code> → <code>"
-                + escape(String.join(" ", successors)) + "</code> ";
+                + first.description()) + "\"><code>" + render.apply(old) + "</code> → <code>"
+                + successors.stream().map(render).collect(Collectors.joining(" ")) + "</code> ";
         if (description != null) {
             line += "<span class=\"name\">(" + escape(shorten(description.name())) + ")</span> ";
         }
@@ -659,6 +684,18 @@ public final class ValidatorReport {
 
     private static String shorten(String name) {
         return name.length() > 70 ? name.substring(0, 69) + "…" : name;
+    }
+
+    /** {@code html} as a link to where a {@link Sources.Spot} is written, or plain when there is none. */
+    public static String linked(String html, Sources.Spot spot) {
+        return spot == null ? html : linked(html, spot.url(), spot.title());
+    }
+
+    /** {@code  at commit b6c9e06}: the commit a rule's link points to, or nothing without a link. */
+    private static String commit(RuleComparison rule) {
+        var matcher = java.util.regex.Pattern.compile("/blob/([0-9a-f]{7})[0-9a-f]{33}/").matcher(
+                rule.sourceUrl() == null ? "" : rule.sourceUrl());
+        return matcher.find() ? " at commit " + matcher.group(1) : "";
     }
 
     /** {@code text} as a link to {@code url} in a new tab, or plain when there is no link. */

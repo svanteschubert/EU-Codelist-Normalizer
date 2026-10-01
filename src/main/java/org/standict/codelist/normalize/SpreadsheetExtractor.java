@@ -14,7 +14,27 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 
 /** Extracts every sheet as CSV and can also write a separate, sorted copy. */
 public final class SpreadsheetExtractor {
-    public record SheetResult(String sheet, String filename, int rows, int columns) {}
+    /**
+     * @param omittedRows the 1-based workbook rows left out as blank, so that a CSV record can be traced back to the row
+     *     of the workbook it came from
+     */
+    public record SheetResult(String sheet, String filename, int rows, int columns, List<Integer> omittedRows) {
+        /** The 1-based workbook row of the CSV record at {@code index} (0-based). */
+        public int workbookRow(int index) {
+            return workbookRow(omittedRows, index);
+        }
+
+        /** The 1-based workbook row of the CSV record at {@code index}, given the rows the extraction omitted. */
+        public static int workbookRow(List<Integer> omittedRows, int index) {
+            int row = index + 1;
+            for (int omitted : omittedRows) {
+                if (omitted <= row) {
+                    row++;
+                }
+            }
+            return row;
+        }
+    }
 
     public List<SheetResult> extract(Path source, Path destination) throws IOException {
         return extract(source, destination, null);
@@ -40,6 +60,7 @@ public final class SpreadsheetExtractor {
                 for (Row row : sheet) columns = Math.max(columns, row.getLastCellNum());
                 if (rows > 0) columns = Math.max(1, columns);
                 var values = new ArrayList<List<String>>();
+                var omitted = new ArrayList<Integer>();
                 for (int rowIndex = 0; rowIndex < rows; rowIndex++) {
                     Row row = sheet.getRow(rowIndex);
                     var cells = new ArrayList<String>();
@@ -48,12 +69,13 @@ public final class SpreadsheetExtractor {
                         cells.add(formatter.formatCellValue(cell));
                     }
                     if (cells.stream().anyMatch(value -> !isBlank(value))) values.add(List.copyOf(cells));
+                    else omitted.add(rowIndex + 1);
                 }
                 writeCsv(destination.resolve(name), values);
                 if (normalized != null) {
                     writeCsv(normalized.resolve(name), new SpreadsheetNormalizer().normalize(sheet.getSheetName(), values));
                 }
-                results.add(new SheetResult(sheet.getSheetName(), name, values.size(), columns));
+                results.add(new SheetResult(sheet.getSheetName(), name, values.size(), columns, List.copyOf(omitted)));
             }
         } catch (RuntimeException e) {
             throw new IOException("Cannot extract workbook " + source + ": " + e.getMessage(), e);

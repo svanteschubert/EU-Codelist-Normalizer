@@ -70,7 +70,7 @@ class ValidatorPipelineTest {
         assertEquals(List.of("389"), rule(result, "2024-11-15", Syntax.CII, "BR-CL-01").genericode().onlyPublished());
     }
 
-    /** With a GitHub origin, each differing code links to its line in the release's Schematron file, by tag. */
+    /** With a GitHub origin, each differing code links to its line in the release's Schematron file, by commit. */
     @Test
     void linksImplementedCodesToTheirLineInTheTaggedRelease() throws Exception {
         git("remote", "add", "origin", "git@github.com:ConnectingEurope/eInvoicing-EN16931.git");
@@ -78,9 +78,9 @@ class ValidatorPipelineTest {
         var result = new ValidatorPipeline(catalog).run(repository, output);
 
         var rule = rule(result, "2024-06-01", Syntax.UBL, "BR-CL-01");
-        String url = "https://github.com/ConnectingEurope/eInvoicing-EN16931/blob/validation-B/"
-                + Syntax.UBL.repositoryPath();
-        assertEquals(url + "#L4", rule.link("389"), "the list of BR-CL-01 is on line 4");
+        String url = "https://github.com/ConnectingEurope/eInvoicing-EN16931/blob/"
+                + gitOutput(repository, "rev-parse", "validation-B^{commit}") + "/" + Syntax.UBL.repositoryPath();
+        assertEquals(url + "#L4", rule.link("389"), "the list of BR-CL-01 is on line 4, at the commit the tag names");
         String page = Files.readString(output.resolve("validator/index.html"));
         assertTrue(page.contains("href=\"" + url + "#L4\""), "implemented links to the line");
     }
@@ -92,6 +92,50 @@ class ValidatorPipelineTest {
 
         assertNull(rule(result, "2024-06-01", Syntax.UBL, "BR-CL-01").link("389"));
         assertFalse(Files.readString(output.resolve("validator/index.html")).contains("github.com/"));
+    }
+
+    /**
+     * Published into a downloader checkout on GitHub, every finding links to where it is written: a remark to its cell
+     * of the Index, a code to its line in the extracted copy, the release to its original workbook.
+     */
+    @Test
+    void linksFindingsToWhereTheDownloaderPublishesThem() throws Exception {
+        Path downloader = Files.createDirectories(temp.resolve("EU-Codelist-Downloader"));
+        git(downloader, "init", "-q", "-b", "master");
+        git(downloader, "remote", "add", "origin", "https://github.com/svanteschubert/EU-Codelist-Downloader.git");
+        write(downloader.resolve("README.md"), "downloader\n");
+        git(downloader, "add", "README.md");
+        git(downloader, "-c", "user.name=Test", "-c", "user.email=test@example.org", "commit", "-q", "-m", "start");
+        Path extracted = downloader.resolve("docs/extracted");
+
+        var result = new ValidatorPipeline(catalog).run(repository, output, new ValidatorPipeline.Publication(
+                downloader, downloader.resolve("docs/en16931-code-list-comparison"), extracted));
+
+        assertEquals(extracted, result.extracted());
+        assertEquals(Files.readString(output.resolve("02_2024-11-15/r01/extracted/xlsx/1001.csv")),
+                Files.readString(extracted.resolve("02_2024-11-15/r01/xlsx/1001.csv")), "the copies are verbatim");
+        assertEquals("extracted", json.readTree(extracted.resolve("manifest.json").toFile()).path("kind").asText());
+        String copies = "https://github.com/svanteschubert/EU-Codelist-Downloader/blob/master/docs/extracted/";
+        String page = Files.readString(result.page());
+        assertTrue(page.contains("href=\"" + copies + "02_2024-11-15/r01/xlsx/Index.csv?plain=1#L2\""),
+                "the remark links to its row of the Index");
+        assertTrue(page.contains("title=\"Index sheet, cell F3 (Remark on updates) — EN16931 test.xlsx\""),
+                "and names its cell, past the blank row the extraction dropped");
+        assertTrue(page.contains("href=\"" + copies + "02_2024-11-15/r01/xlsx/1001.csv?plain=1#L6\""),
+                "the added 389 links to its line, below two wrapped names");
+        assertTrue(page.contains("href=\"" + copies + "02_2024-11-15/r01/gc/1001.gc#L"),
+                "CII's unimplemented 389 links to where Genericode publishes it");
+        assertTrue(page.contains("href=\"https://github.com/svanteschubert/EU-Codelist-Downloader/blob/master/"
+                + "src/main/resources/downloaded-files/EN%2016931%20code%20list%20-%20XLSX/EN16931%20test.xlsx\""),
+                "the original workbook");
+
+        // A copy published elsewhere would be linked wrongly, so it is not linked at all.
+        var elsewhere = new ValidatorPipeline(catalog).run(repository, output, new ValidatorPipeline.Publication(
+                downloader, null, temp.resolve("elsewhere/extracted")));
+        assertFalse(Files.readString(elsewhere.directory().resolve("index.html")).contains(copies));
+        // Nor is one folder ever published over the other.
+        assertThrows(IOException.class, () -> new ValidatorPipeline(catalog).run(repository, output,
+                new ValidatorPipeline.Publication(downloader, null, downloader.resolve("docs/en16931-code-list-comparison"))));
     }
 
     /** The Time sheet has no Genericode counterpart, and CII is compared with the UNTDID 2475 column only. */
@@ -284,10 +328,24 @@ class ValidatorPipelineTest {
             csv.append('"').append(code).append("\",\"A name\nwrapped over two lines\"\n");
         }
         write(normalized.resolve("xlsx/1001.csv"), csv.toString());
-        write(output.resolve(release).resolve("r01/extracted/xlsx/Index.csv"),
+        Path extracted = output.resolve(release).resolve("r01/extracted");
+        write(extracted.resolve("xlsx/Index.csv"),
                 "\"Code lists\",\"Tab name\",\"Version/as published on\",\"Usage\",\"Changes\","
                         + "\"Remark on updates\",\"EN business terms where the code list is used.\"\n"
                         + "\"UNTDID 1001\",\"1001\",\"\",\"Subset\",\"Yes\",\"Added 389\",\"BT-3\"\n");
+        // The extracted copies the report links to, and their provenance: row 2 of each sheet was blank.
+        Files.createDirectories(extracted.resolve("gc"));
+        Files.copy(normalized.resolve("gc/1001.gc"), extracted.resolve("gc/1001.gc"));
+        Files.copy(normalized.resolve("xlsx/1001.csv"), extracted.resolve("xlsx/1001.csv"));
+        write(extracted.resolve("xlsx/source.json"), """
+                {"source_path": "src/main/resources/downloaded-files/EN 16931 code list - XLSX/EN16931 test.xlsx",
+                 "source_filename": "EN16931 test.xlsx",
+                 "files": [{"filename": "Index.csv", "omitted_rows": [2]}, {"filename": "1001.csv", "omitted_rows": [2]}]}
+                """);
+        write(extracted.resolve("gc/source.json"), """
+                {"source_path": "src/main/resources/downloaded-files/EN 16931 code list - GeneriCode/test.zip",
+                 "source_filename": "test.zip", "files": [{"filename": "1001.gc"}]}
+                """);
         write(normalized.resolve("xlsx/Time.csv"), """
                 "UBL and UN/EDIFACT","","UN/CEFACT Cross Industry Invoice",""
                 "2005 Code","Value","2475 Code","Value"
@@ -313,7 +371,15 @@ class ValidatorPipelineTest {
     }
 
     private void git(String... arguments) throws Exception {
-        var command = new ArrayList<>(List.of("git", "-C", repository.toString()));
+        git(repository, arguments);
+    }
+
+    private static void git(Path directory, String... arguments) throws Exception {
+        gitOutput(directory, arguments);
+    }
+
+    private static String gitOutput(Path directory, String... arguments) throws Exception {
+        var command = new ArrayList<>(List.of("git", "-C", directory.toString()));
         command.addAll(List.of(arguments));
         var builder = new ProcessBuilder(command).redirectErrorStream(true);
         // Ignore the developer's own Git configuration: commit signing, hooks or templates would stall or alter the
@@ -324,6 +390,7 @@ class ValidatorPipelineTest {
         Process process = builder.redirectInput(ProcessBuilder.Redirect.from(new java.io.File(nullDevice()))).start();
         String log = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
         assertEquals(0, process.waitFor(), log);
+        return log.strip();
     }
 
     private static String nullDevice() {

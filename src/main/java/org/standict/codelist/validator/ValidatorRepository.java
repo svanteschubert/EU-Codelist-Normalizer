@@ -1,14 +1,7 @@
 package org.standict.codelist.validator;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * Reads files of tagged releases out of a checkout of the validator repository, without touching its working tree.
@@ -18,82 +11,35 @@ import java.util.concurrent.CompletableFuture;
  * is only ever read: nothing is checked out, fetched or written.
  */
 public final class ValidatorRepository {
-    private final Path root;
+    private final GitCheckout checkout;
 
     public ValidatorRepository(Path root) throws IOException {
-        this.root = root.toRealPath();
-        if (!Files.exists(this.root.resolve(".git"))) {
-            throw new IOException("Not a Git checkout of the validator: " + root);
+        try {
+            this.checkout = new GitCheckout(root);
+        } catch (IOException e) {
+            throw new IOException("Not a Git checkout of the validator: " + root, e);
         }
     }
 
     public Path root() {
-        return root;
+        return checkout.root();
     }
 
     /**
-     * The repository's web address on GitHub, from its {@code origin} remote, for linking to a line of a tagged file;
-     * empty when there is no such remote. Both {@code https://github.com/o/r(.git)} and {@code git@github.com:o/r.git}
-     * are understood.
+     * The repository's web address on GitHub, from its {@code origin} remote, for linking to a line of a released
+     * file; empty when there is no such remote.
      */
     public java.util.Optional<String> webUrl() {
-        try {
-            String remote = new String(git("remote", "get-url", "origin"), StandardCharsets.UTF_8).strip();
-            var matcher = java.util.regex.Pattern.compile("^(?:https://github\\.com/|git@github\\.com:)([^/]+/[^/]+?)(?:\\.git)?/?$")
-                    .matcher(remote);
-            return matcher.matches() ? java.util.Optional.of("https://github.com/" + matcher.group(1))
-                    : java.util.Optional.empty();
-        } catch (IOException e) {
-            return java.util.Optional.empty(); // No origin: the report simply carries no links.
-        }
+        return checkout.webUrl();
     }
 
-    /** The commit a tag names, so a report can state exactly which revision it read. */
+    /** The commit a tag names, so a report can state, and link to, exactly the revision it read. */
     public String commit(String tag) throws IOException {
-        return new String(git("rev-parse", "--verify", "--quiet", "refs/tags/" + tag + "^{commit}"),
-                StandardCharsets.UTF_8).strip();
+        return checkout.text("rev-parse", "--verify", "--quiet", "refs/tags/" + tag + "^{commit}");
     }
 
     /** The contents of one file as the tagged release published it. */
     public byte[] show(String tag, String path) throws IOException {
-        return git("show", "refs/tags/" + tag + ":" + path);
-    }
-
-    private byte[] git(String... arguments) throws IOException {
-        var command = new ArrayList<String>(List.of("git", "-C", root.toString()));
-        command.addAll(List.of(arguments));
-        Process process = new ProcessBuilder(command).redirectInput(ProcessBuilder.Redirect.from(nullDevice())).start();
-        // Drain both streams concurrently, so a large file on stdout cannot block git on a full stderr pipe.
-        CompletableFuture<byte[]> errors = CompletableFuture.supplyAsync(() -> readQuietly(process.getErrorStream()));
-        byte[] output;
-        try (InputStream stream = process.getInputStream()) {
-            output = stream.readAllBytes();
-        }
-        try {
-            int exit = process.waitFor();
-            if (exit != 0) {
-                throw new IOException("git " + String.join(" ", arguments) + " failed in " + root + ": "
-                        + new String(errors.join(), StandardCharsets.UTF_8).strip());
-            }
-        } catch (InterruptedException e) {
-            process.destroy();
-            Thread.currentThread().interrupt();
-            throw new IOException("Interrupted while running git", e);
-        }
-        return output;
-    }
-
-    private static byte[] readQuietly(InputStream stream) {
-        var buffer = new ByteArrayOutputStream();
-        try (stream) {
-            stream.transferTo(buffer);
-        } catch (IOException ignored) {
-            // The exit status reports the failure; the message is only a courtesy.
-        }
-        return buffer.toByteArray();
-    }
-
-    private static java.io.File nullDevice() {
-        return new java.io.File(System.getProperty("os.name").startsWith("Windows") ? "NUL" : "/dev/null");
+        return checkout.git("show", "refs/tags/" + tag + ":" + path);
     }
 }

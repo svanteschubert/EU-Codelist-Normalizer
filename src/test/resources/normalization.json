@@ -5,6 +5,7 @@
   "spreadsheet_extraction" : "sheet-order-quoted-utf8-csv-v2",
   "spreadsheet_normalization" : "base36-code-column-order-v2",
   "apache_poi_version" : "5.5.1",
+  "sources_digest" : "c4331c4256e658ac38e748166132de143d72694242e9e1896345a245c93a4d1e",
   "archives" : [ {
     "directory" : "07_2021-05-17/r01/normalized/gc",
     "extracted_directory" : "07_2021-05-17/r01/extracted/gc",

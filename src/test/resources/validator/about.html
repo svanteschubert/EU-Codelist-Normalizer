@@ -110,6 +110,25 @@ first:</p>
 </ul>
 <p>Pairing only changes how a difference is shown; it is still counted and checked as a removal and an addition.</p>
 
+<h2 id="sources">Where the links go</h2>
+<p>Every finding links to where it is written, or to the file that lacks it:</p>
+<dl>
+  <dt>A code of the EU code lists</dt>
+  <dd>Its line in the extracted copy of the release: the Genericode file byte for byte as the archive holds it, or the
+      sheet as CSV. GitHub cannot show a line of the original XLSX or ZIP, so these copies are published next to this
+      report, in <code>docs/extracted/</code> of the EU-Codelist-Downloader repository. The link's title names the
+      original, and for a sheet the cell, such as <em>Currency sheet, cell C12</em>. A code a file does not list links to
+      that file.</dd>
+  <dt>A remark, a change flag or the business terms of the Index</dt>
+  <dd>The tab's row of the Index sheet, with the cell in the link's title.</dd>
+  <dt>The originals</dt>
+  <dd>Each release links its workbook and Genericode archive, as the European Commission published them, in the
+      downloader repository.</dd>
+  <dt>A validator rule</dt>
+  <dd>The line of its Schematron file at the commit the release tag names, in ConnectingEurope/eInvoicing-EN16931:
+      exactly the lines that were in force, even if the tag were ever moved.</dd>
+</dl>
+
 <h2 id="dates">Dates</h2>
 <p>The validator's effective dates come from
 <a href="configuration/validator-releases.csv"><code>validator-releases.csv</code></a>, those of the code lists from the

@@ -153,6 +153,8 @@ class NormalizationPipelineTest {
         assertEquals("Index", manifest.path("files").get(0).path("source_sheet").asText());
         assertEquals(NormalizationPipeline.sha256(csv), manifest.path("files").get(1).path("sha256").asText());
         assertEquals(3, manifest.path("files").get(1).path("rows").asInt());
+        assertEquals("[4,5]", manifest.path("files").get(1).path("omitted_rows").toString(),
+                "the whitespace-only and the empty row, so CSV records can be cited by workbook row");
         var index = json.readTree(output().resolve("normalization.json").toFile());
         assertEquals(5, index.path("format_version").asInt());
         assertEquals("17_2026-05-15/r02/normalized/gc", index.path("archives").get(0).path("directory").asText());

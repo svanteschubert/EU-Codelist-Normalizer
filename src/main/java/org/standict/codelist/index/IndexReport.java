@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.standict.codelist.index.IndexCheck.Finding;
 import org.standict.codelist.index.IndexCheck.RevisionCheck;
 import org.standict.codelist.index.IndexCheck.TabCheck;
+import org.standict.codelist.validator.Sources;
 import org.standict.codelist.validator.Successions;
 import org.standict.codelist.validator.ValidatorReport;
 
@@ -31,10 +32,15 @@ import org.standict.codelist.validator.ValidatorReport;
 public final class IndexReport {
     private final IndexCheck.Report report;
     private final Successions successions;
+    private final Sources sources;
 
-    public IndexReport(IndexCheck.Report report, Successions successions) {
+    /**
+     * @param sources where the codes and remarks are written, for the links; {@link Sources#none()} for no links
+     */
+    public IndexReport(IndexCheck.Report report, Successions successions, Sources sources) {
         this.report = report;
         this.successions = successions;
+        this.sources = sources;
     }
 
     public List<List<String>> claimsCsv() {
@@ -43,7 +49,8 @@ public final class IndexReport {
                 "stated removed", "stated renamed", "stated deprecated", "stated counts", "unresolved in remark",
                 "sheet added", "sheet removed", "sheet renamed", "sheet other columns changed",
                 "genericode compared with", "genericode added", "genericode removed", "genericode renamed",
-                "only in sheet", "only in genericode", "names differ in sheet and genericode", "verdict", "findings"));
+                "only in sheet", "only in genericode", "names differ in sheet and genericode", "verdict", "findings",
+                "index row source", "sheet source", "genericode source"));
         for (RevisionCheck revision : report.revisions()) {
             for (TabCheck tab : revision.tabs()) {
                 ChangeClaims claims = tab.claims();
@@ -61,6 +68,9 @@ public final class IndexReport {
                         join(tab.listed().added()), join(tab.listed().renamed())));
                 row.add(tab.verdict().name());
                 row.add(findings(tab.findings()));
+                row.add(url(sources.indexCell(revision.revision(), tab.tab(), "Remark on updates")));
+                row.add(url(sources.file(revision.revision(), "xlsx", tab.tab())));
+                row.add(url(sources.file(revision.revision(), "gc", tab.tab())));
                 rows.add(row);
             }
         }
@@ -141,11 +151,13 @@ public final class IndexReport {
         var rows = new StringBuilder();
         for (RevisionCheck revision : revisions.reversed()) {
             for (TabCheck tab : listedDiffering(revision)) {
+                String name = revision.revision();
                 rows.append("<tr><th scope=\"row\">").append(escape(tab.tab()))
-                        .append(revisions.size() > 1 ? " <span class=\"quiet\">" + escape(revision.revision()) + "</span>"
-                                : "")
-                        .append("</th>").append(terms(List.copyOf(tab.listed().removed()), "removed"))
-                        .append(terms(List.copyOf(tab.listed().added()), "added")).append("</tr>\n");
+                        .append(revisions.size() > 1 ? " <span class=\"quiet\">" + escape(name) + "</span>" : "")
+                        .append("</th>")
+                        .append(codesCell(codes(tab.listed().removed(), tab.tab(), "xlsx", name, ""), "removed"))
+                        .append(codesCell(codes(tab.listed().added(), tab.tab(), "gc", name, ""), "added"))
+                        .append("</tr>\n");
             }
         }
         if (!rows.isEmpty()) {
@@ -156,8 +168,8 @@ public final class IndexReport {
             body.append("<p>Every code is in both, under the same name.</p>\n");
         }
         if (!renamedNames.isEmpty()) {
-            body.append("<p>Names that differ: ").append(renamedNames.stream().map(tab -> escape(tab.tab()) + " <code>"
-                    + escape(abbreviate(List.copyOf(tab.listed().renamed()))) + "</code>")
+            body.append("<p>Names that differ: ").append(renamedNames.stream().map(tab -> escape(tab.tab()) + " "
+                    + codes(tab.listed().renamed(), tab.tab(), "gc", current.revision(), ""))
                     .collect(Collectors.joining("; "))).append("</p>\n");
         }
         var without = current.tabs().stream().filter(tab -> tab.listed() == null).map(TabCheck::tab).toList();
@@ -201,16 +213,26 @@ public final class IndexReport {
     /**
      * One revision's Index rows that state a change, or whose list changed, with what the Index claims next to what
      * the spreadsheet and the Genericode file actually changed, and what does not match. Rows that disagree come first.
+     * The remark links to its cell on the Index sheet, every code to the line listing it.
      */
     private String revisionNotes(RevisionCheck revision) {
         var html = new StringBuilder();
+        String name = revision.revision();
         html.append("<p class=\"quiet\">").append(revision.previous().isEmpty()
                 ? "The first release in this comparison: there is nothing to compare its changes with."
-                : "Compared with " + escape(revision.previous()) + ".").append("</p>\n");
+                : "Compared with " + escape(revision.previous()) + ".");
+        var originals = sources.originals(name);
+        if (!originals.isEmpty()) {
+            html.append(" Originals: ").append(originals.stream().map(spot -> ValidatorReport.linked(
+                    escape(spot.title().replaceFirst(" — .*", "")), spot)).collect(Collectors.joining(", ")))
+                    .append('.');
+        }
+        html.append("</p>\n");
         // The tabs never published as Genericode are named in the Spreadsheet ⇄ Genericode block.
         var revisionFindings = revision.findings().stream()
-                .filter(finding -> !finding.message().startsWith("tabs defined by EN 16931 itself")).map(finding -> "<li class=\""
-                + finding.severity().name().toLowerCase(Locale.ROOT) + "\">" + escape(finding.text()) + "</li>")
+                .filter(finding -> !finding.message().startsWith("tabs defined by EN 16931 itself"))
+                .map(finding -> "<li class=\"" + finding.severity().name().toLowerCase(Locale.ROOT) + "\">"
+                        + revisionFinding(name, finding) + "</li>")
                 .collect(Collectors.joining());
         if (!revisionFindings.isEmpty()) {
             html.append("<ul class=\"findings\">").append(revisionFindings).append("</ul>\n");
@@ -228,18 +250,24 @@ public final class IndexReport {
                     .append("<th scope=\"col\">Spreadsheet</th><th scope=\"col\">Genericode</th></tr>")
                     .append("</thead><tbody>\n");
             for (TabCheck tab : shown) {
+                String flag = tab.claims().flagText().isEmpty() ? "—" : tab.claims().flagText();
                 html.append("<tr class=\"").append(tab.verdict().name().toLowerCase(Locale.ROOT))
-                        .append("\"><th scope=\"row\">").append(escape(tab.tab())).append("</th><td class=\"list\">")
-                        .append(escape(tab.claims().flagText().isEmpty() ? "—" : tab.claims().flagText()))
+                        .append("\"><th scope=\"row\">")
+                        .append(ValidatorReport.linked(escape(tab.tab()), sources.file(name, "xlsx", tab.tab())))
+                        .append("</th><td class=\"list\">")
+                        .append(ValidatorReport.linked(escape(flag), sources.indexCell(name, tab.tab(), "Changes")))
                         .append("</td><td class=\"note\">")
                         .append(tab.claims().remark().isEmpty() ? "<span class=\"quiet\">—</span>"
-                                : escape(tab.claims().remark()))
-                        .append("</td>").append(actual(tab.tab(), tab.sheet(), "", 1, revision.previous().isEmpty()
-                                ? "first release in this comparison" : "no sheet"))
-                        .append(actual(tab.tab(), tab.genericode(), tab.genericodeBaseline(), tab.genericodeSpan(),
+                                : ValidatorReport.linked(escape(tab.claims().remark()),
+                                        sources.indexCell(name, tab.tab(), "Remark on updates")))
+                        .append("</td>")
+                        .append(actual(tab.tab(), tab.sheet(), "xlsx", name, revision.previous(), "", 1,
+                                revision.previous().isEmpty() ? "first release in this comparison" : "no sheet"))
+                        .append(actual(tab.tab(), tab.genericode(), "gc", name, tab.genericodeBaseline(),
+                                tab.genericodeBaseline(), tab.genericodeSpan(),
                                 tab.findings().stream().anyMatch(f -> f.message().startsWith("first Genericode"))
                                         ? "first Genericode release of this list" : "no Genericode file"))
-                        .append("<td class=\"note\">").append(findingsList(tab)).append("</td></tr>\n");
+                        .append("<td class=\"note\">").append(findingsList(revision, tab)).append("</td></tr>\n");
             }
             html.append("</tbody></table></div>\n");
         }
@@ -249,6 +277,23 @@ public final class IndexReport {
                     + (quiet == 1 ? " further row states" : " further rows state")).append(" no change, and none happened.</p>\n");
         }
         return html.toString();
+    }
+
+    /**
+     * A finding about a whole revision, linked to its origin: a date to the cell stating it, a sheet the Index does
+     * not list to that sheet, a tab without a sheet to its Index row.
+     */
+    private String revisionFinding(String revision, Finding finding) {
+        if (finding.component().equals("index") && finding.message().startsWith("the Index states the effective date")) {
+            return ValidatorReport.linked(escape(finding.text()), sources.indexDate(revision));
+        }
+        if (!finding.component().equals("structure") || finding.codes().isEmpty()) {
+            return escape(finding.text());
+        }
+        return escape(finding.message()) + ": <code>" + finding.codes().stream().map(tab -> {
+            Sources.Spot sheet = sources.file(revision, "xlsx", tab);
+            return ValidatorReport.linked(escape(tab), sheet != null ? sheet : sources.indexCell(revision, tab, "Tab name"));
+        }).collect(Collectors.joining(" ")) + "</code>";
     }
 
     private String businessTerms(String id, RevisionCheck current, boolean open) {
@@ -266,7 +311,9 @@ public final class IndexReport {
                     .append("</th></tr></thead><tbody>\n");
             for (BusinessTerms.Check check : shown) {
                 body.append("<tr><th scope=\"row\">").append(escape(check.tab())).append("</th><td class=\"note\">")
-                        .append(escape(join(check.index()))).append("</td><td class=\"note\"")
+                        .append(ValidatorReport.linked(escape(join(check.index())),
+                                sources.indexCell(current.revision(), check.tab(), "EN business terms")))
+                        .append("</td><td class=\"note\"")
                         .append(check.reference() == null ? "><em>no reference</em>"
                                 : " title=\"" + escape(check.reference().evidence()) + "\">"
                                         + escape(join(check.reference().terms())))
@@ -275,8 +322,10 @@ public final class IndexReport {
                         .append(check.changedSincePrevious() && !current.previous().isEmpty()
                                 ? (check.addedSincePrevious().isEmpty() ? "" : "<div class=\"added\">+ <code>"
                                         + escape(join(check.addedSincePrevious())) + "</code></div>")
-                                        + (check.removedSincePrevious().isEmpty() ? "" : "<div class=\"removed\">− <code>"
-                                                + escape(join(check.removedSincePrevious())) + "</code></div>")
+                                        + (check.removedSincePrevious().isEmpty() ? "" : "<div class=\"removed\">− "
+                                                + ValidatorReport.linked("<code>" + escape(join(check.removedSincePrevious()))
+                                                        + "</code>", sources.indexCell(current.previous(), check.tab(),
+                                                                "EN business terms")) + "</div>")
                                 : "<span class=\"quiet\">unchanged</span>")
                         .append("</td></tr>\n");
             }
@@ -308,9 +357,13 @@ public final class IndexReport {
 
     /**
      * What one component actually changed: renamed codes as {@code ANG → XCG}, then added, removed and renamed codes,
-     * one kind per line.
+     * one kind per line. A code that came links to its line in {@code now}, one that went to its line in
+     * {@code before}.
+     *
+     * @param format {@code xlsx} or {@code gc}
      */
-    private String actual(String tab, ActualChanges changes, String baseline, int span, String absent) {
+    private String actual(String tab, ActualChanges changes, String format, String now, String before, String baseline,
+            int span, String absent) {
         if (changes == null) {
             return "<td class=\"absent\">" + escape(absent) + "</td>";
         }
@@ -323,22 +376,25 @@ public final class IndexReport {
             lines.append("<span class=\"quiet\">no code added, removed or renamed</span>");
         }
         var pairs = successions.pairs(tab, changes.removed(), changes.added(), code -> null);
-        lines.append(ValidatorReport.successionLines(pairs));
+        lines.append(ValidatorReport.successionLines(pairs, code -> code(code, tab, format, before, ""),
+                code -> code(code, tab, format, now, "")));
         var paired = Successions.codes(pairs);
-        line(lines, "added", "+", changes.added().stream().filter(code -> !paired.contains(code)).toList());
+        line(lines, "added", "+", codes(changes.added().stream().filter(code -> !paired.contains(code)).toList(), tab,
+                format, now, ""));
         var removed = changes.removed().stream().filter(code -> !paired.contains(code)).toList();
-        line(lines, "removed", "−", removed.stream().filter(code -> successions.successorsOf(tab, code).isEmpty())
-                .toList());
+        line(lines, "removed", "−", codes(removed.stream().filter(code -> successions.successorsOf(tab, code).isEmpty())
+                .toList(), tab, format, before, ""));
         for (String code : removed) {
             for (Successions.Pair successor : successions.successorsOf(tab, code)) {
-                lines.append("<div class=\"removed\">− <code>").append(escape(code)).append("</code> → <code>")
-                        .append(escape(successor.newCode())).append("</code> <span class=\"quiet\">")
-                        .append(escape(successor.when()))
+                lines.append("<div class=\"removed\">− <code>").append(code(code, tab, format, before, ""))
+                        .append("</code> → <code>").append(code(successor.newCode(), tab, format, now, before))
+                        .append("</code> <span class=\"quiet\">").append(escape(successor.when()))
                         .append(changes.after().contains(successor.newCode()) ? ", " + escape(successor.newCode())
-                                + " already listed" : "").append("</span> ").append(ValidatorReport.wikipedia(successor)).append("</div>");
+                                + " already listed" : "").append("</span> ").append(ValidatorReport.wikipedia(successor))
+                        .append("</div>");
             }
         }
-        line(lines, "reworded", "name changed", changes.renamed());
+        line(lines, "reworded", "name changed", codes(changes.renamed(), tab, format, now, ""));
         if (!changes.otherColumns().isEmpty()) {
             lines.append("<div class=\"quiet\">other columns changed for ").append(changes.otherColumns().size())
                     .append(changes.otherColumns().size() == 1 ? " code" : " codes").append("</div>");
@@ -346,14 +402,20 @@ public final class IndexReport {
         return lines.append("</td>").toString();
     }
 
-    private static void line(StringBuilder lines, String kind, String label, Collection<String> codes) {
-        if (!codes.isEmpty()) {
-            lines.append("<div class=\"").append(kind).append("\">").append(label).append(" <code>")
-                    .append(escape(abbreviate(List.copyOf(codes)))).append("</code></div>");
+    /** @param codes already rendered, or empty for nothing */
+    private static void line(StringBuilder lines, String kind, String label, String codes) {
+        if (!codes.equals("<code></code>")) {
+            lines.append("<div class=\"").append(kind).append("\">").append(label).append(' ').append(codes)
+                    .append("</div>");
         }
     }
 
-    private static String findingsList(TabCheck tab) {
+    /**
+     * Each finding with its codes linked: a sheet finding's code to the line listing it in this revision's sheet,
+     * else in the previous release's; a Genericode finding's likewise in the Genericode files; a code only the remark
+     * names to the remark. A code neither lists links to this revision's file, which lacks it.
+     */
+    private String findingsList(RevisionCheck revision, TabCheck tab) {
         var shown = tab.findings().stream().filter(finding -> finding.severity() == IndexCheck.Severity.MISMATCH
                 || !finding.message().startsWith("first ")).toList();
         if (shown.isEmpty()) {
@@ -365,11 +427,47 @@ public final class IndexReport {
                     .append("\"><span class=\"component ").append(finding.component()).append("\">")
                     .append(finding.component()).append("</span> ").append(escape(finding.message()));
             if (!finding.codes().isEmpty()) {
-                list.append(": <code>").append(escape(abbreviate(finding.codes()))).append("</code>");
+                list.append(": ").append(switch (finding.component()) {
+                    case "sheet" -> codes(finding.codes(), tab.tab(), "xlsx", revision.revision(), revision.previous());
+                    case "genericode" -> codes(finding.codes(), tab.tab(), "gc", revision.revision(),
+                            tab.genericodeBaseline());
+                    default -> ValidatorReport.linked("<code>" + escape(abbreviate(finding.codes())) + "</code>",
+                            sources.indexCell(revision.revision(), tab.tab(), "Remark on updates"));
+                });
             }
             list.append("</li>");
         }
         return list.append("</ul>").toString();
+    }
+
+    /**
+     * Codes as links to where each is written: the line listing it in {@code primary}'s file, else in
+     * {@code secondary}'s, else {@code primary}'s file, which lacks it. More than 30 are cut short.
+     */
+    private String codes(Collection<String> codes, String tab, String format, String primary, String secondary) {
+        var list = List.copyOf(codes);
+        var html = new StringBuilder("<code>");
+        for (int i = 0; i < Math.min(30, list.size()); i++) {
+            html.append(i == 0 ? "" : " ").append(code(list.get(i), tab, format, primary, secondary));
+        }
+        if (list.size() > 30) {
+            html.append(" … ").append(list.size() - 30).append(" more");
+        }
+        return html.append("</code>").toString();
+    }
+
+    private String code(String code, String tab, String format, String primary, String secondary) {
+        if (primary.isEmpty() || !sources.linked()) {
+            return escape(code);
+        }
+        String revision = !secondary.isEmpty() && !sources.lists(primary, format, tab, code)
+                && sources.lists(secondary, format, tab, code) ? secondary : primary;
+        return ValidatorReport.linked(escape(code), sources.code(revision, format, tab, code));
+    }
+
+    private static String codesCell(String codes, String kind) {
+        return codes.equals("<code></code>") ? "<td class=\"zero\">·</td>"
+                : "<td class=\"codes " + kind + "\">" + codes + "</td>";
     }
 
     public static int mismatching(RevisionCheck revision) {
@@ -394,6 +492,10 @@ public final class IndexReport {
     private static String published(Map<String, List<String>> published) {
         return published.entrySet().stream().map(entry -> entry.getKey() + ": " + String.join(" ", entry.getValue()))
                 .collect(Collectors.joining("; "));
+    }
+
+    private static String url(Sources.Spot spot) {
+        return spot == null ? "" : spot.url();
     }
 
     private static String join(Collection<String> values) {

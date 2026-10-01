@@ -84,17 +84,20 @@ public final class ValidatorComparison {
 
     private final Map<String, Optional<CodeListReleases.Published>> published = new HashMap<>();
     private final String repositoryUrl;
+    private final Map<String, String> commits;
 
     public ValidatorComparison() {
-        this(null);
+        this(null, Map.of());
     }
 
     /**
      * @param repositoryUrl the validator repository on GitHub, such as
      *     {@code https://github.com/ConnectingEurope/eInvoicing-EN16931}, or {@code null} for a report without links
+     * @param commits the commit each release tag names, which links point to
      */
-    public ValidatorComparison(String repositoryUrl) {
+    public ValidatorComparison(String repositoryUrl, Map<String, String> commits) {
         this.repositoryUrl = repositoryUrl;
+        this.commits = Map.copyOf(commits);
     }
 
     /**
@@ -137,9 +140,11 @@ public final class ValidatorComparison {
     private RuleComparison compare(LocalDate date, ValidatorCatalog.Release validator,
             CodeListReleases.Release release, Syntax syntax, SchematronCodeLists.RuleCodes rule,
             ValidatorCatalog catalog, CodeListReleases codeLists) throws IOException {
-        // Linked by tag, not branch: line numbers differ between releases, and a tag keeps pointing at this one.
+        // Linked by the commit the tag names, not by branch or tag: line numbers differ between releases, and a commit
+        // shows exactly the lines that were in force, even if the tag were ever moved.
         String sourceUrl = repositoryUrl == null ? null
-                : repositoryUrl + "/blob/" + validator.tag() + "/" + syntax.repositoryPath();
+                : repositoryUrl + "/blob/" + commits.getOrDefault(validator.tag(), validator.tag()) + "/"
+                        + syntax.repositoryPath();
         var mapping = catalog.mapping(syntax, rule.rule());
         if (mapping.isEmpty()) {
             return new RuleComparison(date, validator.tag(), release.directory(), syntax, rule.rule(), "",

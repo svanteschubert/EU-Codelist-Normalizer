@@ -10,7 +10,10 @@ and `normalized/` directories. Comparisons and change reports are future work.
 
 [`EU-Codelist-Downloader`](../EU-Codelist-Downloader) acquires and archives the
 official artefacts. This repository reads its registry, ZIP files and workbooks locally,
-without changing or downloading anything in that sibling repository.
+without changing or downloading anything in that sibling repository. The one exception
+is `--validator`, which publishes its report and the extracted text it links to into
+two folders of the downloader's `docs/`, served by GitHub Pages; each carries this
+generator's `manifest.json`, and nothing else there is touched.
 
 Normalization uses Philip Helger's
 [`com.helger:ph-genericode:8.1.0`](https://github.com/phax/ph-genericode/tree/ph-genericode-8.1.0)
@@ -219,6 +222,9 @@ Output inside the downloader repository is rejected.
    their saved cached results without recalculation; those results may be stale
    if the source workbook was not recalculated before saving. CSV retains cell
    values, not workbook formatting, formulas, comments or images.
+6. Record in `source.json`, per sheet, the workbook rows left out as blank
+   (`"omitted_rows": [5, 26]`), so that every CSV record can be traced back to its
+   row, and a report can cite the cell of the original workbook.
 
 ## Spreadsheet normalization policy
 
@@ -337,24 +343,41 @@ validator/
 - **Dates:** the effective date the Index states is compared with the date the
   release is filed under. The 2019 workbooks state only a publication date, on `Main`.
 
-The report is also published as a self-contained folder to share, by default
-`docs/en16931-code-list-comparison/` (`--report-folder PATH` to change it):
+The report is published, with the extracted text its links point into, to the
+downloader's GitHub Pages folder (`--report-folder PATH` and `--extracted-folder PATH`
+to change either):
 
 ```text
-docs/en16931-code-list-comparison/
-├── en16931-code-list-comparison.html   # the report; open it in a browser
-├── about.html                          # how it is compared, and every file
-├── manifest.json                       # every file with its size and SHA-256
-├── summary.csv  rules.csv  index-claims.csv  business-terms.csv  index-releases.csv
-└── configuration/validator-releases.csv  rule-catalog.csv  business-terms-2017.csv  code-successions.csv
+EU-Codelist-Downloader/docs/
+├── en16931-code-list-comparison/
+│   ├── en16931-code-list-comparison.html   # the report; open it in a browser
+│   ├── about.html                          # how it is compared, where links go, every file
+│   ├── manifest.json                       # every file with its size and SHA-256
+│   ├── summary.csv  rules.csv  index-claims.csv  business-terms.csv  index-releases.csv
+│   └── configuration/validator-releases.csv  rule-catalog.csv  business-terms-2017.csv  code-successions.csv
+└── extracted/
+    ├── manifest.json
+    └── 17_2026-05-15/r02/{gc,xlsx}/...     # every revision's extracted/, with its source.json
 ```
 
-All links are relative and the page loads nothing from the network, so the folder
-can be copied to any web server or file share as it is.
+Every finding links to where it is written, or to the file that lacks it:
 
-The tree is replaced as a whole on each run and is byte-identical for the same
-inputs. A `validator/` directory without `validator-index.json` is refused, as is
-a report folder without this generator's `manifest.json`.
+- **EU code lists:** a code to its line in the extracted copy on GitHub (sheets as
+  CSV with `?plain=1#Lnn`, Genericode files with `#Lnn`), a remark or business terms
+  to the tab's row of the Index. The title names the original file and the workbook
+  cell, counted with the omitted rows. Each release links its original XLSX and ZIP
+  in the downloader's `downloaded-files/`. The GitHub address and branch come from
+  the downloader checkout's `origin`; copies published outside it are not linked.
+- **Validator:** a code to its line of the Schematron file at the commit the release
+  tag names, so the link stays exact even if a tag moves.
+
+Links are absolute, so the report folder still works when copied to any web server
+or file share; `index-claims.csv` and `rules.csv` carry the same links.
+
+Both folders, like the `validator/` tree, are replaced as a whole on each run and are
+byte-identical for the same inputs. A `validator/` directory without
+`validator-index.json` is refused, as is a published folder without this generator's
+`manifest.json` of the same kind.
 
 ## Development
 

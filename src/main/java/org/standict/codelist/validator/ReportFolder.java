@@ -18,7 +18,7 @@ import java.util.HexFormat;
  * says what it is, next to every file it links to, and a {@code manifest.json} naming each file with its SHA-256.
  *
  * <pre>
- * docs/en16931-code-list-comparison/
+ * EU-Codelist-Downloader/docs/en16931-code-list-comparison/
  * ├── en16931-code-list-comparison.html
  * ├── about.html
  * ├── manifest.json
@@ -26,16 +26,18 @@ import java.util.HexFormat;
  * └── configuration/validator-releases.csv  rule-catalog.csv  business-terms-2017.csv  code-successions.csv
  * </pre>
  *
- * <p>Links are relative and the page loads nothing from the network, so the folder needs no server configuration. The
- * folder is replaced as a whole on every run; one that exists without this generator's manifest is refused rather than
- * overwritten.
+ * <p>Links to the folder's own files are relative, links to where a finding is written point to GitHub, and the page
+ * loads nothing from the network, so the folder needs no server configuration. The folder is replaced as a whole on
+ * every run; one that exists without this generator's manifest of the same kind is refused rather than overwritten.
  */
 public final class ReportFolder {
     /** The page's name in the published folder, recognisable once the folder has been copied elsewhere. */
     public static final String PAGE = "en16931-code-list-comparison.html";
     static final String MANIFEST = "manifest.json";
-    private static final String GENERATOR = "eu-codelist-normalizer --validator";
-    private static final int FORMAT_VERSION = 1;
+    static final String GENERATOR = "eu-codelist-normalizer --validator";
+    static final int FORMAT_VERSION = 1;
+    /** What a published folder holds; a report folder written before kinds were recorded has none. */
+    static final String KIND = "report";
 
     private final ObjectMapper json = new ObjectMapper();
 
@@ -44,6 +46,7 @@ public final class ReportFolder {
         ObjectNode manifest = json.createObjectNode();
         manifest.put("format_version", FORMAT_VERSION);
         manifest.put("generator", GENERATOR);
+        manifest.put("kind", KIND);
         manifest.put("page", page);
         var files = manifest.putArray("files");
         addFile(files.addObject(), directory, page, "the comparison report; open it in a browser");
@@ -63,7 +66,7 @@ public final class ReportFolder {
      */
     public Path publish(Path report, Path destination) throws IOException {
         Path target = destination.toAbsolutePath().normalize();
-        requireOwnedOrAbsent(target);
+        requireOwnedOrAbsent(target, KIND);
         Files.createDirectories(target.getParent());
         Path staging = Files.createTempDirectory(target.getParent(), "." + target.getFileName() + "-");
         try {
@@ -82,45 +85,60 @@ public final class ReportFolder {
                 }
             }
             writeManifest(staging, PAGE);
-            deleteRecursively(target);
-            try {
-                Files.move(staging, target, StandardCopyOption.ATOMIC_MOVE);
-            } catch (IOException e) {
-                Files.move(staging, target);
-            }
+            replace(staging, target);
             return target.resolve(PAGE);
         } finally {
             deleteRecursively(staging);
         }
     }
 
-    private void requireOwnedOrAbsent(Path root) throws IOException {
+    /**
+     * Refuses a folder this generator cannot prove it published as {@code kind}, so a mistyped path deletes nothing:
+     * neither a hand-made folder nor the other kind of published folder.
+     */
+    static void requireOwnedOrAbsent(Path root, String kind) throws IOException {
         if (!Files.exists(root, LinkOption.NOFOLLOW_LINKS)) {
             return;
         }
         if (Files.isSymbolicLink(root) || !Files.isDirectory(root)) {
-            throw new IOException("Report folder is not a directory: " + root);
+            throw new IOException("Published folder is not a directory: " + root);
         }
         Path manifest = root.resolve(MANIFEST);
-        if (!Files.isRegularFile(manifest) || !GENERATOR.equals(json.readTree(manifest.toFile()).path("generator")
-                .asText())) {
+        var read = Files.isRegularFile(manifest) ? new ObjectMapper().readTree(manifest.toFile()) : null;
+        if (read == null || !GENERATOR.equals(read.path("generator").asText())) {
             throw new IOException("Refusing to replace " + root + ": no " + MANIFEST + " from " + GENERATOR
                     + ", so this folder was not generated here");
         }
+        if (!kind.equals(read.path("kind").asText(KIND))) {
+            throw new IOException("Refusing to replace " + root + ": it holds the " + read.path("kind").asText()
+                    + " folder, not the " + kind + " folder");
+        }
     }
 
-    private static void addFile(ObjectNode entry, Path directory, String path, String description) throws IOException {
+    /** Moves a staged folder into place, replacing what was there. */
+    static void replace(Path staging, Path target) throws IOException {
+        deleteRecursively(target);
+        try {
+            Files.move(staging, target, StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            Files.move(staging, target);
+        }
+    }
+
+    static void addFile(ObjectNode entry, Path directory, String path, String description) throws IOException {
         byte[] contents = Files.readAllBytes(directory.resolve(path));
         try {
             entry.put("path", path).put("bytes", contents.length)
-                    .put("sha256", HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(contents)))
-                    .put("description", description);
+                    .put("sha256", HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(contents)));
+            if (!description.isEmpty()) {
+                entry.put("description", description);
+            }
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException(e);
         }
     }
 
-    private static void deleteRecursively(Path root) throws IOException {
+    static void deleteRecursively(Path root) throws IOException {
         if (!Files.exists(root, LinkOption.NOFOLLOW_LINKS)) {
             return;
         }

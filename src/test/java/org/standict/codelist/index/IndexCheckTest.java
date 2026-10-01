@@ -111,7 +111,7 @@ class IndexCheckTest {
 
         var first = tab(report, "03_2022-05-16/r01", "Currency");
         assertTrue(texts(first.findings()).contains("stated as removed, but still listed: BBB"), first.toString());
-        assertEquals("01_2021-05-17", first.genericodeBaseline());
+        assertEquals("01_2021-05-17/r01", first.genericodeBaseline());
         assertEquals(2, first.genericodeSpan());
 
         var corrected = tab(report, "03_2022-05-16/r02", "Currency");
