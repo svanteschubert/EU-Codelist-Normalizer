@@ -300,7 +300,7 @@ public final class ValidatorReport {
                     implemented.differing() == 0 ? "every rule accepts exactly the declared codes"
                             : implemented.codes() + " codes implemented otherwise than declared"));
         }
-        return "<p class=\"glance-title\">At a glance: " + latest.effectiveDate() + " · code lists "
+        return "<p class=\"glance-title\">Last release at a glance: " + latest.effectiveDate() + " · code lists "
                 + escape(latest.codeLists().directory()) + " · validator " + escape(version(latest.validator().tag()))
                 + "</p>\n<div class=\"glance\">\n" + tiles + "</div>\n";
     }
