@@ -36,6 +36,9 @@ public final class Sources {
     /** A link to where something is written, with a title naming the original file and the cell or line. */
     public record Spot(String url, String title) {}
 
+    /** A component as the release tree names it: {@code 17_2026-05-15/r02/normalized/xlsx/Time.csv [2475 Code]}. */
+    private static final Pattern SOURCE =
+            Pattern.compile("^([^/]+/[^/]+)/normalized/(gc|xlsx)/(.+)\\.(?:gc|csv)(?: \\[(.+)])?$");
     private static final Pattern KEY = Pattern.compile("<Key\\b[^>]*>.*?<ColumnRef\\s+Ref=\"([^\"]+)\"", Pattern.DOTALL);
 
     private final Path releases;
@@ -255,13 +258,18 @@ public final class Sources {
      * labelled column. The normalized file was compared; the link goes to its extracted original.
      */
     public Spot published(String source, String code) {
-        Matcher matcher = Pattern.compile("^([^/]+/[^/]+)/normalized/(gc|xlsx)/(.+)\\.(?:gc|csv)(?: \\[(.+)])?$")
-                .matcher(source);
+        Matcher matcher = SOURCE.matcher(source);
         if (!linked() || !matcher.matches()) {
             return null;
         }
         return code(matcher.group(1), matcher.group(2), matcher.group(3),
                 matcher.group(4) == null ? "" : matcher.group(4), code);
+    }
+
+    /** The file a comparison read, given as {@link #published} takes it, as its extracted copy. */
+    public Spot declared(String source) {
+        Matcher matcher = SOURCE.matcher(source);
+        return linked() && matcher.matches() ? file(matcher.group(1), matcher.group(2), matcher.group(3)) : null;
     }
 
     private Spot missing(String revision, String format, String tab, String code) {

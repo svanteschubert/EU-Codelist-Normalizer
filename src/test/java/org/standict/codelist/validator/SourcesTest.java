@@ -100,6 +100,10 @@ class SourcesTest {
 
         assertEquals(BLOB + "src/test/resources/17_2026-05-15/r02/extracted/xlsx/VAT%20ID.csv?plain=1#L3", spot.url(),
                 "the line the code is written on, below the first line of the name wrapped before it");
+        assertEquals(BLOB + "src/test/resources/17_2026-05-15/r02/extracted/gc/Currency.gc",
+                sources.declared(REVISION + "/normalized/gc/Currency.gc").url(), "the file itself");
+        assertEquals(BLOB + "src/test/resources/17_2026-05-15/r02/extracted/xlsx/VAT%20ID.csv?plain=1",
+                sources.declared(REVISION + "/normalized/xlsx/VAT ID.csv [Code]").url(), "a labelled column's sheet");
     }
 
     @Test

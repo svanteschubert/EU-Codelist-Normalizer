@@ -596,8 +596,8 @@ public final class ValidatorReport {
         rows.append("<tr><td>").append(escape(rule.rule())).append("</td><td class=\"list\">")
                 .append(escape(rule.codeList())).append("</td><td class=\"list quiet\" title=\"")
                 .append(escape(declared.stream().map(Side::source).collect(Collectors.joining("; ")))).append("\">")
-                .append(declared.stream().map(each -> escape(each.source().replaceFirst(".*/", "")))
-                        .collect(Collectors.joining("<br>")))
+                .append(declared.stream().map(each -> linked(escape(each.source().replaceFirst(".*/", "")),
+                        sources.declared(each.source()))).collect(Collectors.joining("<br>")))
                 .append("</td>").append(differences(rule, side)).append("</tr>\n");
     }
 

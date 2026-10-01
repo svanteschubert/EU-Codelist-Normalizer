@@ -5,8 +5,8 @@
   "page" : "index.html",
   "files" : [ {
     "path" : "index.html",
-    "bytes" : 2416709,
-    "sha256" : "489cc5db86988c971e3e137240e7cb0913995beb39008070d9bdbb214bcfc0c3",
+    "bytes" : 2589229,
+    "sha256" : "0abac0976cc2fb6c2503e70bf3a58090364ee5b2e552afb86493873696db5b7f",
     "description" : "the comparison report; open it in a browser"
   }, {
     "path" : "about.html",
