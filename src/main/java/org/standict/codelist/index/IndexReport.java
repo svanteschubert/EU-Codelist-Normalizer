@@ -189,13 +189,19 @@ public final class IndexReport {
         int mismatching = mismatching(current);
         var body = new StringBuilder();
         for (RevisionCheck revision : revisions.reversed()) {
-            if (revisions.size() > 1) {
-                body.append("<h4>").append(escape(revision.revision())).append(revision == current
-                        ? " <span class=\"quiet\">current</span>"
-                        : " <span class=\"quiet\">replaced by " + escape(current.revision()) + ", " + mismatching(revision)
-                                + " rows wrong</span>").append("</h4>\n");
+            if (revisions.size() == 1) {
+                body.append(revisionNotes(revision));
+                continue;
             }
-            body.append(revisionNotes(revision));
+            // A corrected release: every revision opens on its own, the current one open, the ones it replaced closed.
+            int wrong = mismatching(revision);
+            body.append(ValidatorReport.block(id + "-index-" + revision.revision().replaceFirst(".*/", ""),
+                    revision == current, revision.revision(), wrong == 0
+                            ? ValidatorReport.chip("ok", "all " + revision.tabs().size() + " rows correct", null, null)
+                            : ValidatorReport.chip("bad", wrong + " of " + revision.tabs().size() + " rows wrong", null,
+                                    null),
+                    escape(revision == current ? "the current revision" : "replaced by " + current.revision()), null,
+                    revisionNotes(revision)));
         }
         String chip = mismatching == 0
                 ? ValidatorReport.chip("ok", "all " + current.tabs().size() + " rows correct", null, null)
