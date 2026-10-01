@@ -378,17 +378,18 @@ public final class IndexReport {
             lines.append("<span class=\"quiet\">no code added, removed or renamed</span>");
         }
         var pairs = successions.pairs(tab, changes.removed(), changes.added(), code -> null);
-        lines.append(ValidatorReport.successionLines(pairs, code -> code(code, tab, format, before, ""),
-                code -> code(code, tab, format, now, "")));
+        lines.append(ValidatorReport.successionLines(pairs, code -> changed(code, tab, format, now, before, true),
+                code -> changed(code, tab, format, now, before, false)));
         var paired = Successions.codes(pairs);
-        line(lines, "added", "+", codes(changes.added().stream().filter(code -> !paired.contains(code)).toList(), tab,
-                format, now, ""));
+        line(lines, "added", "+", changedCodes(changes.added().stream().filter(code -> !paired.contains(code)).toList(),
+                tab, format, now, before, false));
         var removed = changes.removed().stream().filter(code -> !paired.contains(code)).toList();
-        line(lines, "removed", "−", codes(removed.stream().filter(code -> successions.successorsOf(tab, code).isEmpty())
-                .toList(), tab, format, before, ""));
+        line(lines, "removed", "−", changedCodes(removed.stream()
+                .filter(code -> successions.successorsOf(tab, code).isEmpty()).toList(), tab, format, now, before, true));
         for (String code : removed) {
             for (Successions.Pair successor : successions.successorsOf(tab, code)) {
-                lines.append("<div class=\"removed\">− <code>").append(code(code, tab, format, before, ""))
+                // The successor was listed before, so its line is unchanged: it links to the release tree.
+                lines.append("<div class=\"removed\">− <code>").append(changed(code, tab, format, now, before, true))
                         .append("</code> → <code>").append(code(successor.newCode(), tab, format, now, before))
                         .append("</code> <span class=\"quiet\">").append(escape(successor.when()))
                         .append(changes.after().contains(successor.newCode()) ? ", " + escape(successor.newCode())
@@ -396,7 +397,7 @@ public final class IndexReport {
                         .append("</div>");
             }
         }
-        line(lines, "reworded", "name changed", codes(changes.renamed(), tab, format, now, ""));
+        line(lines, "reworded", "name changed", changedCodes(changes.renamed(), tab, format, now, before, false));
         if (!changes.otherColumns().isEmpty()) {
             lines.append("<div class=\"quiet\">other columns changed for ").append(changes.otherColumns().size())
                     .append(changes.otherColumns().size() == 1 ? " code" : " codes").append("</div>");
@@ -465,6 +466,33 @@ public final class IndexReport {
         String revision = !secondary.isEmpty() && !sources.lists(primary, format, tab, code)
                 && sources.lists(secondary, format, tab, code) ? secondary : primary;
         return ValidatorReport.linked(escape(code), sources.code(revision, format, tab, code));
+    }
+
+    /** Codes that came, changed or went, linked as {@link #changed} links one; more than 30 are cut short. */
+    private String changedCodes(Collection<String> codes, String tab, String format, String now, String before,
+            boolean removed) {
+        var list = List.copyOf(codes);
+        var html = new StringBuilder("<code>");
+        for (int i = 0; i < Math.min(30, list.size()); i++) {
+            html.append(i == 0 ? "" : " ").append(changed(list.get(i), tab, format, now, before, removed));
+        }
+        if (list.size() > 30) {
+            html.append(" … ").append(list.size() - 30).append(" more");
+        }
+        return html.append("</code>").toString();
+    }
+
+    /**
+     * A code that came, changed or went, linked to its line in the code-history commit of the release, which shows the
+     * change and is dated by its effective date; without that commit, to the line in the release tree.
+     */
+    private String changed(String code, String tab, String format, String now, String before, boolean removed) {
+        if (now.isEmpty()) {
+            return escape(code);
+        }
+        Sources.Spot spot = sources.change(now, format, tab, code, removed);
+        return spot != null ? ValidatorReport.linked(escape(code), spot)
+                : code(code, tab, format, removed ? before : now, "");
     }
 
     private static String codesCell(String codes, String kind) {

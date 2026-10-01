@@ -420,7 +420,11 @@ Every finding links to where it is written, or to the file that lacks it:
   `src/test/resources/<release>/rNN/extracted/` (sheets as CSV with `?plain=1#Lnn`,
   Genericode files with `#Lnn`), a remark or business terms to the tab's row of the
   Index. The title names the original file and the workbook cell, counted with the
-  omitted rows. Each release links its original XLSX and ZIP in the downloader's
+  omitted rows. A code under *What actually changed* links instead to its line in the
+  `code-history` commit of that date, dated by the effective date, whose diff shows
+  the change: a new or renamed code on the new side (`#diff-…R<n>`), a removed one on
+  the old (`#diff-…L<n>`). Build the branch before the report, so the links find its
+  commits, and push it, so they resolve. Each release links its original XLSX and ZIP in the downloader's
   `downloaded-files/`. The GitHub addresses and branches come from the `origin` of this
   checkout and of the downloader's; a release tree outside a checkout on GitHub is not
   linked.

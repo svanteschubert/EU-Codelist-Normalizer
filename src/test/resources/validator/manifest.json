@@ -5,13 +5,13 @@
   "page" : "index.html",
   "files" : [ {
     "path" : "index.html",
-    "bytes" : 2590188,
-    "sha256" : "d7ce62261d6a96d87b508e0f19164446f5eae63b7209b5ab142b287da845523a",
+    "bytes" : 2626371,
+    "sha256" : "6cba4ed1e086c9fefb9244a2426af9c9965b2ee5bfbbfacd9fdeb802bdfab89b",
     "description" : "the comparison report; open it in a browser"
   }, {
     "path" : "about.html",
-    "bytes" : 11512,
-    "sha256" : "33ff1362d968158a223257ba825594da98170dbd8ce564bac6276206a57cdc7a",
+    "bytes" : 11992,
+    "sha256" : "7580e0d0be0468e993b149f5642fe521118dc47a1605d55ff1ca5c3540bae968",
     "description" : "how each comparison works, and what each file holds"
   }, {
     "path" : "summary.csv",

@@ -29,6 +29,9 @@ import org.standict.codelist.statistics.Canonical;
  * workbook cell, counted the way the workbook counts it: the extraction drops blank rows and records which, in
  * {@code source.json}, so the cell is exact. The originals themselves are linked where the downloader keeps them.
  *
+ * <p>A change from one release to the next links to the commit of the {@code code-history} branch that made it, at the
+ * line of the code: that commit is dated by the effective date, and its diff shows the line before and after.
+ *
  * <p>A release tree outside a checkout on GitHub is not linked, rather than linked wrongly; nor are the originals when
  * the downloader is not on GitHub.
  */
@@ -48,16 +51,32 @@ public final class Sources {
     private final String copies;
     /** The same address of the downloader, which keeps the originals, or {@code null}. */
     private final String originals;
+    /** The branch with one commit per effective date, built by {@code build-history-branch.sh}. */
+    static final String HISTORY = "code-history";
+
+    /** The checkout holding the release tree and the history branch, or {@code null}. */
+    private final GitCheckout checkout;
+    /** {@code https://github.com/<owner>/<repo>} of that checkout, or {@code null}. */
+    private final String web;
     private final ObjectMapper json = new ObjectMapper();
     private final Map<Path, Csv> csvs = new HashMap<>();
     private final Map<Path, Map<String, Integer>> genericodes = new HashMap<>();
     private final Map<Path, JsonNode> manifests = new HashMap<>();
+    private final Map<String, String> committed = new HashMap<>();
+    /** The history commit of each release, such as {@code 17_2026-05-15}, read when first needed. */
+    private Map<String, String> history;
 
     Sources(Path releases, String blob, String copies, String originals) {
+        this(releases, blob, copies, originals, null, null);
+    }
+
+    Sources(Path releases, String blob, String copies, String originals, GitCheckout checkout, String web) {
         this.releases = releases;
         this.blob = blob;
         this.copies = copies;
         this.originals = originals;
+        this.checkout = checkout;
+        this.web = web;
     }
 
     /** A report without links. */
@@ -89,7 +108,7 @@ public final class Sources {
                 }
             }
             return new Sources(releases, blob, checkout.root().relativize(folder).toString().replace('\\', '/'),
-                    originals);
+                    originals, checkout, checkout.webUrl().orElse(null));
         } catch (IOException e) {
             return none();
         }
@@ -146,6 +165,77 @@ public final class Sources {
                             + original(revision, format));
         } catch (IOException e) {
             return file(revision, format, tab);
+        }
+    }
+
+    /**
+     * The line of {@code code} in the {@code code-history} commit of the revision's release, whose diff shows the
+     * change: the line after it for a code that came or changed, the line before it for one that went. {@code null}
+     * when there is no such commit, so that the caller links the release tree instead.
+     *
+     * @param removed whether the code went, so that the line is that of the file before the commit
+     */
+    public Spot change(String revision, String format, String tab, String code, boolean removed) {
+        String release = revision.replaceFirst("/.*", "");
+        String commit = web == null ? null : history().get(release);
+        if (commit == null) {
+            return null;
+        }
+        String path = format + "/" + tab + (format.equals("gc") ? ".gc" : ".csv");
+        String text = committed(commit + (removed ? "^" : ""), path);
+        int line = 0;
+        if (text != null) {
+            if (format.equals("gc")) {
+                line = genericodeLines(text).getOrDefault(code, 0);
+            } else {
+                Csv csv = csv(text, "");
+                Integer record = csv.codes().get(code);
+                line = record == null ? 0 : csv.records().get(record).lineOf(csv.codeColumn());
+            }
+        }
+        String date = release.replaceFirst("^[^_]*_", "");
+        return new Spot(web + "/commit/" + commit + "#diff-" + sha256(path) + (line > 0 ? (removed ? "L" : "R") + line
+                : ""), (format.equals("gc") ? tab + ".gc" : tab + " sheet") + (line > 0 ? ", line " + line : "")
+                + (removed ? " before" : "") + " — the change in force from " + date + ", as the code-history commit of "
+                + release + " shows it");
+    }
+
+    /** The history commit of each release, from the {@code Code-List-Release} trailers of the history branch. */
+    private Map<String, String> history() {
+        if (history == null) {
+            history = new HashMap<>();
+            try {
+                for (String line : checkout.text("log", "--format=%H|%(trailers:key=Code-List-Release,valueonly,"
+                        + "separator=)", HISTORY).split("\n")) {
+                    int bar = line.indexOf('|');
+                    if (bar > 0 && bar < line.length() - 1) {
+                        history.putIfAbsent(line.substring(bar + 1), line.substring(0, bar));
+                    }
+                }
+            } catch (IOException e) {
+                // No history branch: changes link to the release tree.
+            }
+        }
+        return history;
+    }
+
+    /** A file as a commit holds it, or {@code null} when it does not. */
+    private String committed(String commit, String path) {
+        return committed.computeIfAbsent(commit + ":" + path, key -> {
+            try {
+                return new String(checkout.git("show", key), StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                return null;
+            }
+        });
+    }
+
+    private static String sha256(String text) {
+        try {
+            return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256")
+                    .digest(text.getBytes(StandardCharsets.UTF_8)));
+        } catch (java.security.NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
         }
     }
 
@@ -331,10 +421,15 @@ public final class Sources {
     private Csv csv(Path file, String column) throws IOException {
         Path key = column.isEmpty() ? file : file.resolveSibling(file.getFileName() + " [" + column + "]");
         Csv cached = csvs.get(key);
-        if (cached != null) {
-            return cached;
+        if (cached == null) {
+            cached = csv(Files.readString(file, StandardCharsets.UTF_8), column);
+            csvs.put(key, cached);
         }
-        var records = Canonical.parseCsvRecords(Files.readString(file, StandardCharsets.UTF_8));
+        return cached;
+    }
+
+    private static Csv csv(String text, String column) {
+        var records = Canonical.parseCsvRecords(text);
         int header = 0;
         int codeColumn = 0;
         if (!column.isEmpty()) {
@@ -362,18 +457,20 @@ public final class Sources {
                 codes.putIfAbsent(cells.get(codeColumn).strip(), record);
             }
         }
-        Csv csv = new Csv(records, codeColumn, Map.copyOf(codes));
-        csvs.put(key, csv);
-        return csv;
+        return new Csv(records, codeColumn, Map.copyOf(codes));
     }
 
     /** The line of each code in a Genericode file: where its key column's value is written. */
     private Map<String, Integer> genericode(Path file) throws IOException {
         Map<String, Integer> cached = genericodes.get(file);
-        if (cached != null) {
-            return cached;
+        if (cached == null) {
+            cached = genericodeLines(Files.readString(file, StandardCharsets.UTF_8));
+            genericodes.put(file, cached);
         }
-        String text = Files.readString(file, StandardCharsets.UTF_8);
+        return cached;
+    }
+
+    private static Map<String, Integer> genericodeLines(String text) {
         Matcher key = KEY.matcher(text);
         String column = key.find() ? key.group(1) : "Code";
         Matcher values = Pattern.compile("<Value\\s+ColumnRef=\"" + Pattern.quote(column)
@@ -385,9 +482,7 @@ public final class Sources {
             int line = Arrays.binarySearch(lineStarts, values.start(1));
             lines.putIfAbsent(code, line >= 0 ? line + 1 : -line - 1);
         }
-        cached = Map.copyOf(lines);
-        genericodes.put(file, cached);
-        return cached;
+        return Map.copyOf(lines);
     }
 
     private static int[] lineStarts(String text) {

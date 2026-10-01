@@ -122,6 +122,66 @@ class SourcesTest {
         assertEquals("AA7", Sources.cell(26, 7));
     }
 
+    /**
+     * A change links to the code-history commit of its release, at the line after the change, or, for a code that went,
+     * at the line before it: the commit's diff shows both, dated by the effective date.
+     */
+    @Test
+    void linksAChangeToItsLineInTheHistoryCommitOfItsRelease() throws Exception {
+        Path repository = Files.createDirectories(temp.resolve("normalizer"));
+        Path releases = Files.createDirectories(repository.resolve("src/test/resources"));
+        git(repository, "init", "-q", "-b", "master");
+        git(repository, "remote", "add", "origin", "https://github.com/o/EU-Codelist-Normalizer.git");
+        write(releases.resolve("README.md"), "releases\n");
+        commit(repository, "release tree", "");
+        git(repository, "checkout", "-q", "--orphan", "code-history");
+        git(repository, "rm", "-rq", "--cached", ".");
+        write(repository.resolve("xlsx/ICD.csv"), "\"Code\",\"Name\"\n\"0199\",\"Legal Entity\"\n\"0241\",\"Name unknown\"\n");
+        commit(repository, "16", "Code-List-Release: 16_2025-11-15");
+        write(repository.resolve("xlsx/ICD.csv"), "\"Code\",\"Name\"\n\"0241\",\"Hitachi Rail\"\n\"0245\",\"New\"\n");
+        commit(repository, "17", "Code-List-Release: 17_2026-05-15");
+        String commit = gitOutput(repository, "rev-parse", "HEAD");
+        git(repository, "checkout", "-q", "master");
+
+        var history = Sources.of(releases, null);
+        String diff = "https://github.com/o/EU-Codelist-Normalizer/commit/" + commit + "#diff-"
+                + java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256")
+                        .digest("xlsx/ICD.csv".getBytes(StandardCharsets.UTF_8)));
+
+        assertEquals(diff + "R2", history.change("17_2026-05-15/r02", "xlsx", "ICD", "0241", false).url(),
+                "the renamed code at its line after the change");
+        assertEquals(diff + "R3", history.change("17_2026-05-15/r02", "xlsx", "ICD", "0245", false).url());
+        assertEquals(diff + "L2", history.change("17_2026-05-15/r02", "xlsx", "ICD", "0199", true).url(),
+                "the removed code at its line before the change");
+        assertTrue(history.change("17_2026-05-15/r02", "xlsx", "ICD", "0241", false).title()
+                .contains("in force from 2026-05-15"));
+        assertNull(history.change("18_2026-11-15/r01", "xlsx", "ICD", "0241", false), "no commit for that date yet");
+    }
+
+    private static void commit(Path repository, String message, String trailer) throws Exception {
+        git(repository, "add", "-A");
+        git(repository, "-c", "user.name=Test", "-c", "user.email=test@example.org", "commit", "-q", "-m", message,
+                "-m", trailer.isEmpty() ? "-" : trailer);
+    }
+
+    private static void git(Path directory, String... arguments) throws Exception {
+        gitOutput(directory, arguments);
+    }
+
+    private static String gitOutput(Path directory, String... arguments) throws Exception {
+        var command = new java.util.ArrayList<>(List.of("git", "-C", directory.toString()));
+        command.addAll(List.of(arguments));
+        var builder = new ProcessBuilder(command).redirectErrorStream(true);
+        // The developer's own Git configuration, such as commit signing, must not reach the test repository.
+        String nullDevice = System.getProperty("os.name").startsWith("Windows") ? "NUL" : "/dev/null";
+        builder.environment().put("GIT_CONFIG_GLOBAL", nullDevice);
+        builder.environment().put("GIT_CONFIG_NOSYSTEM", "1");
+        Process process = builder.redirectInput(ProcessBuilder.Redirect.from(new java.io.File(nullDevice))).start();
+        String output = new String(process.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        assertEquals(0, process.waitFor(), output);
+        return output.strip();
+    }
+
     private static void write(Path file, String contents) throws Exception {
         Files.createDirectories(file.getParent());
         Files.writeString(file, contents, StandardCharsets.UTF_8);
