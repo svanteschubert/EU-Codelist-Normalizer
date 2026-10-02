@@ -87,7 +87,8 @@ public final class SpreadsheetExtractor {
         return value.codePoints().allMatch(c -> Character.isWhitespace(c) || Character.isSpaceChar(c));
     }
 
-    private static void writeCsv(Path destination, List<List<String>> rows) throws IOException {
+    /** Writes UTF-8, LF-terminated CSV, quoting every field and preserving multiline cell values. */
+    public static void writeCsv(Path destination, List<List<String>> rows) throws IOException {
         try (var writer = Files.newBufferedWriter(destination, StandardCharsets.UTF_8)) {
             for (var row : rows) {
                 for (int column = 0; column < row.size(); column++) {
