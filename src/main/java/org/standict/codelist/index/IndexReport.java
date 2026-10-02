@@ -437,9 +437,7 @@ public final class IndexReport {
                     .append(finding.component()).append("</span> ").append(escape(finding.message()));
             if (!finding.codes().isEmpty()) {
                 list.append(": ").append(switch (finding.component()) {
-                    case "sheet" -> codes(finding.codes(), tab.tab(), "xlsx", revision.revision(), revision.previous());
-                    case "genericode" -> codes(finding.codes(), tab.tab(), "gc", revision.revision(),
-                            tab.genericodeBaseline());
+                    case "sheet", "genericode" -> findingCodes(finding, revision, tab);
                     default -> ValidatorReport.linked("<code>" + escape(abbreviate(finding.codes())) + "</code>",
                             sources.indexCell(revision.revision(), tab.tab(), "Remark on updates"));
                 });
@@ -453,6 +451,50 @@ public final class IndexReport {
      * Codes as links to where each is written: the line listing it in {@code primary}'s file, else in
      * {@code secondary}'s, else {@code primary}'s file, which lacks it. More than 30 are cut short.
      */
+    /**
+     * The codes of a sheet or Genericode finding. A code that changed in this revision, added, removed, renamed,
+     * respelled or recased, links to its line in the code-history diff of the release, which shows it before and after;
+     * a Genericode finding about a change only the sheet made links to the sheet's diff. A code that did not change,
+     * such as one stated as renamed but unchanged, links to where it is written now, as there is no diff line for it.
+     */
+    private String findingCodes(Finding finding, RevisionCheck revision, TabCheck tab) {
+        boolean genericode = finding.component().equals("genericode");
+        var list = finding.codes();
+        var html = new StringBuilder("<code>");
+        for (int i = 0; i < Math.min(30, list.size()); i++) {
+            String code = list.get(i);
+            String format = genericode ? "gc" : "xlsx";
+            Boolean removed = change(genericode ? tab.genericode() : tab.sheet(), code);
+            if (removed == null && genericode) {
+                removed = change(tab.sheet(), code);
+                format = removed == null ? "gc" : "xlsx";
+            }
+            String before = format.equals("gc") ? tab.genericodeBaseline() : revision.previous();
+            html.append(i == 0 ? "" : " ").append(removed != null
+                    ? changed(code, tab.tab(), format, revision.revision(), before, removed)
+                    : code(code, tab.tab(), format, revision.revision(), before));
+        }
+        if (list.size() > 30) {
+            html.append(" … ").append(list.size() - 30).append(" more");
+        }
+        return html.append("</code>").toString();
+    }
+
+    /**
+     * Whether {@code code} changed between the two releases {@code changes} compares: {@code true} when it went,
+     * {@code false} when it came or its name or spelling changed, {@code null} when it did not change.
+     */
+    private static Boolean change(ActualChanges changes, String code) {
+        if (changes == null) {
+            return null;
+        }
+        if (changes.removed().contains(code)) {
+            return true;
+        }
+        return changes.added().contains(code) || changes.renamed().contains(code)
+                || changes.whitespaceOnly().contains(code) ? false : null;
+    }
+
     private String codes(Collection<String> codes, String tab, String format, String primary, String secondary) {
         var list = List.copyOf(codes);
         var html = new StringBuilder("<code>");

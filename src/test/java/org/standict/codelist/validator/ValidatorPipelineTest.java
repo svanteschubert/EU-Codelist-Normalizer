@@ -137,6 +137,44 @@ class ValidatorPipelineTest {
                 + "https://github.com/svanteschubert/EU-Codelist-Normalizer"));
     }
 
+    /**
+     * A finding about a code that changed links to that code's line in the code-history commit of its release, whose
+     * diff shows it before and after: here the Index states no change while the sheet adds 389.
+     */
+    @Test
+    void linksAFindingAboutAChangeToItsLineInTheHistoryDiff() throws Exception {
+        Path normalizer = checkout("EU-Codelist-Normalizer");
+        Path releases = normalizer.resolve("src/test/resources");
+        copy(output, releases);
+        write(releases.resolve("02_2024-11-15/r01/extracted/xlsx/Index.csv"),
+                "\"Code lists\",\"Tab name\",\"Version/as published on\",\"Usage\",\"Changes\","
+                        + "\"Remark on updates\",\"EN business terms where the code list is used.\"\n"
+                        + "\"UNTDID 1001\",\"1001\",\"\",\"Subset\",\"No\",\"\",\"BT-3\"\n");
+        // The history as build-history-branch.sh writes it: one commit per release, its normalized files at fixed paths.
+        git(normalizer, "checkout", "-q", "--orphan", "code-history");
+        git(normalizer, "rm", "-rq", "--cached", ".");
+        for (String release : List.of("01_2024-05-15", "02_2024-11-15")) {
+            Files.createDirectories(normalizer.resolve("xlsx"));
+            Files.copy(releases.resolve(release + "/r01/normalized/xlsx/1001.csv"), normalizer.resolve("xlsx/1001.csv"),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            git(normalizer, "add", "xlsx/1001.csv");
+            git(normalizer, "-c", "user.name=Test", "-c", "user.email=test@example.org", "commit", "-q", "-m",
+                    release + "\n\nCode-List-Release: " + release);
+        }
+        String commit = gitOutput(normalizer, "rev-parse", "HEAD");
+        // Back to master, whose README.md the orphan branch left untracked; the release tree stays untracked.
+        git(normalizer, "checkout", "-q", "-f", "master");
+
+        var result = new ValidatorPipeline(catalog).run(repository, releases, ValidatorPipeline.Publication.none());
+
+        String page = Files.readString(result.directory().resolve("index.html"));
+        String diff = "https://github.com/svanteschubert/EU-Codelist-Normalizer/commit/" + commit + "#diff-"
+                + java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256")
+                        .digest("xlsx/1001.csv".getBytes(StandardCharsets.UTF_8)));
+        assertTrue(page.contains("Changes = No, but added: <code><a class=\"source\" href=\"" + diff + "R6\""),
+                "389 links to its added line in the diff of release 02, below two wrapped names");
+    }
+
     private static void copy(Path from, Path to) throws IOException {
         try (var paths = Files.walk(from)) {
             for (Path path : paths.toList()) {
